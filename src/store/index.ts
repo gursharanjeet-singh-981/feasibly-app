@@ -16,12 +16,14 @@ interface AppState {
   components: SelectedComponent[];
   setComponents: (components: SelectedComponent[]) => void;
   toggleComponent: (id: number) => void;
+  addComponent: (group: string) => void;
 
   // Templates
   templates: SelectedTemplate[];
   setTemplates: (templates: SelectedTemplate[]) => void;
   toggleTemplate: (id: number) => void;
   setAdditionalPages: (id: number, pages: number) => void;
+  addTemplate: (group: string) => void;
 
   // Computed
   getEstimation: () => EstimationSummary;
@@ -51,6 +53,23 @@ export const useAppStore = create<AppState>()(
             c.id === id ? { ...c, isSelected: !c.isSelected } : c
           ),
         })),
+      addComponent: (group) =>
+        set((state) => {
+          const maxId = state.components.reduce((max, c) => Math.max(max, c.id), 0);
+          const newComponent: SelectedComponent = {
+            id: maxId + 1,
+            group,
+            name: "",
+            category: "",
+            designDescription: "",
+            developmentDescription: "",
+            designEffort: 0,
+            devEffort: 0,
+            assumptions: "",
+            isSelected: false,
+          };
+          return { components: [...state.components, newComponent] };
+        }),
 
       // Templates
       templates: [],
@@ -67,6 +86,23 @@ export const useAppStore = create<AppState>()(
             t.id === id ? { ...t, additionalPages: pages } : t
           ),
         })),
+      addTemplate: (group) =>
+        set((state) => {
+          const maxId = state.templates.reduce((max, t) => Math.max(max, t.id), 0);
+          const newTemplate: SelectedTemplate = {
+            id: maxId + 1,
+            name: "",
+            category: "",
+            description: "",
+            designEffortBase: 0,
+            designEffortPerPage: 0,
+            devEffortBase: 0,
+            devEffortPerPage: 0,
+            isSelected: false,
+            additionalPages: 0,
+          };
+          return { templates: [...state.templates, newTemplate] };
+        }),
 
       // Estimation
       getEstimation: () => {

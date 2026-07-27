@@ -16,6 +16,7 @@ export default function TemplatesPage() {
   const setTemplates = useAppStore((s) => s.setTemplates);
   const toggleTemplate = useAppStore((s) => s.toggleTemplate);
   const setAdditionalPages = useAppStore((s) => s.setAdditionalPages);
+  const addTemplate = useAppStore((s) => s.addTemplate);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
@@ -172,6 +173,17 @@ export default function TemplatesPage() {
                             onSetPages={(pages) => setAdditionalPages(template.id, pages)}
                           />
                         ))}
+
+                        {/* Add Row CTA */}
+                        <div className="flex justify-center py-3">
+                          <button
+                            onClick={() => addTemplate(group)}
+                            className="flex items-center justify-center w-9 h-9 rounded-full bg-cobalt text-white hover:bg-cobalt/90 transition-colors"
+                            aria-label="Add new row"
+                          >
+                            <CirclePlus className="w-5 h-5" />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>

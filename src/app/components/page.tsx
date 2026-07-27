@@ -15,6 +15,7 @@ export default function ComponentsPage() {
   const components = useAppStore((s) => s.components);
   const setComponents = useAppStore((s) => s.setComponents);
   const toggleComponent = useAppStore((s) => s.toggleComponent);
+  const addComponent = useAppStore((s) => s.addComponent);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
@@ -170,6 +171,17 @@ export default function ComponentsPage() {
                             onToggle={() => toggleComponent(component.id)}
                           />
                         ))}
+
+                        {/* Add Row CTA */}
+                        <div className="flex justify-center py-3">
+                          <button
+                            onClick={() => addComponent(group)}
+                            className="flex items-center justify-center w-9 h-9 rounded-full bg-cobalt text-white hover:bg-cobalt/90 transition-colors"
+                            aria-label="Add new row"
+                          >
+                            <CirclePlus className="w-5 h-5" />
+                          </button>
+                        </div>
                       </div>
                     )}
                   </div>
