@@ -1,0 +1,322 @@
+[
+  {
+    "id": 1,
+    "name": "Homepage",
+    "category": "Core",
+    "description": "High‑level layout defining key entry points, hero areas, content sections and primary journeys using standard components.",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 24,
+    "devEffortPerPage": 6
+  },
+  {
+    "id": 2,
+    "name": "Listing Page (ie: PLP, Blog landing)",
+    "category": "Core",
+    "description": "Grid/list layout showcasing items with basic metadata and repeatable patterns.",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 16,
+    "devEffortPerPage": 2
+  },
+  {
+    "id": 3,
+    "name": "PDP",
+    "category": "Core",
+    "description": "Structured layout presenting core product information, media and supporting content.",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 20,
+    "devEffortPerPage": 2
+  },
+  {
+    "id": 4,
+    "name": "Article Page",
+    "category": "Core",
+    "description": "Long‑form editorial layout optimised for readability and media placement.",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 12,
+    "devEffortPerPage": 3
+  },
+  {
+    "id": 5,
+    "name": "Event Page",
+    "category": "Core",
+    "description": "Structured page presenting individual event details such as date, time, location and supporting content.",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 12,
+    "devEffortPerPage": 2
+  },
+  {
+    "id": 6,
+    "name": "Landing Page (General Content)",
+    "category": "Core",
+    "description": "Conversion‑focused page with flexible content sections and primary calls to action.",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 16,
+    "devEffortPerPage": 4
+  },
+  {
+    "id": 7,
+    "name": "Search Results Page",
+    "category": "Core",
+    "description": "Results‑driven layout displaying search results list and basic messaging.",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 8,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 8,
+    "name": "Error Page",
+    "category": "Core",
+    "description": "Simple branded error layout with messaging and recovery CTAs.",
+    "designEffortBase": 16,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 9,
+    "name": "Category Page",
+    "category": "Core",
+    "description": "Structured page presenting a category overview with supporting content, sub‑categories, and entry points into deeper navigation layers.",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 14,
+    "devEffortPerPage": 2
+  },
+  {
+    "id": 10,
+    "name": "Checkout",
+    "category": "Core",
+    "description": "Step 1: Landing Checkout (Login)",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 10,
+    "devEffortPerPage": 2
+  },
+  {
+    "id": 11,
+    "name": "Checkout",
+    "category": "Core",
+    "description": "Step 2: Delivery Method",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 8,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 12,
+    "name": "Checkout",
+    "category": "Core",
+    "description": "Step 3: Payment",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 8,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 13,
+    "name": "Checkout",
+    "category": "Core",
+    "description": "Step 4: Confirmation Page",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 5,
+    "devEffortPerPage": 0.5
+  },
+  {
+    "id": 14,
+    "name": "Checkout",
+    "category": "Core",
+    "description": "Basket Page / Minibasket",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 10,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 15,
+    "name": "Contact Page",
+    "category": "Core",
+    "description": "Includes single page or multi-step pages (login, details, delivery, confirmation page)",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 0
+  },
+  {
+    "id": 16,
+    "name": "Reduced Template",
+    "category": "Core",
+    "description": "No header / no fotter template",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 17,
+    "name": "Utility Template",
+    "category": "Core",
+    "description": "This might be a template used for contact forms, FAQs, help & support, etc",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 18,
+    "name": "Cookies Template",
+    "category": "Core",
+    "description": "Page allowing users to manage privacy, consent, or preferences.",
+    "designEffortBase": 16,
+    "designEffortPerPage": 4,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 19,
+    "name": "Store Locator",
+    "category": "Bespoke",
+    "description": "Searchable and/or map‑based layout allowing users to find locations using filters or proximity.",
+    "designEffortBase": 56,
+    "designEffortPerPage": 8,
+    "devEffortBase": 3,
+    "devEffortPerPage": 2
+  },
+  {
+    "id": 20,
+    "name": "Gift Finder",
+    "category": "Bespoke",
+    "description": "Guided, step‑based experience helping users discover products through questions or selections.",
+    "designEffortBase": 80,
+    "designEffortPerPage": 8,
+    "devEffortBase": 14,
+    "devEffortPerPage": 3
+  },
+  {
+    "id": 21,
+    "name": "Registration & Login",
+    "category": "Core",
+    "description": "Registration - Simple Page",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 8,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 22,
+    "name": "Registration & Login",
+    "category": "Core",
+    "description": "Registration - Confirmation Page",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 4,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 23,
+    "name": "Registration & Login",
+    "category": "Core",
+    "description": "Registration - Multi-step",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 10,
+    "devEffortPerPage": 2
+  },
+  {
+    "id": 24,
+    "name": "My Account",
+    "category": "Core",
+    "description": "Account Dashboard",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 16,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 25,
+    "name": "My Account",
+    "category": "Core",
+    "description": "Profile",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 26,
+    "name": "My Account",
+    "category": "Core",
+    "description": "Order History",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 27,
+    "name": "My Account",
+    "category": "Core",
+    "description": "Order Detail",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 28,
+    "name": "My Account",
+    "category": "Core",
+    "description": "Saved Addresses",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 29,
+    "name": "My Account",
+    "category": "Core",
+    "description": "Saved Payment Methods",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 30,
+    "name": "My Account",
+    "category": "Core",
+    "description": "Invoices / Receipts",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 31,
+    "name": "My Account",
+    "category": "Core",
+    "description": "Preferences",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  },
+  {
+    "id": 32,
+    "name": "My Account",
+    "category": "Core",
+    "description": "Wishlist",
+    "designEffortBase": 32,
+    "designEffortPerPage": 8,
+    "devEffortBase": 6,
+    "devEffortPerPage": 1
+  }
+]

@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "name": "Responsiveness",
+    "designDescription": "All designs are fully responsive. Meaning if the user resizes the browser window nothing will break. Design to define responsiveness principles.",
+    "developmentDescription": "All designs are fully responsive. Meaning if the user resizes the browser window nothing will break. Development to ensure responsiveness."
+  },
+  {
+    "id": 2,
+    "name": "Accessibility",
+    "designDescription": "All components and screens should be accessible in complance with WGAG 2.2. All components to fall under this.",
+    "developmentDescription": "All components and screens should be accessible in complance with WGAG 2.2. All components to fall under this."
+  },
+  {
+    "id": 3,
+    "name": "Languages",
+    "designDescription": "Translations are out of scope for design. Any translations should be scoped separately.",
+    "developmentDescription": "Market and translations shouold be scoped separately."
+  },
+  {
+    "id": 4,
+    "name": "Analytics",
+    "designDescription": "N/A for design.",
+    "developmentDescription": "Implementing the analytics layer: integrating the tag manager (e.g. Adobe Launch, GTM), defining and populating the data layer, instrumenting tracking on key events (page views, clicks, form submissions, transactions), adding data attributes to components per the tracking spec, and validating events fire correctly in the chosen analytics platform (e.g. Adobe Analytics, GA4). This should be scoped separately."
+  },
+  {
+    "id": 5,
+    "name": "CSS Layout Changes",
+    "designDescription": "Anything that can be achieved with CSS can be edited from a design perspective (alignment, strokes, positioning, background fills, typography, etc)",
+    "developmentDescription": "Building author-configurable style controls into component dialogs (alignment, spacing, background, colour, typography) backed by design-system-safe options, and ensuring CSS overrides work responsively without breaking accessibility."
+  }
+]

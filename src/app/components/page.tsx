@@ -1,0 +1,268 @@
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import { useAppStore } from "@/store";
+import { loadComponents } from "@/lib/data";
+import { AppHeader } from "@/components/AppHeader";
+import { EstimationPanel } from "@/components/EstimationPanel";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { ChevronDown, Search, CirclePlus } from "lucide-react";
+import { SvgIcon } from "@/components/SvgIcon";
+import type { SelectedComponent } from "@/types";
+
+export default function ComponentsPage() {
+  const components = useAppStore((s) => s.components);
+  const setComponents = useAppStore((s) => s.setComponents);
+  const toggleComponent = useAppStore((s) => s.toggleComponent);
+
+  const [search, setSearch] = useState("");
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+
+  // Load data on mount
+  useEffect(() => {
+    if (components.length === 0) {
+      loadComponents().then((data) => {
+        const selected: SelectedComponent[] = data.map((c) => ({
+          ...c,
+          isSelected: false,
+        }));
+        setComponents(selected);
+      });
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Group by group field
+  const grouped = useMemo(() => {
+    const map = new Map<string, SelectedComponent[]>();
+    const filtered = components.filter(
+      (c) =>
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.group.toLowerCase().includes(search.toLowerCase()) ||
+        c.designDescription.toLowerCase().includes(search.toLowerCase()) ||
+        c.developmentDescription.toLowerCase().includes(search.toLowerCase())
+    );
+    for (const c of filtered) {
+      const group = c.group || "Other";
+      if (!map.has(group)) map.set(group, []);
+      map.get(group)!.push(c);
+    }
+    return map;
+  }, [components, search]);
+
+  const toggleGroup = (group: string) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group);
+      else next.add(group);
+      return next;
+    });
+  };
+
+  const toggleAllInGroup = (group: string) => {
+    const items = grouped.get(group);
+    if (!items) return;
+    const allSelected = items.every((c) => c.isSelected);
+    for (const item of items) {
+      if (allSelected && item.isSelected) toggleComponent(item.id);
+      if (!allSelected && !item.isSelected) toggleComponent(item.id);
+    }
+  };
+
+  const toggleAllOnPage = () => {
+    const allSelected = components.every((c) => c.isSelected);
+    for (const item of components) {
+      if (allSelected && item.isSelected) toggleComponent(item.id);
+      if (!allSelected && !item.isSelected) toggleComponent(item.id);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background-blue">
+      <AppHeader />
+
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 px-4 md:px-8 lg:px-[60px] py-6 lg:py-10">
+        {/* Left: Component List */}
+        <div className="flex-1 min-w-0">
+          <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
+            {/* Toolbar */}
+            <div className="flex flex-col gap-4 mb-8 lg:mb-10">
+              <div className="flex flex-wrap items-center gap-4">
+                <h2 className="text-xl md:text-2xl lg:text-[30px] font-semibold text-black mr-auto">
+                  Components List
+                </h2>
+                <label className="flex items-center gap-2 text-sm lg:text-base text-black cursor-pointer">
+                  <Checkbox
+                    className="w-[18px] h-[18px] rounded-[5px] border-dark-background"
+                    checked={components.length > 0 && components.every((c) => c.isSelected)}
+                    onCheckedChange={toggleAllOnPage}
+                  />
+                </label>
+                <span className="text-sm lg:text-base text-black whitespace-nowrap">Activate AI-Powered Estimation</span>
+                <button className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-cobalt text-white text-base font-medium hover:bg-cobalt/90 transition-colors whitespace-nowrap">
+                  Add component
+                  <CirclePlus className="w-5 h-5" />
+                </button>
+                <div className="relative w-full sm:w-auto">
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search for component"
+                    className="h-12 lg:h-[60px] rounded-full pl-5 pr-12 text-sm lg:text-base border-strokes bg-white w-full sm:w-[220px]"
+                  />
+                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder-text" />
+                </div>
+              </div>
+            </div>
+
+            {/* Accordion Groups */}
+            <div className="flex flex-col gap-5">
+              {Array.from(grouped.entries()).map(([group, items]) => {
+                const isOpen = openGroups.has(group);
+                const allSelected = items.every((c) => c.isSelected);
+
+                return (
+                  <div key={group}>
+                    {/* Accordion Header */}
+                    <button
+                      onClick={() => toggleGroup(group)}
+                      className={`flex items-center justify-between w-full px-5 py-4 lg:py-5 bg-[#e3e7ef] transition-all ${
+                        isOpen
+                          ? "rounded-t-2xl"
+                          : "rounded-full"
+                      }`}
+                    >
+                      <span className="text-sm lg:text-base font-semibold text-black">
+                        {group}
+                      </span>
+                      <ChevronDown
+                        className={`w-5 h-5 text-black transition-transform ${
+                          isOpen ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+
+                    {/* Accordion Content */}
+                    {isOpen && (
+                      <div className="border border-t-0 border-strokes/50 rounded-b-2xl overflow-hidden">
+                        {/* Table Header */}
+                        <div className="hidden lg:flex bg-background-blue text-sm font-semibold text-black">
+                          <div className="flex items-center gap-3 px-4 py-4 w-[220px] shrink-0">
+                            <Checkbox
+                              checked={allSelected}
+                              onCheckedChange={() => toggleAllInGroup(group)}
+                              className="w-[18px] h-[18px] rounded-[5px] border-dark-background"
+                            />
+                            <span>Variant</span>
+                          </div>
+                          <div className="px-4 py-4 w-[100px] shrink-0">Category</div>
+                          <div className="px-4 py-4 flex-1 min-w-[140px]">Design</div>
+                          <div className="px-4 py-4 flex-1 min-w-[140px]">Development</div>
+                          <div className="px-4 py-4 w-[100px] shrink-0">Design Effort</div>
+                          <div className="px-4 py-4 w-[100px] shrink-0">Dev Effort</div>
+                        </div>
+
+                        {/* Rows */}
+                        {items.map((component) => (
+                          <ComponentRow
+                            key={component.id}
+                            component={component}
+                            onToggle={() => toggleComponent(component.id)}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Estimation Panel */}
+        <EstimationPanel />
+      </div>
+    </div>
+  );
+}
+
+function ComponentRow({
+  component,
+  onToggle,
+}: {
+  component: SelectedComponent;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="border-b border-strokes/50 last:border-b-0">
+      {/* Desktop row */}
+      <div className="hidden lg:flex items-stretch text-xs text-black">
+        <div className="flex items-start gap-3 px-4 py-3 w-[220px] shrink-0 border-r border-strokes/50">
+          <Checkbox
+            checked={component.isSelected}
+            onCheckedChange={onToggle}
+            className="w-[18px] h-[18px] rounded-[5px] border-dark-background mt-0.5"
+          />
+          <span className="leading-snug">{component.name}</span>
+        </div>
+        <div className="flex items-start px-4 py-3 w-[100px] shrink-0 border-r border-strokes/50">
+          <CategoryLabel category={component.category} />
+        </div>
+        <div className="flex items-start px-4 py-3 flex-1 min-w-[140px] border-r border-strokes/50 leading-snug">
+          {component.designDescription}
+        </div>
+        <div className="flex items-start px-4 py-3 flex-1 min-w-[140px] border-r border-strokes/50 leading-snug">
+          {component.developmentDescription}
+        </div>
+        <div className="flex items-start px-4 py-3 w-[100px] shrink-0 border-r border-strokes/50">
+          {component.designEffort}h
+        </div>
+        <div className="flex items-start px-4 py-3 w-[100px] shrink-0">
+          {component.devEffort}h
+        </div>
+      </div>
+
+      {/* Mobile card */}
+      <div className="lg:hidden p-4 flex gap-3">
+        <Checkbox
+          checked={component.isSelected}
+          onCheckedChange={onToggle}
+          className="w-[18px] h-[18px] rounded-[5px] border-dark-background mt-1 shrink-0"
+        />
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-sm font-medium text-black truncate">{component.name}</p>
+            <CategoryLabel category={component.category} />
+          </div>
+          <p className="text-xs text-light-grey-text line-clamp-2 mb-2">
+            {component.designDescription}
+          </p>
+          <div className="flex gap-4 text-xs text-black">
+            <span>Design: {component.designEffort}h</span>
+            <span>Dev: {component.devEffort}h</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CategoryLabel({ category }: { category: string }) {
+  if (!category) return null;
+
+  const isCore = category.toLowerCase() === "core";
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] whitespace-nowrap ${
+        isCore
+          ? "bg-[#f4e4e7] text-black"
+          : "bg-[#e4ecf4] text-black"
+      }`}
+    >
+      {isCore && (
+        <SvgIcon name="heart" width={10} height={10} className="text-current" />
+      )}
+      {category}
+    </span>
+  );
+}
