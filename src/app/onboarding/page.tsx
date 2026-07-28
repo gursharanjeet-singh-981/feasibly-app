@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -23,6 +24,12 @@ type FormData = z.infer<typeof projectSchema>;
 export default function OnboardingPage() {
   const router = useRouter();
   const setProject = useAppStore((s) => s.setProject);
+  const resetStore = useAppStore((s) => s.resetStore);
+
+  // Reset state when visiting onboarding
+  React.useEffect(() => {
+    resetStore();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const {
     register,
@@ -58,7 +65,7 @@ export default function OnboardingPage() {
       },
       platform: "AEM",
     });
-    router.push("/components");
+    router.push(data.scopeComponents ? "/components" : "/templates");
   };
 
   return (

@@ -122,7 +122,9 @@ feasibly-app/
 4. **Platform*** (inbox icon in sky-blue badge)
    - AEM checkbox (pre-selected, disabled)
 
-**CTA Button:** "Let's scope the project" → saves to store → navigates to `/components`
+**CTA Button:** "Let's scope the project" → resets store state → saves project to store → navigates to `/components` if Components scope selected, or `/templates` if only Templates selected.
+
+**State Reset:** On mount of the onboarding page, call `resetStore()` to clear all previous project data (components, templates, project info). This ensures a fresh start each time.
 
 **Validation:** Zod schema — projectName required, URL optional (valid if provided), at least 1 scope checkbox required.
 
@@ -130,7 +132,7 @@ feasibly-app/
 
 ### Screen 2: Components Selection (`/components`)
 
-**Layout:** AppHeader on top, then two-column: scrollable table (left) + estimation panel (right).
+**Layout:** Top-level flex row — left column (AppHeader + scrollable table) and right column (estimation panel, full viewport height). The header does NOT span the full page width; it only spans the left content area. The estimation panel sits alongside from the very top of the page.
 
 **AppHeader:**
 - Structure is a flex row with three sections:
@@ -144,8 +146,10 @@ feasibly-app/
 - Toolbar: page title "Components List", checkbox (selects/deselects all components on the page), "Activate AI-Powered Estimation" placeholder label, "Add component" button (cobalt pill, circle-plus icon ⊕), search input
 - Table grouped by `group` field into collapsible accordion sections
 - Each group header: checkbox to select/deselect all in group + group name + chevron
-- Each row: checkbox | component name | design description | dev description | design effort | dev effort
+- Each row: checkbox | component name | category label | design description | dev description | design effort | dev effort
+- **Category label ("Core" tag):** Pill badge with `bg-[#f4e4e7]`, `p-2` (8px all around), `gap-1.5` (6px), red heart icon at 12×12 (`text-red-500`), `text-xs` (12px). Non-core categories use `bg-[#e4ecf4]` without a heart icon.
 - Rows are filterable by search
+- **Add row button:** Right-aligned (`justify-end`) within each accordion group. Clicking adds a new blank row where all fields are editable inline (name, category, descriptions, design/dev effort as `<input>` fields with placeholders). Pre-loaded data rows remain read-only.
 
 **Right Column — Estimation Panel** (shared component, see below)
 
@@ -158,12 +162,14 @@ Same layout as Components page, but:
 - Grouped by template `name` field
 - Extra column: "Additional effort per page" with numeric input per template
 - Template effort = base + (additionalPages × perPage rate)
+- **Add row button:** Right-aligned, adds editable blank row (same pattern as Components)
+- **Category label:** Same Core tag styling as Components (red heart, pink pill)
 
 ---
 
 ### Screen 4: Global Principles (`/global-principles`)
 
-**Layout:** AppHeader + two-column (table left, estimation panel right)
+**Layout:** AppHeader + two-column (table left, estimation panel right). Same top-level flex row layout as Components/Templates — header inside left column, estimation panel full height on right.
 
 **Table content (loaded from `/data/global-principles.json`):**
 | Global Parameter | Design Description | Development Description |
@@ -183,11 +189,13 @@ Same layout as Components page, but:
 
 ### Screen 5: Estimation Panel (shared right sidebar)
 
-**Metrics displayed:**
-- Total Components (components icon)
-- Total Variants (graph icon) — same count as components
-- Total Templates (file-copy icon)
-- Additional Pages (add-to-queue icon)
+**Container:** The estimation panel wrapper uses `lg:sticky lg:top-0 lg:h-screen` so it sticks to the viewport and spans full height. The panel itself uses `h-full overflow-y-auto` to fill its container and scroll internally if content overflows. Background: `#e3e7ef`, `rounded-[60px]` on desktop, `w-[529px]` fixed width on desktop.
+
+**Metrics displayed (conditionally based on project scope):**
+- Total Components (components icon) — only shown if `project.scope.components` is true
+- Total Variants (graph icon) — same count as components, only shown if `project.scope.components` is true
+- Total Templates (file-copy icon) — only shown if `project.scope.templates` is true
+- Additional Pages (add-to-queue icon) — only shown if `project.scope.templates` is true
 
 **Development Card:**
 - Developer mode icon in cobalt badge
@@ -295,10 +303,15 @@ devWeeks = Math.ceil(devDaysWithBuffer / 5)
 - components: SelectedComponent[]
 - setComponents(components)
 - toggleComponent(id)         // toggle isSelected
+- addComponent(group)         // add blank editable row to group (marked with assumptions="__custom__")
+- updateComponent(id, updates) // update any field on a component (for editable custom rows)
 - templates: SelectedTemplate[]
 - setTemplates(templates)
 - toggleTemplate(id)          // toggle isSelected
 - setAdditionalPages(id, pages)
+- addTemplate(group)          // add blank editable row
+- updateTemplate(id, updates) // update any field on a template (for editable custom rows)
+- resetStore()                 // clears project, components, templates back to defaults (called on onboarding mount)
 - getEstimation(): EstimationSummary  // computed from selections
 ```
 

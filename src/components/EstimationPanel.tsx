@@ -70,7 +70,7 @@ export function EstimationPanel() {
   };
 
   return (
-    <div className="bg-[#e3e7ef] flex flex-col justify-between rounded-3xl lg:rounded-[60px] p-6 md:p-8 lg:p-10 w-full lg:w-[529px] shrink-0">
+    <div className="bg-[#e3e7ef] flex flex-col justify-between rounded-3xl lg:rounded-[60px] p-6 md:p-8 lg:p-10 w-full lg:w-[529px] shrink-0 h-full overflow-y-auto">
       <div className="flex flex-col gap-8 lg:gap-10">
         {/* Title */}
         <h2 className="text-2xl lg:text-[30px] font-semibold text-black">
@@ -78,6 +78,7 @@ export function EstimationPanel() {
         </h2>
 
         {/* Summary Stats - Row 1 */}
+        {project.scope.components && (
         <div className="grid grid-cols-2 gap-6 lg:gap-8">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-1.5">
@@ -109,8 +110,10 @@ export function EstimationPanel() {
             </p>
           </div>
         </div>
+        )}
 
         {/* Summary Stats - Row 2 */}
+        {project.scope.templates && (
         <div className="grid grid-cols-2 gap-6 lg:gap-8">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-1.5">
@@ -142,6 +145,7 @@ export function EstimationPanel() {
             </p>
           </div>
         </div>
+        )}
 
         {/* Development Card */}
         <div className="bg-white border border-strokes rounded-2xl lg:rounded-[40px] p-5">

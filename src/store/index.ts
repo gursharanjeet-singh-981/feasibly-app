@@ -17,6 +17,7 @@ interface AppState {
   setComponents: (components: SelectedComponent[]) => void;
   toggleComponent: (id: number) => void;
   addComponent: (group: string) => void;
+  updateComponent: (id: number, updates: Partial<SelectedComponent>) => void;
 
   // Templates
   templates: SelectedTemplate[];
@@ -24,9 +25,13 @@ interface AppState {
   toggleTemplate: (id: number) => void;
   setAdditionalPages: (id: number, pages: number) => void;
   addTemplate: (group: string) => void;
+  updateTemplate: (id: number, updates: Partial<SelectedTemplate>) => void;
 
   // Computed
   getEstimation: () => EstimationSummary;
+
+  // Reset
+  resetStore: () => void;
 }
 
 const BUFFER_MULTIPLIER = 1.2;
@@ -43,6 +48,19 @@ export const useAppStore = create<AppState>()(
         platform: "AEM",
       },
       setProject: (project) => set({ project }),
+
+      // Reset
+      resetStore: () =>
+        set({
+          project: {
+            projectName: "",
+            liveUrl: "",
+            scope: { components: false, templates: false },
+            platform: "AEM",
+          },
+          components: [],
+          templates: [],
+        }),
 
       // Components
       components: [],
@@ -65,11 +83,17 @@ export const useAppStore = create<AppState>()(
             developmentDescription: "",
             designEffort: 0,
             devEffort: 0,
-            assumptions: "",
+            assumptions: "__custom__",
             isSelected: false,
           };
           return { components: [...state.components, newComponent] };
         }),
+      updateComponent: (id, updates) =>
+        set((state) => ({
+          components: state.components.map((c) =>
+            c.id === id ? { ...c, ...updates } : c
+          ),
+        })),
 
       // Templates
       templates: [],
@@ -91,7 +115,7 @@ export const useAppStore = create<AppState>()(
           const maxId = state.templates.reduce((max, t) => Math.max(max, t.id), 0);
           const newTemplate: SelectedTemplate = {
             id: maxId + 1,
-            name: "",
+            name: group,
             category: "",
             description: "",
             designEffortBase: 0,
@@ -100,9 +124,16 @@ export const useAppStore = create<AppState>()(
             devEffortPerPage: 0,
             isSelected: false,
             additionalPages: 0,
+            isCustom: true,
           };
           return { templates: [...state.templates, newTemplate] };
         }),
+      updateTemplate: (id, updates) =>
+        set((state) => ({
+          templates: state.templates.map((t) =>
+            t.id === id ? { ...t, ...updates } : t
+          ),
+        })),
 
       // Estimation
       getEstimation: () => {

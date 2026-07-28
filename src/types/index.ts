@@ -28,6 +28,7 @@ export interface Template {
 export interface SelectedTemplate extends Template {
   isSelected: boolean;
   additionalPages: number;
+  isCustom?: boolean;
 }
 
 export interface Project {

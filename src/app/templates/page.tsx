@@ -17,6 +17,7 @@ export default function TemplatesPage() {
   const toggleTemplate = useAppStore((s) => s.toggleTemplate);
   const setAdditionalPages = useAppStore((s) => s.setAdditionalPages);
   const addTemplate = useAppStore((s) => s.addTemplate);
+  const updateTemplate = useAppStore((s) => s.updateTemplate);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
@@ -80,12 +81,12 @@ export default function TemplatesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background-blue">
-      <AppHeader />
+    <div className="min-h-screen bg-background-blue flex flex-col lg:flex-row">
+      {/* Left: Header + Content */}
+      <div className="flex-1 min-w-0">
+        <AppHeader />
 
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 px-4 md:px-8 lg:px-[60px] py-6 lg:py-10">
-        {/* Left: Template List */}
-        <div className="flex-1 min-w-0">
+        <div className="px-4 md:px-8 lg:px-[60px] py-6 lg:py-10">
           <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
             {/* Toolbar */}
             <div className="flex flex-col gap-4 mb-8 lg:mb-10">
@@ -171,11 +172,12 @@ export default function TemplatesPage() {
                             template={template}
                             onToggle={() => toggleTemplate(template.id)}
                             onSetPages={(pages) => setAdditionalPages(template.id, pages)}
+                            onUpdate={(updates) => updateTemplate(template.id, updates)}
                           />
                         ))}
 
                         {/* Add Row CTA */}
-                        <div className="flex justify-center py-3">
+                        <div className="flex justify-end px-4 py-3">
                           <button
                             onClick={() => addTemplate(group)}
                             className="flex items-center justify-center w-9 h-9 rounded-full bg-cobalt text-white hover:bg-cobalt/90 transition-colors"
@@ -199,7 +201,10 @@ export default function TemplatesPage() {
           </div>
         </div>
 
-        {/* Right: Estimation Panel */}
+      </div>
+
+      {/* Right: Estimation Panel */}
+      <div className="px-4 pb-4 md:px-6 md:pb-6 lg:p-5 lg:pl-0 shrink-0 lg:sticky lg:top-0 lg:h-screen">
         <EstimationPanel />
       </div>
     </div>
@@ -210,11 +215,15 @@ function TemplateRow({
   template,
   onToggle,
   onSetPages,
+  onUpdate,
 }: {
   template: SelectedTemplate;
   onToggle: () => void;
   onSetPages: (pages: number) => void;
+  onUpdate: (updates: Partial<SelectedTemplate>) => void;
 }) {
+  const isEditable = !!template.isCustom;
+
   return (
     <div className="border-b border-strokes/50 last:border-b-0">
       {/* Desktop row */}
@@ -225,25 +234,92 @@ function TemplateRow({
             onCheckedChange={onToggle}
             className="w-[18px] h-[18px] rounded-[5px] border-dark-background mt-0.5"
           />
-          <span className="leading-snug font-medium">{template.description}</span>
+          {isEditable ? (
+            <input
+              value={template.description}
+              onChange={(e) => onUpdate({ description: e.target.value })}
+              placeholder="Variant name"
+              className="leading-snug font-medium bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <span className="leading-snug font-medium">{template.description}</span>
+          )}
         </div>
         <div className="flex items-start px-4 py-3 w-[90px] shrink-0 border-r border-strokes/50">
-          <CategoryLabel category={template.category} />
+          {isEditable ? (
+            <input
+              value={template.category}
+              onChange={(e) => onUpdate({ category: e.target.value })}
+              placeholder="Category"
+              className="leading-snug bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <CategoryLabel category={template.category} />
+          )}
         </div>
         <div className="flex items-start px-4 py-3 flex-1 min-w-[140px] border-r border-strokes/50 leading-snug">
-          {template.description}
+          {isEditable ? (
+            <input
+              value={template.description}
+              onChange={(e) => onUpdate({ description: e.target.value })}
+              placeholder="Template description"
+              className="bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            template.description
+          )}
         </div>
         <div className="flex items-start px-4 py-3 w-[100px] shrink-0 border-r border-strokes/50">
-          {template.designEffortBase}h
+          {isEditable ? (
+            <input
+              type="number"
+              min={0}
+              value={template.designEffortBase}
+              onChange={(e) => onUpdate({ designEffortBase: Number(e.target.value) || 0 })}
+              className="bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <>{template.designEffortBase}h</>
+          )}
         </div>
         <div className="flex items-start px-4 py-3 w-[120px] shrink-0 border-r border-strokes/50">
-          {template.designEffortPerPage}h
+          {isEditable ? (
+            <input
+              type="number"
+              min={0}
+              value={template.designEffortPerPage}
+              onChange={(e) => onUpdate({ designEffortPerPage: Number(e.target.value) || 0 })}
+              className="bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <>{template.designEffortPerPage}h</>
+          )}
         </div>
         <div className="flex items-start px-4 py-3 w-[100px] shrink-0 border-r border-strokes/50">
-          {template.devEffortBase}h
+          {isEditable ? (
+            <input
+              type="number"
+              min={0}
+              value={template.devEffortBase}
+              onChange={(e) => onUpdate({ devEffortBase: Number(e.target.value) || 0 })}
+              className="bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <>{template.devEffortBase}h</>
+          )}
         </div>
         <div className="flex items-start px-4 py-3 w-[120px] shrink-0 border-r border-strokes/50">
-          {template.devEffortPerPage}h
+          {isEditable ? (
+            <input
+              type="number"
+              min={0}
+              value={template.devEffortPerPage}
+              onChange={(e) => onUpdate({ devEffortPerPage: Number(e.target.value) || 0 })}
+              className="bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <>{template.devEffortPerPage}h</>
+          )}
         </div>
         <div className="flex items-center px-4 py-3 w-[100px] shrink-0">
           <Input
@@ -265,7 +341,16 @@ function TemplateRow({
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-sm font-medium text-black truncate">{template.description}</p>
+            {isEditable ? (
+              <input
+                value={template.description}
+                onChange={(e) => onUpdate({ description: e.target.value })}
+                placeholder="Template name"
+                className="text-sm font-medium text-black bg-transparent outline-none w-full placeholder:text-gray-400"
+              />
+            ) : (
+              <p className="text-sm font-medium text-black truncate">{template.description}</p>
+            )}
             <CategoryLabel category={template.category} />
           </div>
           <p className="text-xs text-light-grey-text line-clamp-2 mb-2">
@@ -299,12 +384,12 @@ function CategoryLabel({ category }: { category: string }) {
   const isCore = category.toLowerCase() === "core";
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] whitespace-nowrap ${
+      className={`inline-flex items-center gap-1.5 p-2 rounded-full text-xs whitespace-nowrap ${
         isCore ? "bg-[#f4e4e7] text-black" : "bg-[#e4ecf4] text-black"
       }`}
     >
       {isCore && (
-        <SvgIcon name="heart" width={10} height={10} className="text-current" />
+        <SvgIcon name="heart" width={12} height={12} className="text-red-500" />
       )}
       {category}
     </span>

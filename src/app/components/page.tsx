@@ -16,6 +16,7 @@ export default function ComponentsPage() {
   const setComponents = useAppStore((s) => s.setComponents);
   const toggleComponent = useAppStore((s) => s.toggleComponent);
   const addComponent = useAppStore((s) => s.addComponent);
+  const updateComponent = useAppStore((s) => s.updateComponent);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
@@ -79,12 +80,12 @@ export default function ComponentsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background-blue">
-      <AppHeader />
+    <div className="min-h-screen bg-background-blue flex flex-col lg:flex-row">
+      {/* Left: Header + Content */}
+      <div className="flex-1 min-w-0">
+        <AppHeader />
 
-      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 px-4 md:px-8 lg:px-[60px] py-6 lg:py-10">
-        {/* Left: Component List */}
-        <div className="flex-1 min-w-0">
+        <div className="px-4 md:px-8 lg:px-[60px] py-6 lg:py-10">
           <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
             {/* Toolbar */}
             <div className="flex flex-col gap-4 mb-8 lg:mb-10">
@@ -169,11 +170,12 @@ export default function ComponentsPage() {
                             key={component.id}
                             component={component}
                             onToggle={() => toggleComponent(component.id)}
+                            onUpdate={(updates) => updateComponent(component.id, updates)}
                           />
                         ))}
 
                         {/* Add Row CTA */}
-                        <div className="flex justify-center py-3">
+                        <div className="flex justify-end px-4 py-3">
                           <button
                             onClick={() => addComponent(group)}
                             className="flex items-center justify-center w-9 h-9 rounded-full bg-cobalt text-white hover:bg-cobalt/90 transition-colors"
@@ -191,7 +193,10 @@ export default function ComponentsPage() {
           </div>
         </div>
 
-        {/* Right: Estimation Panel */}
+      </div>
+
+      {/* Right: Estimation Panel */}
+      <div className="px-4 pb-4 md:px-6 md:pb-6 lg:p-5 lg:pl-0 shrink-0 lg:sticky lg:top-0 lg:h-screen">
         <EstimationPanel />
       </div>
     </div>
@@ -201,10 +206,15 @@ export default function ComponentsPage() {
 function ComponentRow({
   component,
   onToggle,
+  onUpdate,
 }: {
   component: SelectedComponent;
   onToggle: () => void;
+  onUpdate: (updates: Partial<SelectedComponent>) => void;
 }) {
+  const isCustom = !component.name && !component.designDescription && !component.developmentDescription && component.designEffort === 0 && component.devEffort === 0;
+  const isEditable = isCustom || component.assumptions === "__custom__";
+
   return (
     <div className="border-b border-strokes/50 last:border-b-0">
       {/* Desktop row */}
@@ -215,22 +225,78 @@ function ComponentRow({
             onCheckedChange={onToggle}
             className="w-[18px] h-[18px] rounded-[5px] border-dark-background mt-0.5"
           />
-          <span className="leading-snug">{component.name}</span>
+          {isEditable ? (
+            <input
+              value={component.name}
+              onChange={(e) => onUpdate({ name: e.target.value })}
+              placeholder="Variant name"
+              className="leading-snug bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <span className="leading-snug">{component.name}</span>
+          )}
         </div>
         <div className="flex items-start px-4 py-3 w-[100px] shrink-0 border-r border-strokes/50">
-          <CategoryLabel category={component.category} />
+          {isEditable ? (
+            <input
+              value={component.category}
+              onChange={(e) => onUpdate({ category: e.target.value })}
+              placeholder="Category"
+              className="leading-snug bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <CategoryLabel category={component.category} />
+          )}
         </div>
         <div className="flex items-start px-4 py-3 flex-1 min-w-[140px] border-r border-strokes/50 leading-snug">
-          {component.designDescription}
+          {isEditable ? (
+            <input
+              value={component.designDescription}
+              onChange={(e) => onUpdate({ designDescription: e.target.value })}
+              placeholder="Design description"
+              className="bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            component.designDescription
+          )}
         </div>
         <div className="flex items-start px-4 py-3 flex-1 min-w-[140px] border-r border-strokes/50 leading-snug">
-          {component.developmentDescription}
+          {isEditable ? (
+            <input
+              value={component.developmentDescription}
+              onChange={(e) => onUpdate({ developmentDescription: e.target.value })}
+              placeholder="Development description"
+              className="bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            component.developmentDescription
+          )}
         </div>
         <div className="flex items-start px-4 py-3 w-[100px] shrink-0 border-r border-strokes/50">
-          {component.designEffort}h
+          {isEditable ? (
+            <input
+              type="number"
+              min={0}
+              value={component.designEffort}
+              onChange={(e) => onUpdate({ designEffort: Number(e.target.value) || 0 })}
+              className="bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <>{component.designEffort}h</>
+          )}
         </div>
         <div className="flex items-start px-4 py-3 w-[100px] shrink-0">
-          {component.devEffort}h
+          {isEditable ? (
+            <input
+              type="number"
+              min={0}
+              value={component.devEffort}
+              onChange={(e) => onUpdate({ devEffort: Number(e.target.value) || 0 })}
+              className="bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <>{component.devEffort}h</>
+          )}
         </div>
       </div>
 
@@ -243,15 +309,42 @@ function ComponentRow({
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-sm font-medium text-black truncate">{component.name}</p>
+            {isEditable ? (
+              <input
+                value={component.name}
+                onChange={(e) => onUpdate({ name: e.target.value })}
+                placeholder="Variant name"
+                className="text-sm font-medium text-black bg-transparent outline-none w-full placeholder:text-gray-400"
+              />
+            ) : (
+              <p className="text-sm font-medium text-black truncate">{component.name}</p>
+            )}
             <CategoryLabel category={component.category} />
           </div>
-          <p className="text-xs text-light-grey-text line-clamp-2 mb-2">
-            {component.designDescription}
-          </p>
+          {isEditable ? (
+            <input
+              value={component.designDescription}
+              onChange={(e) => onUpdate({ designDescription: e.target.value })}
+              placeholder="Design description"
+              className="text-xs text-light-grey-text mb-2 bg-transparent outline-none w-full placeholder:text-gray-400"
+            />
+          ) : (
+            <p className="text-xs text-light-grey-text line-clamp-2 mb-2">
+              {component.designDescription}
+            </p>
+          )}
           <div className="flex gap-4 text-xs text-black">
-            <span>Design: {component.designEffort}h</span>
-            <span>Dev: {component.devEffort}h</span>
+            {isEditable ? (
+              <>
+                <label className="flex items-center gap-1">Design: <input type="number" min={0} value={component.designEffort} onChange={(e) => onUpdate({ designEffort: Number(e.target.value) || 0 })} className="w-12 bg-transparent outline-none" />h</label>
+                <label className="flex items-center gap-1">Dev: <input type="number" min={0} value={component.devEffort} onChange={(e) => onUpdate({ devEffort: Number(e.target.value) || 0 })} className="w-12 bg-transparent outline-none" />h</label>
+              </>
+            ) : (
+              <>
+                <span>Design: {component.designEffort}h</span>
+                <span>Dev: {component.devEffort}h</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -265,14 +358,14 @@ function CategoryLabel({ category }: { category: string }) {
   const isCore = category.toLowerCase() === "core";
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] whitespace-nowrap ${
+      className={`inline-flex items-center gap-1.5 p-2 rounded-full text-xs whitespace-nowrap ${
         isCore
           ? "bg-[#f4e4e7] text-black"
           : "bg-[#e4ecf4] text-black"
       }`}
     >
       {isCore && (
-        <SvgIcon name="heart" width={10} height={10} className="text-current" />
+        <SvgIcon name="heart" width={12} height={12} className="text-red-500" />
       )}
       {category}
     </span>

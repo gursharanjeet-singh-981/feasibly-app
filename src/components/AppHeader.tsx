@@ -6,10 +6,10 @@ import { useAppStore } from "@/store";
 import { Input } from "@/components/ui/input";
 import { SvgIcon } from "@/components/SvgIcon";
 
-const tabs = [
-  { label: "Components", href: "/components", icon: "components" },
-  { label: "Templates", href: "/templates", icon: "file-copy" },
-  { label: "Global Principles", href: "/global-principles", icon: "flag" },
+const allTabs = [
+  { label: "Components", href: "/components", icon: "components", scope: "components" as const },
+  { label: "Templates", href: "/templates", icon: "file-copy", scope: "templates" as const },
+  { label: "Global Principles", href: "/global-principles", icon: "flag", scope: null },
 ];
 
 export function AppHeader() {
@@ -17,16 +17,20 @@ export function AppHeader() {
   const project = useAppStore((s) => s.project);
   const setProject = useAppStore((s) => s.setProject);
 
+  const tabs = allTabs.filter(
+    (tab) => tab.scope === null || project.scope[tab.scope]
+  );
+
   return (
     <header className="flex flex-col gap-4 lg:flex-row lg:gap-[109px] lg:items-start px-4 md:px-8 lg:px-[60px] pt-6 lg:pt-[60px] pb-4">
       {/* Feasibly Logo — top-aligned, separate from header content */}
-      <div className="flex items-center gap-2 shrink-0">
+      <Link href="/" className="flex items-center gap-2 shrink-0">
         <SvgIcon name="feasibly-logo" width={24} height={24} className="text-[#F1012F]" />
         <div className="flex flex-col">
           <span className="text-base font-bold text-[#020E4E] leading-tight">Feasibly</span>
           <span className="text-[9px] text-light-grey-text leading-tight opacity-50">a Merkle tool</span>
         </div>
-      </div>
+      </Link>
 
       {/* Header Content: Project info + Tabs — bottom-aligned with each other */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between flex-1">
