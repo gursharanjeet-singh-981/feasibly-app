@@ -66,7 +66,7 @@ export default function OnboardingPage() {
       {/* Left Panel */}
       <div className="flex flex-col justify-between lg:w-[624px] bg-cobalt p-8 md:p-12 lg:p-[60px] text-white">
         <div className="flex items-center gap-2">
-          <SvgIcon name="feasibly-logo" width={24} height={24} className="text-white" />
+          <SvgIcon name="feasibly-logo" width={24} height={24} className="text-red-500" />
           <div className="flex flex-col">
             <span className="text-2xl md:text-[31.5px] font-bold">Feasibly</span>
             <span className="text-xs text-light-white-text">a Merkle tool</span>

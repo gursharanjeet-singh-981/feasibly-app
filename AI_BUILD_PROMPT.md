@@ -133,8 +133,12 @@ feasibly-app/
 **Layout:** AppHeader on top, then two-column: scrollable table (left) + estimation panel (right).
 
 **AppHeader:**
-- Left: Feasibly logo + folder badge + "Project" label + editable project name input (pill). No divider between logo and Project.
-- Right: Tab navigation in a pill container — Components | Templates | Global Principles (with SVG icons, active tab has blue border + background)
+- Structure is a flex row with three sections:
+  1. **Feasibly Logo** (separate, top-aligned with `items-start`): Red arrow icon (`text-[#F1012F]`) + "Feasibly" bold text (`text-[#020E4E]`) + "a Merkle tool" small subtitle (opacity 50%). This is a standalone flex item, NOT nested inside the Project section.
+  2. **Header Content** (flex-1, contains Project info + Tabs in a flex row with `items-end` so Input and Tabs bottom-align):
+     - Left: Sky-blue folder badge (30×30, `rounded-[9px]`) + "Project" label above, editable project name input (pill, `h-[60px]`, `w-[245px]`) below. Gap of 10px between label row and input.
+     - Right: Tab navigation in a pill container (`rounded-[1000px]`, `p-3`, `gap-5`) — Components | Templates | Global Principles (with 24×24 SVG icons, `gap-[5px]` between icon and label, active tab has blue border + background)
+- Key alignment: Logo is top-aligned with Project text. Input field and Tabs container are bottom-aligned with each other. The Tabs must NOT float up to the Project text level.
 
 **Left Column — Component Table:**
 - Toolbar: page title "Components List", checkbox (selects/deselects all components on the page), "Activate AI-Powered Estimation" placeholder label, "Add component" button (cobalt pill, circle-plus icon ⊕), search input
