@@ -275,7 +275,10 @@ export function exportPDF(
     for (const t of selectedTemplates) {
       y = checkPageBreak(doc, y, 7);
       tx = margin + 2;
-      doc.text(t.name, tx, y, { maxWidth: tColWidths[0] - 4 });
+      const templateLabel = t.description && t.description !== t.name
+        ? `${t.name} - ${t.description}`
+        : t.name;
+      doc.text(templateLabel, tx, y, { maxWidth: tColWidths[0] - 4 });
       tx += tColWidths[0];
       doc.text(t.category, tx, y, { maxWidth: tColWidths[1] - 4 });
       tx += tColWidths[1];

@@ -24,7 +24,9 @@ async function convertExcel() {
     const designDesc = row.getCell(5).value || "";
     const devDesc = row.getCell(6).value || "";
     const designEffort = Number(row.getCell(7).value) || 0;
+    const aiDesignEffort = Number(row.getCell(8).value) || 0;
     const devEffort = Number(row.getCell(9).value) || 0;
+    const aiDevEffort = Number(row.getCell(10).value) || 0;
     const assumptions = row.getCell(11).value || "";
 
     components.push({
@@ -35,7 +37,9 @@ async function convertExcel() {
       designDescription: String(designDesc).trim(),
       developmentDescription: String(devDesc).trim(),
       designEffort,
+      aiDesignEffort,
       devEffort,
+      aiDevEffort,
       assumptions: String(assumptions).trim(),
     });
   }
@@ -58,8 +62,10 @@ async function convertExcel() {
     const category = row.getCell(3).value || "";
     const description = row.getCell(4).value || "";
     const designEffortBase = Number(row.getCell(5).value) || 0;
+    const aiDesignEffortBase = Number(row.getCell(6).value) || 0;
     const designEffortPerPage = Number(row.getCell(7).value) || 0;
     const devEffortBase = Number(row.getCell(8).value) || 0;
+    const aiDevEffortBase = Number(row.getCell(9).value) || 0;
     const devEffortPerPage = Number(row.getCell(10).value) || 0;
 
     templates.push({
@@ -68,8 +74,10 @@ async function convertExcel() {
       category: String(category).trim(),
       description: String(description).trim(),
       designEffortBase,
+      aiDesignEffortBase,
       designEffortPerPage,
       devEffortBase,
+      aiDevEffortBase,
       devEffortPerPage,
     });
   }

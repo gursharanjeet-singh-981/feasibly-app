@@ -79,12 +79,48 @@ export default function ComponentsPage() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-background-blue flex flex-col lg:flex-row">
-      {/* Left: Header + Content */}
-      <div className="flex-1 min-w-0">
-        <AppHeader />
+  const handleAddComponentGroup = () => {
+    const existingGroups = new Set(components.map((c) => c.group));
+    let name = "New Component";
+    let counter = 2;
+    while (existingGroups.has(name)) {
+      name = `New Component ${counter}`;
+      counter++;
+    }
+    addComponent(name);
+    setOpenGroups((prev) => new Set(prev).add(name));
+    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), 100);
+  };
 
+  const renameGroup = (oldName: string, newName: string) => {
+    const trimmed = newName.trim();
+    if (!trimmed || trimmed === oldName) return;
+    const existingGroups = new Set(components.map((c) => c.group));
+    if (existingGroups.has(trimmed)) return;
+    for (const c of components) {
+      if (c.group === oldName) {
+        updateComponent(c.id, { group: trimmed });
+      }
+    }
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(oldName)) {
+        next.delete(oldName);
+        next.add(trimmed);
+      }
+      return next;
+    });
+  };
+
+  const isCustomGroup = (items: SelectedComponent[]) =>
+    items.every((c) => c.assumptions === "__custom__");
+
+  return (
+    <div className="min-h-screen bg-background-blue flex flex-col">
+      <AppHeader />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 flex-1">
+      {/* Left: Content - 8 columns */}
+      <div className="lg:col-span-8 min-w-0">
         <div className="px-4 md:px-8 lg:px-[60px] py-6 lg:py-10">
           <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
             {/* Toolbar */}
@@ -101,7 +137,10 @@ export default function ComponentsPage() {
                   />
                 </label>
                 <span className="text-sm lg:text-base text-black whitespace-nowrap">Activate AI-Powered Estimation</span>
-                <button className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-cobalt text-white text-base font-medium hover:bg-cobalt/90 transition-colors whitespace-nowrap">
+                <button
+                  onClick={handleAddComponentGroup}
+                  className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-cobalt text-white text-base font-medium hover:bg-cobalt/90 transition-colors whitespace-nowrap"
+                >
                   Add component
                   <CirclePlus className="w-5 h-5" />
                 </button>
@@ -134,9 +173,19 @@ export default function ComponentsPage() {
                           : "rounded-full"
                       }`}
                     >
-                      <span className="text-sm lg:text-base font-semibold text-black">
-                        {group}
-                      </span>
+                      {isCustomGroup(items) ? (
+                        <input
+                          value={group}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => renameGroup(group, e.target.value)}
+                          className="text-sm lg:text-base font-semibold text-black bg-transparent outline-none border-b border-dashed border-cobalt/40 focus:border-cobalt"
+                          placeholder="Group name"
+                        />
+                      ) : (
+                        <span className="text-sm lg:text-base font-semibold text-black">
+                          {group}
+                        </span>
+                      )}
                       <ChevronDown
                         className={`w-5 h-5 text-black transition-transform ${
                           isOpen ? "rotate-180" : ""
@@ -146,9 +195,10 @@ export default function ComponentsPage() {
 
                     {/* Accordion Content */}
                     {isOpen && (
-                      <div className="border border-t-0 border-strokes/50 rounded-b-2xl overflow-hidden">
+                      <div className="accordion-scroll border border-t-0 border-strokes/50 rounded-b-2xl overflow-x-auto">
+                        <div className="min-w-max">
                         {/* Table Header */}
-                        <div className="hidden lg:flex bg-background-blue text-sm font-semibold text-black">
+                        <div className="hidden lg:flex min-w-max bg-background-blue text-sm font-semibold text-black">
                           <div className="flex items-center gap-3 px-4 py-4 w-[220px] shrink-0">
                             <Checkbox
                               checked={allSelected}
@@ -158,8 +208,8 @@ export default function ComponentsPage() {
                             <span>Variant</span>
                           </div>
                           <div className="px-4 py-4 w-[100px] shrink-0">Category</div>
-                          <div className="px-4 py-4 flex-1 min-w-[140px]">Design</div>
-                          <div className="px-4 py-4 flex-1 min-w-[140px]">Development</div>
+                          <div className="px-4 py-4 w-[200px] shrink-0">Design</div>
+                          <div className="px-4 py-4 w-[200px] shrink-0">Development</div>
                           <div className="px-4 py-4 w-[100px] shrink-0">Design Effort</div>
                           <div className="px-4 py-4 w-[100px] shrink-0">Dev Effort</div>
                         </div>
@@ -184,6 +234,7 @@ export default function ComponentsPage() {
                             <CirclePlus className="w-5 h-5" />
                           </button>
                         </div>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -195,9 +246,10 @@ export default function ComponentsPage() {
 
       </div>
 
-      {/* Right: Estimation Panel */}
-      <div className="px-4 pb-4 md:px-6 md:pb-6 lg:p-5 lg:pl-0 shrink-0 lg:sticky lg:top-0 lg:h-screen">
+      {/* Right: Estimation Panel - 4 columns */}
+      <div className="px-4 pb-4 md:px-6 md:pb-6 lg:col-span-4 lg:p-5 lg:pl-0 lg:sticky lg:top-0 lg:h-screen lg:self-start">
         <EstimationPanel />
+      </div>
       </div>
     </div>
   );
@@ -218,7 +270,7 @@ function ComponentRow({
   return (
     <div className="border-b border-strokes/50 last:border-b-0">
       {/* Desktop row */}
-      <div className="hidden lg:flex items-stretch text-xs text-black">
+      <div className="hidden lg:flex min-w-max items-stretch text-xs text-black">
         <div className="flex items-start gap-3 px-4 py-3 w-[220px] shrink-0 border-r border-strokes/50">
           <Checkbox
             checked={component.isSelected}
@@ -248,7 +300,7 @@ function ComponentRow({
             <CategoryLabel category={component.category} />
           )}
         </div>
-        <div className="flex items-start px-4 py-3 flex-1 min-w-[140px] border-r border-strokes/50 leading-snug">
+        <div className="flex items-start px-4 py-3 w-[200px] shrink-0 border-r border-strokes/50 leading-snug">
           {isEditable ? (
             <input
               value={component.designDescription}
@@ -260,7 +312,7 @@ function ComponentRow({
             component.designDescription
           )}
         </div>
-        <div className="flex items-start px-4 py-3 flex-1 min-w-[140px] border-r border-strokes/50 leading-snug">
+        <div className="flex items-start px-4 py-3 w-[200px] shrink-0 border-r border-strokes/50 leading-snug">
           {isEditable ? (
             <input
               value={component.developmentDescription}

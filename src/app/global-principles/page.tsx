@@ -12,11 +12,11 @@ export default function GlobalPrinciplesPage() {
     loadGlobalPrinciples().then(setPrinciples);
   }, []);
   return (
-    <div className="min-h-screen bg-background-blue flex flex-col lg:flex-row">
-      {/* Left: Header + Content */}
-      <div className="flex-1 min-w-0">
-        <AppHeader />
-
+    <div className="min-h-screen bg-background-blue flex flex-col">
+      <AppHeader />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 flex-1">
+      {/* Left: Content - 8 columns */}
+      <div className="lg:col-span-8 min-w-0">
         <div className="px-4 md:px-8 lg:px-[60px] py-6 lg:py-10">
           <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
             <h2 className="text-xl md:text-2xl lg:text-[30px] font-semibold text-black mb-8 lg:mb-10">
@@ -86,9 +86,10 @@ export default function GlobalPrinciplesPage() {
 
       </div>
 
-      {/* Right: Estimation Panel */}
-      <div className="px-4 pb-4 md:px-6 md:pb-6 lg:p-5 lg:pl-0 shrink-0 lg:sticky lg:top-0 lg:h-screen">
+      {/* Right: Estimation Panel - 4 columns */}
+      <div className="px-4 pb-4 md:px-6 md:pb-6 lg:col-span-4 lg:p-5 lg:pl-0 lg:sticky lg:top-0 lg:h-screen lg:self-start">
         <EstimationPanel />
+      </div>
       </div>
     </div>
   );

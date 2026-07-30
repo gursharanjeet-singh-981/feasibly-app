@@ -104,3 +104,23 @@
     @apply font-sans;
   }
 }
+
+/* Custom thin scrollbar for accordion tables */
+.accordion-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.accordion-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 3px;
+}
+.accordion-scroll::-webkit-scrollbar-thumb {
+  background: #d9d9d9;
+  border-radius: 3px;
+}
+.accordion-scroll::-webkit-scrollbar-thumb:hover {
+  background: #bbb;
+}
+.accordion-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #d9d9d9 transparent;
+}

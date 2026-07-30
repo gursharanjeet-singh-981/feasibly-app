@@ -5,8 +5,10 @@
     "category": "Core",
     "description": "High‑level layout defining key entry points, hero areas, content sections and primary journeys using standard components.",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 24,
+    "aiDevEffortBase": 14,
     "devEffortPerPage": 6
   },
   {
@@ -15,8 +17,10 @@
     "category": "Core",
     "description": "Grid/list layout showcasing items with basic metadata and repeatable patterns.",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 16,
+    "aiDevEffortBase": 10,
     "devEffortPerPage": 2
   },
   {
@@ -25,8 +29,10 @@
     "category": "Core",
     "description": "Structured layout presenting core product information, media and supporting content.",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 20,
+    "aiDevEffortBase": 12,
     "devEffortPerPage": 2
   },
   {
@@ -35,8 +41,10 @@
     "category": "Core",
     "description": "Long‑form editorial layout optimised for readability and media placement.",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 12,
+    "aiDevEffortBase": 7,
     "devEffortPerPage": 3
   },
   {
@@ -45,8 +53,10 @@
     "category": "Core",
     "description": "Structured page presenting individual event details such as date, time, location and supporting content.",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 12,
+    "aiDevEffortBase": 7,
     "devEffortPerPage": 2
   },
   {
@@ -55,8 +65,10 @@
     "category": "Core",
     "description": "Conversion‑focused page with flexible content sections and primary calls to action.",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 16,
+    "aiDevEffortBase": 11,
     "devEffortPerPage": 4
   },
   {
@@ -65,8 +77,10 @@
     "category": "Core",
     "description": "Results‑driven layout displaying search results list and basic messaging.",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 8,
+    "aiDevEffortBase": 5,
     "devEffortPerPage": 1
   },
   {
@@ -75,8 +89,10 @@
     "category": "Core",
     "description": "Simple branded error layout with messaging and recovery CTAs.",
     "designEffortBase": 16,
+    "aiDesignEffortBase": 8,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -85,8 +101,10 @@
     "category": "Core",
     "description": "Structured page presenting a category overview with supporting content, sub‑categories, and entry points into deeper navigation layers.",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 14,
+    "aiDevEffortBase": 8,
     "devEffortPerPage": 2
   },
   {
@@ -95,8 +113,10 @@
     "category": "Core",
     "description": "Step 1: Landing Checkout (Login)",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 10,
+    "aiDevEffortBase": 6,
     "devEffortPerPage": 2
   },
   {
@@ -105,8 +125,10 @@
     "category": "Core",
     "description": "Step 2: Delivery Method",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 8,
+    "aiDevEffortBase": 5,
     "devEffortPerPage": 1
   },
   {
@@ -115,8 +137,10 @@
     "category": "Core",
     "description": "Step 3: Payment",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 8,
+    "aiDevEffortBase": 5,
     "devEffortPerPage": 1
   },
   {
@@ -125,8 +149,10 @@
     "category": "Core",
     "description": "Step 4: Confirmation Page",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 5,
+    "aiDevEffortBase": 2,
     "devEffortPerPage": 0.5
   },
   {
@@ -135,8 +161,10 @@
     "category": "Core",
     "description": "Basket Page / Minibasket",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 10,
+    "aiDevEffortBase": 6,
     "devEffortPerPage": 1
   },
   {
@@ -145,8 +173,10 @@
     "category": "Core",
     "description": "Includes single page or multi-step pages (login, details, delivery, confirmation page)",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 0
   },
   {
@@ -155,8 +185,10 @@
     "category": "Core",
     "description": "No header / no fotter template",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -165,8 +197,10 @@
     "category": "Core",
     "description": "This might be a template used for contact forms, FAQs, help & support, etc",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -175,8 +209,10 @@
     "category": "Core",
     "description": "Page allowing users to manage privacy, consent, or preferences.",
     "designEffortBase": 16,
+    "aiDesignEffortBase": 8,
     "designEffortPerPage": 4,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -185,8 +221,10 @@
     "category": "Bespoke",
     "description": "Searchable and/or map‑based layout allowing users to find locations using filters or proximity.",
     "designEffortBase": 56,
+    "aiDesignEffortBase": 28,
     "designEffortPerPage": 8,
     "devEffortBase": 3,
+    "aiDevEffortBase": 1,
     "devEffortPerPage": 2
   },
   {
@@ -195,8 +233,10 @@
     "category": "Bespoke",
     "description": "Guided, step‑based experience helping users discover products through questions or selections.",
     "designEffortBase": 80,
+    "aiDesignEffortBase": 40,
     "designEffortPerPage": 8,
     "devEffortBase": 14,
+    "aiDevEffortBase": 9,
     "devEffortPerPage": 3
   },
   {
@@ -205,8 +245,10 @@
     "category": "Core",
     "description": "Registration - Simple Page",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 8,
+    "aiDevEffortBase": 4,
     "devEffortPerPage": 1
   },
   {
@@ -215,8 +257,10 @@
     "category": "Core",
     "description": "Registration - Confirmation Page",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 4,
+    "aiDevEffortBase": 2,
     "devEffortPerPage": 1
   },
   {
@@ -225,8 +269,10 @@
     "category": "Core",
     "description": "Registration - Multi-step",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 10,
+    "aiDevEffortBase": 6,
     "devEffortPerPage": 2
   },
   {
@@ -235,8 +281,10 @@
     "category": "Core",
     "description": "Account Dashboard",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 16,
+    "aiDevEffortBase": 10,
     "devEffortPerPage": 1
   },
   {
@@ -245,8 +293,10 @@
     "category": "Core",
     "description": "Profile",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -255,8 +305,10 @@
     "category": "Core",
     "description": "Order History",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -265,8 +317,10 @@
     "category": "Core",
     "description": "Order Detail",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -275,8 +329,10 @@
     "category": "Core",
     "description": "Saved Addresses",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -285,8 +341,10 @@
     "category": "Core",
     "description": "Saved Payment Methods",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -295,8 +353,10 @@
     "category": "Core",
     "description": "Invoices / Receipts",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -305,8 +365,10 @@
     "category": "Core",
     "description": "Preferences",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   },
   {
@@ -315,8 +377,10 @@
     "category": "Core",
     "description": "Wishlist",
     "designEffortBase": 32,
+    "aiDesignEffortBase": 16,
     "designEffortPerPage": 8,
     "devEffortBase": 6,
+    "aiDevEffortBase": 3,
     "devEffortPerPage": 1
   }
 ]

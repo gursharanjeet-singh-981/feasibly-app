@@ -7,7 +7,9 @@
     "designDescription": "CTA may include an icon positioned left, right, or shown on hover. Design defines size variants, icon alignment, spacing, and default interaction states (hover, focus, disabled).",
     "developmentDescription": "Uses Core Button component with icon support. Configuration via dialogs and CSS. No custom logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -18,7 +20,9 @@
     "designDescription": "CTA includes simple motion such as hover transitions, icon movement, or subtle animation. Motion behaviour aligns with design system guidelines.",
     "developmentDescription": "CSS-based animations or transitions applied to Core component. No JavaScript required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 6,
+    "aiDevEffort": 4,
     "assumptions": ""
   },
   {
@@ -29,7 +33,9 @@
     "designDescription": "Additional visual styles beyond standard button hierarchy. Clear rules defined for usage, contrast, and accessibility.",
     "developmentDescription": "Implemented via style system or policies. No structural changes to the Core component.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 7,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -40,7 +46,9 @@
     "designDescription": "Additional size definitions introduced beyond standard breakpoints. Padding, font size, and tap‑target considerations defined.",
     "developmentDescription": "CSS extensions to support additional size modifiers. Core component structure retained.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 5,
+    "aiDevEffort": 4,
     "assumptions": ""
   },
   {
@@ -51,7 +59,9 @@
     "designDescription": "CTA can trigger modal behaviour or navigate to internal/external links. Visual consistency across behaviours defined.",
     "developmentDescription": "Modal component dependency. Conditional behaviour handling, additional JS initialisation for modal triggering.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -62,7 +72,9 @@
     "designDescription": "Button appearance or behaviour changes based on context (e.g. logged‑in state, availability, form completion). States and rules defined by design.",
     "developmentDescription": "Custom logic required to determine CTA state. Additional backend or front‑end logic beyond Core behaviour.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 20,
     "assumptions": ""
   },
   {
@@ -73,7 +85,9 @@
     "designDescription": "Accordion panels contain formatted rich text content with one or more CTAs styled according to design system guidelines. CTA placement, spacing and hierarchy are visually defined within expanded states.",
     "developmentDescription": "Accordion body supports rich text rendering and nested CTA components. CTA interactions respect accordion state, accessibility, and focus management.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -84,7 +98,9 @@
     "designDescription": "Accordion panels include images or icons alongside rich text, with responsive layout rules and clear visual hierarchy defined across breakpoints.",
     "developmentDescription": "Accordion content supports media assets with responsive handling, image optimisation, and breakpoint‑specific layout logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 13,
+    "aiDevEffort": 10,
     "assumptions": ""
   },
   {
@@ -95,7 +111,9 @@
     "designDescription": "Accordion content area visually accommodates interactive or dynamic elements without breaking layout or visual consistency.",
     "developmentDescription": "Accordion supports injected JavaScript‑driven components, ensuring no conflicts with accordion open/close logic, lifecycle events, or performance constraints.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 17,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -106,7 +124,9 @@
     "designDescription": "Accordion panels display structured content such as lists or tables with consistent spacing, alignment, and responsive behaviour.",
     "developmentDescription": "Accordion body supports semantic list and table markup, including responsive handling and overflow management within expandable panels.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 11,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -117,7 +137,9 @@
     "designDescription": "Accordion panels contain embedded video with defined aspect ratios, playback controls, and clear visual affordances.",
     "developmentDescription": "Accordion integrates video players or embeds, managing lazy loading, playback state on open/close, and preventing background playback issues.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 15,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -128,7 +150,9 @@
     "designDescription": "Accordion panels render reusable content modules while maintaining consistent visual styling and spacing.",
     "developmentDescription": "Accordion supports Experience Fragments or content fragment rendering within panels, including configuration and dependency management.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 25,
+    "aiDevEffort": 19,
     "assumptions": ""
   },
   {
@@ -139,7 +163,9 @@
     "designDescription": "Accordion group visually supports multiple expanded panels at the same time without layout collision or usability issues.",
     "developmentDescription": "Accordion interaction logic allows multiple panels to remain open, managing independent state per accordion item.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 9,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -150,7 +176,9 @@
     "designDescription": "Accordion open and close actions include motion aligned to motion guidelines, enhancing clarity and perceived responsiveness.",
     "developmentDescription": "Accordion open/close actions trigger CSS or JS animations, supporting reduced‑motion preferences and accessibility requirements.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 7,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -161,7 +189,9 @@
     "designDescription": "Design enforces a maximum number of accordion items to maintain readability and visual consistency.",
     "developmentDescription": "Validation logic restricts the number of accordion items that can be authored, enforced via configuration or policy controls.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 12,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -172,7 +202,9 @@
     "designDescription": "All fields shown in one view",
     "developmentDescription": "Basic form rendering and submission",
     "designEffort": 16,
+    "aiDesignEffort": 8,
     "devEffort": 40,
+    "aiDevEffort": 20,
     "assumptions": "Configure AEM form dialog with standard field types (text, dropdowns, checkboxes, radio). Wire client-side validation and submit to existing backend endpoint."
   },
   {
@@ -183,7 +215,9 @@
     "designDescription": "Fields split across logical steps",
     "developmentDescription": "Step logic, state persistance",
     "designEffort": 25,
+    "aiDesignEffort": 15,
     "devEffort": 96,
+    "aiDevEffort": 64,
     "assumptions": "Configure multi-step form container with step state management. Each step is a separate form panel; completion state persists across steps."
   },
   {
@@ -194,7 +228,9 @@
     "designDescription": "Stepper / progress bar shown",
     "developmentDescription": "Step tracking and UI sync",
     "designEffort": 8,
+    "aiDesignEffort": 5,
     "devEffort": 22,
+    "aiDevEffort": 13,
     "assumptions": "Add step progress indicator (stepper/bar) linked to multi-step form state. Visual only — no additional data logic."
   },
   {
@@ -205,7 +241,9 @@
     "designDescription": "Form embedded within content flow",
     "developmentDescription": "Layout-aware rendering",
     "designEffort": 6,
+    "aiDesignEffort": 4,
     "devEffort": 18,
+    "aiDevEffort": 10,
     "assumptions": "Embed form within content flow using container layout policies. No modal or overlay behaviour."
   },
   {
@@ -216,7 +254,9 @@
     "designDescription": "Form opens in modal",
     "developmentDescription": "Modal dependency, focus management",
     "designEffort": 15,
+    "aiDesignEffort": 9,
     "devEffort": 44,
+    "aiDevEffort": 30,
     "assumptions": "Trigger form via CTA and render inside AEM modal component. Focus management and close behaviour included."
   },
   {
@@ -227,7 +267,9 @@
     "designDescription": "Fields appears based on selection",
     "developmentDescription": "Dynamic DOM + data handling",
     "designEffort": 16,
+    "aiDesignEffort": 8,
     "devEffort": 48,
+    "aiDevEffort": 34,
     "assumptions": "Show/hide form fields using client-side conditional logic driven by author-configured rules in dialog."
   },
   {
@@ -238,7 +280,9 @@
     "designDescription": "Upload field with UI feedback",
     "developmentDescription": "File handling, size/type validation",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 56,
+    "aiDevEffort": 42,
     "assumptions": "Add file upload field with client-side size/type validation. Backend file storage endpoint assumed to exist."
   },
   {
@@ -249,7 +293,9 @@
     "designDescription": "Custom-styled picker",
     "developmentDescription": "JS date handling, localisation",
     "designEffort": 10,
+    "aiDesignEffort": 6,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": "Implement styled date/time picker. Locale-aware formatting; no custom calendar logic."
   },
   {
@@ -260,7 +306,9 @@
     "designDescription": "Required state visually indicated",
     "developmentDescription": "Client-side field validation",
     "designEffort": 5,
+    "aiDesignEffort": 3,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": "Mark fields as required in dialog; show inline error on submit attempt before any API call."
   },
   {
@@ -271,7 +319,9 @@
     "designDescription": "Errors shown near field",
     "developmentDescription": "Error mapping and messaging",
     "designEffort": 6,
+    "aiDesignEffort": 4,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": "Display field-level error messages adjacent to each invalid field on form submission."
   },
   {
@@ -282,7 +332,9 @@
     "designDescription": "Error summary at the top of the form",
     "developmentDescription": "Agreggated validation logic",
     "designEffort": 10,
+    "aiDesignEffort": 6,
     "devEffort": 30,
+    "aiDevEffort": 20,
     "assumptions": "Display aggregated error summary at top of form on submission failure, linked to each failing field."
   },
   {
@@ -293,7 +345,9 @@
     "designDescription": "Pattern-specific messaging",
     "developmentDescription": "Custom validation logic",
     "designEffort": 11,
+    "aiDesignEffort": 7,
     "devEffort": 32,
+    "aiDevEffort": 20,
     "assumptions": "Apply pattern-based validation rules (regex, min/max, format) configured per field in dialog."
   },
   {
@@ -304,7 +358,9 @@
     "designDescription": "Inline Confirmation State",
     "developmentDescription": "Submission response handling",
     "designEffort": 5,
+    "aiDesignEffort": 3,
     "devEffort": 14,
+    "aiDevEffort": 7,
     "assumptions": "Render inline confirmation message after successful form submission. No page redirect."
   },
   {
@@ -315,7 +371,9 @@
     "designDescription": "Failure messaging",
     "developmentDescription": "Error handling + retries",
     "designEffort": 6,
+    "aiDesignEffort": 4,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": "Display form-level error state with retry option on submission failure (network or server error)."
   },
   {
@@ -326,7 +384,9 @@
     "designDescription": "Navigate to confirmation page",
     "developmentDescription": "Post-submit routing",
     "designEffort": 5,
+    "aiDesignEffort": 3,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": "Redirect user to configured destination page after successful form submission."
   },
   {
@@ -337,7 +397,9 @@
     "designDescription": "Partial completion UX",
     "developmentDescription": "Data persistence logic",
     "designEffort": 31,
+    "aiDesignEffort": 19,
     "devEffort": 88,
+    "aiDevEffort": 62,
     "assumptions": "(1) Security and expiry strategy must be agreed upfront\n(2) Persist partial form state to browser/session storage. User can return and resume from last saved step."
   },
   {
@@ -348,7 +410,9 @@
     "designDescription": "Confirmation email design",
     "developmentDescription": "Email service integration",
     "designEffort": 22,
+    "aiDesignEffort": 13,
     "devEffort": 64,
+    "aiDevEffort": 46,
     "assumptions": "Route form submission to email dispatch service. Recipient and template configured in dialog."
   },
   {
@@ -359,7 +423,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Repository modelling",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 56,
+    "aiDevEffort": 38,
     "assumptions": "Persist form submission data to AEM JCR repository. Node structure and data model created."
   },
   {
@@ -370,7 +436,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Third-party API integration",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 88,
+    "aiDevEffort": 62,
     "assumptions": "Map form fields to CRM payload and POST to CRM API endpoint. Field mapping configured via dialog."
   },
   {
@@ -381,7 +449,9 @@
     "designDescription": "Opt-in messaging and UI",
     "developmentDescription": "External system mapping",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 64,
+    "aiDevEffort": 46,
     "assumptions": "Trigger marketing automation platform event on form submission. Payload mapping configured in dialog."
   },
   {
@@ -392,7 +462,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Backend event handling",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 64,
+    "aiDevEffort": 46,
     "assumptions": "Fire configured webhook URL on form submission. Payload includes all form field values."
   },
   {
@@ -403,7 +475,9 @@
     "designDescription": "Pre-populated inputs",
     "developmentDescription": "Data binding logic",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 44,
+    "aiDevEffort": 30,
     "assumptions": "Pre-populate form fields from URL parameters, session data, or backend profile API."
   },
   {
@@ -414,7 +488,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Submission throttling",
     "designEffort": 0.1,
+    "aiDesignEffort": 0.1,
     "devEffort": 40,
+    "aiDevEffort": 26,
     "assumptions": "Integrate reCAPTCHA (or equivalent). Token validated on submit before backend endpoint is called."
   },
   {
@@ -425,7 +501,9 @@
     "designDescription": "Form sections organised into vertical tabs, typically aligned on the left. Design defines hierarchy, active states, and responsive fallback.",
     "developmentDescription": "Custom tab layout and navigation logic required. Core panel behaviour extended.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 88,
+    "aiDevEffort": 62,
     "assumptions": ""
   },
   {
@@ -436,7 +514,9 @@
     "designDescription": "Form sections organised into horizontal tabs. Visual hierarchy, overflow handling, and mobile behaviour defined.",
     "developmentDescription": "Custom tab handling and state management required. Core panels insufficient.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 80,
+    "aiDevEffort": 56,
     "assumptions": ""
   },
   {
@@ -447,7 +527,9 @@
     "designDescription": "Boolean inputs displayed as toggle switches instead of checkboxes. Design defines on/off states, labels, and accessibility behaviour.",
     "developmentDescription": "Custom field configuration or component extension required.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 64,
+    "aiDevEffort": 44,
     "assumptions": ""
   },
   {
@@ -458,7 +540,9 @@
     "designDescription": "Form includes a dedicated telephone input with formatting, validation, and optional country code handling. Design defines error and helper states.",
     "developmentDescription": "Custom validation, formatting, and possibly localisation logic required.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 80,
+    "aiDevEffort": 54,
     "assumptions": ""
   },
   {
@@ -469,7 +553,9 @@
     "designDescription": "Contextual help provided via tooltips or step‑by‑step wizard guidance. Timing, placement, and dismissal rules defined.",
     "developmentDescription": "JavaScript‑driven interaction logic required. Increased QA and accessibility effort.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 64,
+    "aiDevEffort": 40,
     "assumptions": "(1) More of Front end logic is required\n(2) Multi-step adaptive form with wizard navigation, tooltip overlays, per-step client-side validation, and full WCAG 2.2 accessibility compliance."
   },
   {
@@ -480,7 +566,9 @@
     "designDescription": "Horizontal breadcrumb trail",
     "developmentDescription": "Static breadcrumb rendering",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 4,
     "assumptions": "Render breadcrumb trail using AEM Core Breadcrumb component. Path resolved from JCR page hierarchy."
   },
   {
@@ -491,7 +579,9 @@
     "designDescription": "Reflects page hierarchy",
     "developmentDescription": "Hierarchy resolution logic",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 14,
+    "aiDevEffort": 7,
     "assumptions": "Configure breadcrumb depth via dialog. Resolves from current page up to author-defined root level."
   },
   {
@@ -502,7 +592,9 @@
     "designDescription": "Auto-generated from site structure",
     "developmentDescription": "Dynamic page path generation",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 18,
+    "aiDevEffort": 9,
     "assumptions": "Auto-generate breadcrumb path from live page structure at render time. No static overrides."
   },
   {
@@ -513,7 +605,9 @@
     "designDescription": "Editor-defined breadcrumb items",
     "developmentDescription": "Author-configurable breadcrumb model",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 8,
     "assumptions": "Allow authors to override individual breadcrumb items (label and link) via dialog multifield."
   },
   {
@@ -524,7 +618,9 @@
     "designDescription": "Auto-generated with manual override",
     "developmentDescription": "Conditional logic for overrides",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 22,
+    "aiDevEffort": 11,
     "assumptions": "Auto-generated breadcrumb by default; authors can override individual items where needed."
   },
   {
@@ -535,7 +631,9 @@
     "designDescription": "Simple text links",
     "developmentDescription": "Basic link handling",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 5,
+    "aiDevEffort": 3,
     "assumptions": "Render breadcrumb items as plain text or anchor links. No icon support required."
   },
   {
@@ -546,7 +644,9 @@
     "designDescription": "Editable breadcrumb labels",
     "developmentDescription": "Label override logic",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 7,
+    "aiDevEffort": 4,
     "assumptions": "Allow authors to override the display label per item while the link target remains the page path."
   },
   {
@@ -557,7 +657,9 @@
     "designDescription": "Long labels truncated or wrapped",
     "developmentDescription": "Responsive text handling",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 8,
+    "aiDevEffort": 4,
     "assumptions": "Truncate breadcrumb item text beyond a configured character limit with CSS ellipsis."
   },
   {
@@ -568,7 +670,9 @@
     "designDescription": "Middle items collapsed",
     "developmentDescription": "Item hiding and expansion logic",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 9,
+    "aiDevEffort": 6,
     "assumptions": "Collapse middle breadcrumb items beyond a configured count; expand on user interaction."
   },
   {
@@ -579,7 +683,9 @@
     "designDescription": "Home icon as first item",
     "developmentDescription": "Icon rendering logic",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 7,
+    "aiDevEffort": 5,
     "assumptions": "Replace root breadcrumb item text with a home icon. Icon asset configured via dialog."
   },
   {
@@ -590,7 +696,9 @@
     "designDescription": "All items except current page clickable",
     "developmentDescription": "Link resolution",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 7,
+    "aiDevEffort": 5,
     "assumptions": "Render all breadcrumb items as anchor links resolved from the AEM page path."
   },
   {
@@ -601,7 +709,9 @@
     "designDescription": "Breadcrumbs used for context only",
     "developmentDescription": "Disabled link rendering",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 9,
+    "aiDevEffort": 6,
     "assumptions": "Allow authors to mark individual items as non-clickable (plain text, no anchor link)."
   },
   {
@@ -612,7 +722,9 @@
     "designDescription": "Final item visually highlighted",
     "developmentDescription": "Active state logic",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 11,
+    "aiDevEffort": 8,
     "assumptions": "Apply active CSS class to the last breadcrumb item (current page). Current page item has no link."
   },
   {
@@ -623,7 +735,9 @@
     "designDescription": "Scroll or JS-triggered actions",
     "developmentDescription": "Event handling logic",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 7,
+    "aiDevEffort": 5,
     "assumptions": "Attach custom event handler (e.g. analytics push, SPA route) to breadcrumb link clicks."
   },
   {
@@ -634,7 +748,9 @@
     "designDescription": "Breadcrumbs inside container bar",
     "developmentDescription": "Container layout logic",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 9,
+    "aiDevEffort": 6,
     "assumptions": "Wrap breadcrumb in a styled container. Background colour and padding controlled via CSS policies."
   },
   {
@@ -645,7 +761,9 @@
     "designDescription": "Reduced breadcrumb items on mobile",
     "developmentDescription": "Breakpoint logic",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 9,
+    "aiDevEffort": 6,
     "assumptions": "Collapse breadcrumb to show only first and last items on mobile breakpoint."
   },
   {
@@ -656,7 +774,9 @@
     "designDescription": "Horizontal scroll on small screens",
     "developmentDescription": "Overflow handling",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 9,
+    "aiDevEffort": 6,
     "assumptions": "Enable horizontal scroll on overflow when breadcrumb items exceed container width on small screens."
   },
   {
@@ -667,7 +787,9 @@
     "designDescription": "Breadcrumbs removed on small screens",
     "developmentDescription": "Conditional rendering",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 11,
+    "aiDevEffort": 8,
     "assumptions": "Hide entire breadcrumb component on mobile breakpoint via CSS display policy."
   },
   {
@@ -678,7 +800,9 @@
     "designDescription": "Separator changes by breakpoint",
     "developmentDescription": "Responsive styling logic",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 9,
+    "aiDevEffort": 6,
     "assumptions": "Configure separator character or icon between breadcrumb items. Separator adjusts or hides on mobile."
   },
   {
@@ -689,7 +813,9 @@
     "designDescription": "Header displays logo and a linear set of navigation links with clear hierarchy and hover/active states.",
     "developmentDescription": "Static navigation structure with direct link routing and active state handling.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": "Static navigation with logo, link items, active state handling, and responsive collapse. No dynamic data."
   },
   {
@@ -700,7 +826,9 @@
     "designDescription": "Header includes primary navigation links plus one or multiple CTAs styled according to the design system.",
     "developmentDescription": "Navigation rendering with integrated CTAs component and routing logic.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 50,
+    "aiDevEffort": 33,
     "assumptions": ""
   },
   {
@@ -711,7 +839,9 @@
     "designDescription": "Header remains visible on scroll with defined compact or fixed behaviour.",
     "developmentDescription": "Scroll-based positioning logic with state handling for sticky behaviour.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 26,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -722,7 +852,9 @@
     "designDescription": "Header includes a language selector displaying available languages as text links or short language codes.",
     "developmentDescription": "Language selector renders available locales and routes users to corresponding language pages.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 11,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -733,7 +865,9 @@
     "designDescription": "Header supports an expandable or collapsible visual state (e.g. expanding height, revealing secondary content) with clear motion behaviour.",
     "developmentDescription": "Header includes expandable state logic with animation handling, state transitions, and accessibility‑compliant toggle behaviour.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 21,
+    "aiDevEffort": 15,
     "assumptions": ""
   },
   {
@@ -744,7 +878,9 @@
     "designDescription": "Navigation is hidden by default and revealed via a burger menu, displayed as a sidebar or full‑screen overlay with defined layout and hierarchy.",
     "developmentDescription": "Burger menu interaction logic with off‑canvas or modal navigation rendering, open/close state management, and focus handling.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 17,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -755,7 +891,9 @@
     "designDescription": "Navigation links and interactive elements include hover animations aligned with motion and brand guidelines.",
     "developmentDescription": "CSS or JS hover animations applied to navigation elements, ensuring performance, accessibility, and consistency across devices.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 21,
+    "aiDevEffort": 15,
     "assumptions": ""
   },
   {
@@ -766,7 +904,9 @@
     "designDescription": "Navigation links include leading or trailing icons to support recognition and visual hierarchy, with consistent alignment, spacing, and hover behaviour.",
     "developmentDescription": "Navigation supports icon rendering alongside link labels, including icon asset handling, alignment logic, and accessibility considerations (ARIA labels where required).",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 13,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -777,7 +917,9 @@
     "designDescription": "Navigation links visually indicate external destinations where required (e.g. icon, styling, or helper text), while maintaining consistent hierarchy and usability.",
     "developmentDescription": "Navigation supports external link handling, including target behaviour (new tab), optional external indicators, security attributes, and accessibility labelling.",
     "designEffort": 0.5,
+    "aiDesignEffort": 0.1,
     "devEffort": 13,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -788,7 +930,9 @@
     "designDescription": "Header includes an additional bar allowing users to switch audience, brand, or regional context.",
     "developmentDescription": "Context selection logic with state persistence and coordination with mega navigation structure.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 62,
+    "aiDevEffort": 42,
     "assumptions": ""
   },
   {
@@ -799,7 +943,9 @@
     "designDescription": "Header includes multi‑level navigation where top‑level links trigger large dropdown panels displaying grouped navigation options.",
     "developmentDescription": "Dynamic mega menu structure with multi‑level navigation logic, open/close state handling, and routing management.",
     "designEffort": 16,
+    "aiDesignEffort": 8,
     "devEffort": 104,
+    "aiDevEffort": 70,
     "assumptions": ""
   },
   {
@@ -810,7 +956,9 @@
     "designDescription": "Mega menu panels are laid out in multiple columns to present navigation groups clearly and scannably.",
     "developmentDescription": "Layout logic supports configurable column structures and responsive reflow.",
     "designEffort": 16,
+    "aiDesignEffort": 8,
     "devEffort": 96,
+    "aiDevEffort": 64,
     "assumptions": ""
   },
   {
@@ -821,7 +969,9 @@
     "designDescription": "Mega menu panels include non‑link content such as images, promotional blocks or featured sections.",
     "developmentDescription": "Mega menu supports mixed content rendering alongside navigation links, including layout and data modelling.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 80,
+    "aiDevEffort": 60,
     "assumptions": ""
   },
   {
@@ -832,7 +982,9 @@
     "designDescription": "Mega menu includes one or more CTAs styled according to the design system and visually separated from navigation links.",
     "developmentDescription": "CTA components are supported within mega menu panels, with routing, tracking, and interaction handling.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 80,
+    "aiDevEffort": 60,
     "assumptions": ""
   },
   {
@@ -843,7 +995,9 @@
     "designDescription": "Mega menu panels open on hover with defined delay, animation and hover intent behaviour.",
     "developmentDescription": "Hover‑based interaction logic with debounce handling and controlled state transitions.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 57,
+    "aiDevEffort": 39,
     "assumptions": "Assuming any of above 4 variations is already in place"
   },
   {
@@ -854,7 +1008,9 @@
     "designDescription": "Mega menu panels open on click for improved usability and accessibility.",
     "developmentDescription": "Click‑based toggle logic with state persistence and close‑on‑outside‑click handling.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 57,
+    "aiDevEffort": 39,
     "assumptions": ""
   },
   {
@@ -865,7 +1021,9 @@
     "designDescription": "Header and mega navigation remain visible on scroll with defined compact or fixed behaviour.",
     "developmentDescription": "Scroll‑based positioning logic with coordination between sticky header and mega menu states.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 58,
+    "aiDevEffort": 39,
     "assumptions": ""
   },
   {
@@ -876,7 +1034,9 @@
     "designDescription": "Mega menu adapts to mobile as a stacked, accordion, or drill‑down navigation pattern.",
     "developmentDescription": "Mobile‑specific navigation logic with hierarchical transitions and back‑navigation handling.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 49,
+    "aiDevEffort": 33,
     "assumptions": ""
   },
   {
@@ -887,7 +1047,9 @@
     "designDescription": "Mega menu panels include open/close animations aligned with motion and brand guidelines.",
     "developmentDescription": "Animation handling for mega menu transitions, respecting reduced‑motion preferences and accessibility.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 41,
+    "aiDevEffort": 29,
     "assumptions": ""
   },
   {
@@ -898,7 +1060,9 @@
     "designDescription": "Navigation links include icons to support visual hierarchy and content recognition within the mega menu.",
     "developmentDescription": "Icon rendering is supported in navigation items with alignment logic and accessibility considerations.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 41,
+    "aiDevEffort": 29,
     "assumptions": ""
   },
   {
@@ -909,7 +1073,9 @@
     "designDescription": "Mega menu links visually indicate external destinations where required, without disrupting hierarchy or usability.",
     "developmentDescription": "External link handling supported, including target behaviour, indicators, security attributes, and accessibility labelling.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 41,
+    "aiDevEffort": 29,
     "assumptions": ""
   },
   {
@@ -920,7 +1086,9 @@
     "designDescription": "Language selector is integrated into the complex header or mega menu layout with clear active state.",
     "developmentDescription": "Language selector logic integrated alongside mega navigation without interaction conflicts.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 57,
+    "aiDevEffort": 39,
     "assumptions": ""
   },
   {
@@ -931,7 +1099,9 @@
     "designDescription": "Header includes an additional bar allowing users to switch audience, brand, or regional context.",
     "developmentDescription": "Context selection logic with state persistence and coordination with mega navigation structure.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 58,
+    "aiDevEffort": 39,
     "assumptions": ""
   },
   {
@@ -942,7 +1112,9 @@
     "designDescription": "Mega menu content adapts based on selected audience, brand, or region with clear visual indication.",
     "developmentDescription": "Conditional rendering logic connects selected context to navigation configuration.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 64,
+    "aiDevEffort": 42,
     "assumptions": ""
   },
   {
@@ -953,7 +1125,9 @@
     "designDescription": "Simple search input field with placeholder text and submit action, when typing there is an X to remove typing.",
     "developmentDescription": "Uses AEM OOTB search component to submit keyword queries and return results.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 32,
+    "aiDevEffort": 20,
     "assumptions": "AEM OOTB search component wired to existing search index. Includes input, results list, and pagination."
   },
   {
@@ -964,7 +1138,9 @@
     "designDescription": "Clear messaging displayed when no results are found, with optional guidance text.",
     "developmentDescription": "Conditional handling of empty result sets using standard search response logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 57,
+    "aiDevEffort": 39,
     "assumptions": ""
   },
   {
@@ -975,7 +1151,9 @@
     "designDescription": "Search input integrated into header layout with consistent styling.",
     "developmentDescription": "Embeds OOTB search component within header structure.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -986,7 +1164,9 @@
     "designDescription": "Search triggered via icon click or keyboard input.",
     "developmentDescription": "Standard form submission handling using AEM search component.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 17,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -997,7 +1177,9 @@
     "designDescription": "Search input displays suggested terms or pages as the user types.",
     "developmentDescription": "Custom autocomplete service querying AEM or external index with real‑time responses.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 72,
+    "aiDevEffort": 46,
     "assumptions": ""
   },
   {
@@ -1008,7 +1190,9 @@
     "designDescription": "Search suggestions include recently searched terms for the user.",
     "developmentDescription": "Client‑side or persisted state handling for search history.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -1019,7 +1203,9 @@
     "designDescription": "Suggested searches are displayed to guide users before typing.",
     "developmentDescription": "Configurable suggestion logic sourced from analytics or author‑defined lists.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -1030,7 +1216,9 @@
     "designDescription": "Results page displays a simple list of matching pages with title and excerpt.",
     "developmentDescription": "OOTB search results rendering using AEM indexing and query handling.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 60,
+    "aiDevEffort": 40,
     "assumptions": ""
   },
   {
@@ -1041,7 +1229,9 @@
     "designDescription": "Results include images, metadata, tags, or content type indicators.",
     "developmentDescription": "Custom result templates and enriched data mapping beyond OOTB output.",
     "designEffort": 16,
+    "aiDesignEffort": 8,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -1052,7 +1242,9 @@
     "designDescription": "For example: filtering pills, tabs, etc.",
     "developmentDescription": "",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 56,
+    "aiDevEffort": 36,
     "assumptions": "Embed additional AEM components (e.g. teaser, CTA) inside search result item templates."
   },
   {
@@ -1063,7 +1255,9 @@
     "designDescription": "For example: list view, grid view,",
     "developmentDescription": "",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 26,
+    "aiDevEffort": 17,
     "assumptions": "Add grid/list layout toggle to search results page. User selection persisted in session."
   },
   {
@@ -1074,7 +1268,9 @@
     "designDescription": "Results grouped by content type, section, or category.",
     "developmentDescription": "Custom aggregation logic applied to search results.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 48,
+    "aiDevEffort": 34,
     "assumptions": ""
   },
   {
@@ -1085,7 +1281,9 @@
     "designDescription": "Matched keywords are visually highlighted within results.",
     "developmentDescription": "Text processing logic applied to result excerpts.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 34,
+    "aiDevEffort": 23,
     "assumptions": ""
   },
   {
@@ -1096,7 +1294,9 @@
     "designDescription": "Displays a simple list of page section links derived from headings.",
     "developmentDescription": "Uses page heading structure to generate anchor links without additional logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1107,7 +1307,9 @@
     "designDescription": "Table of contents automatically reflects H2/H3 headings on the page.",
     "developmentDescription": "OOTB logic reads page markup and generates anchor links from headings.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 9,
+    "aiDevEffort": 6,
     "assumptions": ""
   },
   {
@@ -1118,7 +1320,9 @@
     "designDescription": "Clicking a ToC item scrolls the user to the corresponding section.",
     "developmentDescription": "Standard anchor link behaviour with browser‑native scrolling.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 9,
+    "aiDevEffort": 6,
     "assumptions": ""
   },
   {
@@ -1129,7 +1333,9 @@
     "designDescription": "Table of contents is positioned within the main content flow.",
     "developmentDescription": "Static rendering of the ToC component within the page layout.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 4,
+    "aiDevEffort": 3,
     "assumptions": ""
   },
   {
@@ -1140,7 +1346,9 @@
     "designDescription": "Table of contents is not displayed when no valid headings exist.",
     "developmentDescription": "Conditional rendering based on heading availability.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1151,7 +1359,9 @@
     "designDescription": "Clear hierarchy and readable structure for assistive technologies.",
     "developmentDescription": "Semantic markup and basic accessibility compliance using standard HTML.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 5,
+    "aiDevEffort": 4,
     "assumptions": ""
   },
   {
@@ -1162,7 +1372,9 @@
     "designDescription": "Table of contents remains visible while scrolling the page.",
     "developmentDescription": "Scroll‑based positioning logic with state handling for sticky behaviour.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 13,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -1173,7 +1385,9 @@
     "designDescription": "Add icons to each heading",
     "developmentDescription": "",
     "designEffort": 3,
+    "aiDesignEffort": 2,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": "Add configurable icon alongside each ToC anchor link. Icon selected via dialog."
   },
   {
@@ -1184,7 +1398,9 @@
     "designDescription": "ToC can be expanded or collapsed to reduce visual clutter.",
     "developmentDescription": "Toggle logic with state management and accessibility‑compliant controls.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -1195,7 +1411,9 @@
     "designDescription": "ToC collapses into a toggle or drawer pattern on smaller screens.",
     "developmentDescription": "Responsive interaction logic with breakpoint‑specific behaviour.",
     "designEffort": 3,
+    "aiDesignEffort": 2,
     "devEffort": 10,
+    "aiDevEffort": 6,
     "assumptions": ""
   },
   {
@@ -1206,7 +1424,9 @@
     "designDescription": "Current section is visually highlighted as the user scrolls.",
     "developmentDescription": "Scroll position tracking with active state updates.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 11,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -1217,7 +1437,9 @@
     "designDescription": "Navigation to sections includes animated scrolling.",
     "developmentDescription": "JavaScript‑driven smooth scroll handling with reduced‑motion support.",
     "designEffort": 3,
+    "aiDesignEffort": 2,
     "devEffort": 7,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1228,7 +1450,9 @@
     "designDescription": "Editors can manually define or reorder ToC items.",
     "developmentDescription": "Custom authoring model with manual mapping to anchors.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -1239,7 +1463,9 @@
     "designDescription": "ToC visually represents nested heading hierarchy.",
     "developmentDescription": "Hierarchy parsing and nested rendering logic.",
     "designEffort": 3,
+    "aiDesignEffort": 2,
     "devEffort": 7,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1250,7 +1476,9 @@
     "designDescription": "ToC items include numeric or ordered prefixes.",
     "developmentDescription": "Numbering logic applied to generated ToC items.",
     "designEffort": 3,
+    "aiDesignEffort": 2,
     "devEffort": 7,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1261,7 +1489,9 @@
     "designDescription": "Only selected heading levels are shown in the ToC.",
     "developmentDescription": "Configuration logic limits heading depth in generation.",
     "designEffort": 3,
+    "aiDesignEffort": 2,
     "devEffort": 5,
+    "aiDevEffort": 4,
     "assumptions": ""
   },
   {
@@ -1272,7 +1502,9 @@
     "designDescription": "Visual separators are used between ToC items.",
     "developmentDescription": "Styling logic applied consistently across items and breakpoints.",
     "designEffort": 3,
+    "aiDesignEffort": 2,
     "devEffort": 7,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1283,7 +1515,9 @@
     "designDescription": "Uses standard AEM List patterns and styles. Minimal design input limited to spacing, typography, and alignment within the design system. No bespoke visual treatment.",
     "developmentDescription": "Configuration-only. Content selection via children, tags, or static paths. Uses out-of-the-box Core Component functionality with no custom logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1294,7 +1528,9 @@
     "designDescription": "Design focuses on content hierarchy, truncation rules, metadata display (e.g. title, description, date). Responsive behaviour defined but consistent with existing patterns.",
     "developmentDescription": "Configure list data source logic. Ensure correct use of Core Component options (tags, children depth, sorting). Minimal backend logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -1305,7 +1541,9 @@
     "designDescription": "Defines visual variants for list items (e.g. compact vs detailed view). Rules established for what metadata appears per variant.",
     "developmentDescription": "Extend Core Component via style system or policies where possible. Limited conditional rendering based on variant selection.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -1316,7 +1554,9 @@
     "designDescription": "Adds small icons or thumbnails to list items using existing DAM assets and predefined aspect ratios. No complex media behaviour.",
     "developmentDescription": "Leverages Core Component image handling. Minor front-end adjustments to support thumbnail placement and fallbacks.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1327,7 +1567,9 @@
     "designDescription": "Fully bespoke card design including imagery, metadata, CTAs, and hover states. Not achievable through Core styles alone. Requires custom layouts and visual states.",
     "developmentDescription": "Custom component build. Custom HTL, Sling Models, and dialogs. Content mapping and card layout logic implemented from scratch.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 44,
+    "aiDevEffort": 32,
     "assumptions": ""
   },
   {
@@ -1338,7 +1580,9 @@
     "designDescription": "Design includes interactive filtering controls (e.g. dropdowns, checkboxes) and visual states for filtered results. UX flows defined.",
     "developmentDescription": "Front-end filtering using JavaScript. Data exposed via component model; no search backend integration. Performance considerations required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 60,
+    "aiDevEffort": 40,
     "assumptions": ""
   },
   {
@@ -1349,7 +1593,9 @@
     "designDescription": "Defines pagination or “load more” UX patterns and states including loading and empty states.",
     "developmentDescription": "Requires custom backend handling or APIs. Integration with pagination logic and possible search endpoints. Increased complexity.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 88,
+    "aiDevEffort": 62,
     "assumptions": ""
   },
   {
@@ -1360,7 +1606,9 @@
     "designDescription": "Highly curated presentation with conditional rules per item (e.g. featured item styling). Visual emphasis rules defined by design.",
     "developmentDescription": "Custom authoring logic for item ordering and overrides. Additional validation and rendering logic.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 48,
+    "aiDevEffort": 34,
     "assumptions": ""
   },
   {
@@ -1371,7 +1619,9 @@
     "designDescription": "Uses default image styles from the design system. Design input limited to alignment, spacing, and responsive behaviour within existing layouts.",
     "developmentDescription": "Out-of-the-box Core Image Component. Configuration-only with standard DAM asset usage, no custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1382,7 +1632,9 @@
     "designDescription": "Defines typography, spacing, and placement rules for caption text relative to the image. Responsive behaviour specified.",
     "developmentDescription": "Uses Core Component caption field. Minimal front-end adjustments for layout consistency.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -1393,7 +1645,9 @@
     "designDescription": "Design defines how the image crops or scales across breakpoints and aspect ratios. Ensures visual integrity across devices.",
     "developmentDescription": "Core Component responsive image behaviour configured via policies. No custom media logic.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -1404,7 +1658,9 @@
     "designDescription": "CTA placement and contrast rules defined. Overlay behaviour (e.g. bottom gradient, hover state) follows established patterns.",
     "developmentDescription": "Light extension of Core Component using CSS and HTL structure. No custom authoring logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 10,
+    "aiDevEffort": 6,
     "assumptions": ""
   },
   {
@@ -1415,7 +1671,9 @@
     "designDescription": "Design specifies when images are decorative vs meaningful (alt text, placement rules). Accessibility requirements defined.",
     "developmentDescription": "Configuration and authoring guidance. Front-end enforces alt text behaviour where applicable.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1426,7 +1684,9 @@
     "designDescription": "Bespoke visual treatments such as masks, shapes, or overlapping layouts that are not supported by Core styles.",
     "developmentDescription": "Custom component build. Bespoke HTL and CSS styling required. May still reference DAM delivery.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -1437,7 +1697,9 @@
     "designDescription": "Rich overlays including text blocks, CTAs, icons, and multiple states (hover/focus). Requires detailed UX definition.",
     "developmentDescription": "Custom component with structured authoring fields and conditional rendering. Increased front-end complexity.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 42,
+    "aiDevEffort": 31,
     "assumptions": ""
   },
   {
@@ -1448,7 +1710,9 @@
     "designDescription": "Defines image transitions, parallax, or scroll-based animations. Motion design and performance considerations included.",
     "developmentDescription": "JavaScript-driven interactions. Performance and accessibility considerations required. Custom implementation.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 20,
+    "aiDevEffort": 15,
     "assumptions": ""
   },
   {
@@ -1459,7 +1723,9 @@
     "designDescription": "Design includes rules for image selection based on context (page type, theme, campaign). Visual consistency rules defined.",
     "developmentDescription": "Logic required to dynamically select or swap images. Custom Sling Model or integration logic needed.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -1470,7 +1736,9 @@
     "designDescription": "Design specifies different crops or images per breakpoint to preserve visual intent. Requires close design–dev alignment.",
     "developmentDescription": "Custom implementation to support breakpoint-specific assets beyond standard Core behaviour.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 38,
+    "aiDevEffort": 28,
     "assumptions": ""
   },
   {
@@ -1481,7 +1749,9 @@
     "designDescription": "Uses standard carousel layout with horizontal sliding panels. Design input limited to spacing, typography, and alignment within the design system.",
     "developmentDescription": "Out-of-the-box Core Carousel component. Configuration-only with no custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -1492,7 +1762,9 @@
     "designDescription": "Defines visual treatment, placement, and active/inactive states for slide indicators. Accessibility considerations included.",
     "developmentDescription": "Uses Core Component indicator options. Minor CSS adjustments only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -1503,7 +1775,9 @@
     "designDescription": "Design defines control placement, iconography, hover/focus states, and responsive behaviour.",
     "developmentDescription": "Core navigation controls enabled via configuration. No custom JS required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 32,
+    "aiDevEffort": 20,
     "assumptions": ""
   },
   {
@@ -1514,7 +1788,9 @@
     "designDescription": "Design defines timing, motion behaviour, and pause-on-hover rules. Visual affordance for motion considered.",
     "developmentDescription": "Core auto-play configuration. Uses existing rotation settings and policies.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 24,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -1525,7 +1801,9 @@
     "designDescription": "Design defines how different content types behave within slides. Consistency rules set for spacing, height, and alignment.",
     "developmentDescription": "Uses allowed components within Core Carousel. No custom component logic required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 28,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -1536,7 +1814,9 @@
     "designDescription": "Design specifies consistent height or aspect ratio across slides to reduce layout shift.",
     "developmentDescription": "CSS configuration applied to Core Carousel wrapper and child components.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -1547,7 +1827,9 @@
     "designDescription": "Bespoke visual treatment such as non-standard slide transitions, overlapping content, or asymmetric layouts.",
     "developmentDescription": "Custom component build or significant extension of Core Carousel. Custom HTL and CSS required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 44,
+    "aiDevEffort": 32,
     "assumptions": ""
   },
   {
@@ -1558,7 +1840,9 @@
     "designDescription": "Design includes bespoke transitions (fade, parallax, staggered content). Motion principles and performance constraints defined.",
     "developmentDescription": "Custom JavaScript animation logic. Performance and accessibility considerations required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 28,
+    "aiDevEffort": 20,
     "assumptions": ""
   },
   {
@@ -1569,7 +1853,9 @@
     "designDescription": "Structural wrapper for grouping components. Design focuses on spacing, alignment, and grid adherence.",
     "developmentDescription": "Out‑of‑the‑box Core Container component. Configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -1580,7 +1866,9 @@
     "designDescription": "Container spans viewport width with controlled inner content width. Background may extend edge‑to‑edge.",
     "developmentDescription": "Core Container with full‑width styling applied via CSS and policies.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -1591,7 +1879,9 @@
     "designDescription": "Limited, predefined layout ratios defined by design system. Responsive stacking rules clearly defined.",
     "developmentDescription": "Core Layout Container or Container with fixed layout options. Configuration‑based.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -1602,7 +1892,9 @@
     "designDescription": "Container used to assemble banner/hero from child components (image, text, CTA). Design system governs hierarchy and spacing.",
     "developmentDescription": "Structural only; no banner‑specific logic. Behaviour handled by child components.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -1613,7 +1905,9 @@
     "designDescription": "Design defines image positioning, focal point, overlays, contrast rules, and minimum height.",
     "developmentDescription": "Background image logic implemented with custom styling. Often exceeds Core Container defaults.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 19,
     "assumptions": ""
   },
   {
@@ -1624,7 +1918,9 @@
     "designDescription": "Video plays silently, loops, and acts as decorative background. Design defines fallback image, overlay treatment, and contrast rules for content.",
     "developmentDescription": "Requires video handling logic, autoplay/loop/mute enforcement, fallback image support, and performance safeguards. Custom build required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 26,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -1635,7 +1931,9 @@
     "designDescription": "Design specifies different video treatments or crops per breakpoint. Mobile‑first behaviour clearly defined.",
     "developmentDescription": "Responsive video source handling (desktop/mobile). Conditional loading logic required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 38,
+    "aiDevEffort": 27,
     "assumptions": ""
   },
   {
@@ -1646,7 +1944,9 @@
     "designDescription": "Design defines user controls, focus states, and accessibility behaviour. Clear motion affordances required.",
     "developmentDescription": "JavaScript required to handle play/pause, focus management, and interaction states. Increased QA and accessibility effort.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 38,
+    "aiDevEffort": 27,
     "assumptions": ""
   },
   {
@@ -1657,7 +1957,9 @@
     "designDescription": "Design accounts for reduced‑motion users, slow connections, and unsupported devices. Visual equivalence ensured.",
     "developmentDescription": "Logic to detect reduced‑motion preferences and serve static fallback imagery. Performance and accessibility critical.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 48,
+    "aiDevEffort": 35,
     "assumptions": ""
   },
   {
@@ -1668,7 +1970,9 @@
     "designDescription": "Banner supports multiple layout ratios (50/50, 60/40, full‑width) combined with image or video backgrounds. Clear constraints defined in design.",
     "developmentDescription": "Combination of dynamic layout logic and media handling. High complexity. Custom dialogs, CSS, and logic required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 48,
+    "aiDevEffort": 37,
     "assumptions": ""
   },
   {
@@ -1679,7 +1983,9 @@
     "designDescription": "Banner changes state based on scroll, interaction, or context. Motion, transitions, and content behaviour defined.",
     "developmentDescription": "Advanced JavaScript interactions. Performance, accessibility, and cross‑device testing required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 50,
+    "aiDevEffort": 39,
     "assumptions": ""
   },
   {
@@ -1690,7 +1996,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Out-of-the-box Core Content Fragment component. Configuration only, no custom logic.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -1701,7 +2009,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Uses Core component element selection. Declarative configuration only.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -1712,7 +2022,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Core variation selection supported via component configuration.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -1723,7 +2035,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Core rendering handles field types automatically. Minimal front‑end configuration.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -1734,7 +2048,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Structural only. Fragment behaviour driven by container/layout rules.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 14,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -1745,7 +2061,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Custom HTL and Sling Model required to override default rendering.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 32,
+    "aiDevEffort": 21,
     "assumptions": ""
   },
   {
@@ -1756,7 +2074,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Custom rendering logic required. Core component not sufficient.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 30,
+    "aiDevEffort": 19,
     "assumptions": ""
   },
   {
@@ -1767,7 +2087,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Requires custom logic to inject and manage interactive elements.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -1778,7 +2100,9 @@
     "designDescription": "N/A",
     "developmentDescription": "GraphQL integration required. Custom data fetching, mapping, and rendering.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 44,
+    "aiDevEffort": 30,
     "assumptions": ""
   },
   {
@@ -1789,7 +2113,9 @@
     "designDescription": "N/A",
     "developmentDescription": "Often combined with bespoke container/banner logic. High integration complexity.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 44,
+    "aiDevEffort": 30,
     "assumptions": ""
   },
   {
@@ -1800,7 +2126,9 @@
     "designDescription": "Renders a list of content fragments using default markup. Design focuses on typography, spacing, and basic hierarchy using existing design system rules.",
     "developmentDescription": "Out‑of‑the‑box Core Content Fragment List component. Configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -1811,7 +2139,9 @@
     "designDescription": "Design defines which fragment fields are shown (e.g. title, description, image) and their order. No conditional logic.",
     "developmentDescription": "Uses Core component element selection. Declarative configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 22,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -1822,7 +2152,9 @@
     "designDescription": "Design specifies which variation of each fragment is rendered (e.g. teaser). Visual consistency enforced across items.",
     "developmentDescription": "Core variation selection supported. Configuration‑driven.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -1833,7 +2165,9 @@
     "designDescription": "Design defines list vs grid presentation and responsive behaviour. Layout rules are fixed and predictable.",
     "developmentDescription": "Uses Core layout options and CSS. No custom rendering logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 22,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -1844,7 +2178,9 @@
     "designDescription": "Design assumes consistent content structure based on fragment model. Minimal edge‑case handling required.",
     "developmentDescription": "Uses Core filtering options. No dynamic logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 28,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -1855,7 +2191,9 @@
     "designDescription": "Bespoke card UI with imagery, metadata, and CTAs. Visual identity goes beyond Core defaults.",
     "developmentDescription": "Custom HTL and styling required to render fragments as cards.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -1866,7 +2204,9 @@
     "designDescription": "Design defines rules such as hiding elements if content is missing, featured item treatments, or field overrides.",
     "developmentDescription": "Custom rendering logic required. Core component insufficient.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -1877,7 +2217,9 @@
     "designDescription": "Design includes user‑driven controls, states, and empty/loading behaviours.",
     "developmentDescription": "JavaScript logic and possibly backend support required. Higher complexity.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 56,
+    "aiDevEffort": 40,
     "assumptions": ""
   },
   {
@@ -1888,7 +2230,9 @@
     "designDescription": "Design accounts for async loading, skeleton states, and error handling. Visual parity maintained with authored content.",
     "developmentDescription": "GraphQL integration with custom data mapping and rendering.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 88,
+    "aiDevEffort": 62,
     "assumptions": ""
   },
   {
@@ -1899,7 +2243,9 @@
     "designDescription": "List forms the primary page narrative (e.g. insights, articles). Strong hierarchy and rhythm defined by design.",
     "developmentDescription": "Often combined with bespoke layout and pagination logic. High integration effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 56,
+    "aiDevEffort": 40,
     "assumptions": ""
   },
   {
@@ -1910,7 +2256,9 @@
     "designDescription": "Simple text-based download link. Design focuses on typography, spacing, and alignment within existing content.",
     "developmentDescription": "Out-of-the-box Core Download component with default rendering. Configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -1921,7 +2269,9 @@
     "designDescription": "Design defines icon usage (file type icon or generic download icon), placement, and spacing relative to text.",
     "developmentDescription": "Uses Core component icon support. Minor CSS configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -1932,7 +2282,9 @@
     "designDescription": "Design includes file name, file size, and format displayed in a consistent hierarchy. No conditional rules.",
     "developmentDescription": "Core component metadata support. Configuration-driven, no custom logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -1943,7 +2295,9 @@
     "designDescription": "Download link visually styled like a button using existing CTA styles. Interaction states defined by design system.",
     "developmentDescription": "Style system or CSS class reuse applied to Core component. No functional changes.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -1954,7 +2308,9 @@
     "designDescription": "Design ensures clear affordance, focus states, and accessible labelling. No bespoke visual treatment.",
     "developmentDescription": "Core accessibility support leveraged. No additional logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -1965,7 +2321,9 @@
     "designDescription": "Bespoke visual layout such as card‑based downloads, stacked metadata, or inline previews.",
     "developmentDescription": "Custom HTL and styling required to override Core rendering.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -1976,7 +2334,9 @@
     "designDescription": "Design defines rules such as “show size only if available” or formatting differences based on file type.",
     "developmentDescription": "Conditional rendering logic required. Core component insufficient.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 22,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -1987,7 +2347,9 @@
     "designDescription": "Design presents multiple downloads as a grouped UI with hierarchy, spacing, and responsive behaviour.",
     "developmentDescription": "Wrapper component or custom logic needed to manage grouping and layout.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 38,
+    "aiDevEffort": 28,
     "assumptions": ""
   },
   {
@@ -1998,7 +2360,9 @@
     "designDescription": "Design accounts for gated vs direct downloads, user feedback, and confirmation states.",
     "developmentDescription": "Custom analytics hooks, tracking, or integration with gating logic required.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 56,
+    "aiDevEffort": 40,
     "assumptions": ""
   },
   {
@@ -2009,7 +2373,9 @@
     "designDescription": "Design includes legal disclaimers, usage notes, or dynamic messaging associated with downloads.",
     "developmentDescription": "Additional authoring fields and rendering logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 30,
+    "aiDevEffort": 20,
     "assumptions": ""
   },
   {
@@ -2020,7 +2386,9 @@
     "designDescription": "Simple embedded external content (e.g. video, social post) with default sizing and alignment. Design focuses on spacing and placement within layouts.",
     "developmentDescription": "Out‑of‑the‑box Core Embed component. URL‑based embedding only, no custom logic.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": "Embed external content via URL using Core Embed. Responsive container; no custom provider logic."
   },
   {
@@ -2031,7 +2399,9 @@
     "designDescription": "Design defines aspect ratios, responsive behaviour, and max widths across breakpoints. No custom UI around embed.",
     "developmentDescription": "Uses Core responsive embed support. CSS‑only adjustments if needed.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 22,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2042,7 +2412,9 @@
     "designDescription": "Design ensures visual consistency across supported providers. Limited visual control beyond container sizing.",
     "developmentDescription": "Core provider support leveraged. Configuration‑driven.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2053,7 +2425,9 @@
     "designDescription": "Design includes optional descriptive text or caption associated with embedded content. Minimal hierarchy.",
     "developmentDescription": "Wrapper styling applied around Core Embed output. No functional changes.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 22,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -2064,7 +2438,9 @@
     "designDescription": "Design wraps embedded content within bespoke UI (card, panel, themed container). Visual identity defined beyond Core defaults.",
     "developmentDescription": "Custom wrapper markup and CSS required. Embed remains external but presentation is bespoke.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 30,
+    "aiDevEffort": 20,
     "assumptions": ""
   },
   {
@@ -2075,7 +2451,9 @@
     "designDescription": "Design defines fallback UI when embed fails, is blocked, or unsupported. Empty and error states are intentional.",
     "developmentDescription": "Custom logic required to detect load failure or provider limitations and display fallback content.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 40,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -2086,7 +2464,9 @@
     "designDescription": "Design includes overlays, play triggers, gated previews, or layered CTAs on top of embedded content.",
     "developmentDescription": "JavaScript required to manage interaction layers and embed lifecycle. Higher complexity.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 32,
+    "aiDevEffort": 21,
     "assumptions": ""
   },
   {
@@ -2097,7 +2477,9 @@
     "designDescription": "Embedded content visually re‑skinned to align tightly with brand (backgrounds, gradients, framed transitions).",
     "developmentDescription": "Significant front‑end work to visually integrate externally sourced content. Limited control over embed internals.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 32,
+    "aiDevEffort": 21,
     "assumptions": ""
   },
   {
@@ -2108,7 +2490,9 @@
     "designDescription": "Design accounts for dynamic or live content (dashboards, maps, third‑party widgets). Loading and error states carefully designed.",
     "developmentDescription": "Custom script handling required. Security, performance, and CSP considerations involved.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 72,
+    "aiDevEffort": 52,
     "assumptions": ""
   },
   {
@@ -2119,7 +2503,9 @@
     "designDescription": "Highly creative usage such as immersive media, scroll‑driven embeds, or mixed‑media storytelling. Design pushes beyond static layouts.",
     "developmentDescription": "Often one‑off implementations. Custom JS, layout logic, QA, and performance tuning required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 38,
+    "aiDevEffort": 28,
     "assumptions": ""
   },
   {
@@ -2130,7 +2516,9 @@
     "designDescription": "N/A is not a component for design. Renders an experience fragment as authored, with no additional visual treatment. Design ensures consistency with page layout and spacing.",
     "developmentDescription": "Out‑of‑the‑box Core Experience Fragment component. Configuration only.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -2141,7 +2529,9 @@
     "designDescription": "N/A is not a component for design. Design defines reusable patterns (e.g. header promo, footer CTA) that work consistently across contexts. Constraints clearly documented.",
     "developmentDescription": "Reuse of authored XF across multiple pages. No custom rendering logic.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -2152,7 +2542,9 @@
     "designDescription": "N/A is not a component for design. Design specifies how the experience fragment adapts across breakpoints while remaining reusable.",
     "developmentDescription": "Responsive behaviour handled by XF’s internal components. No additional logic.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 22,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2163,7 +2555,9 @@
     "designDescription": "N/A is not a component for design. Design accounts for XF placement within different containers or layout variants. XF itself remains unchanged.",
     "developmentDescription": "Structural placement only. No changes to XF internals.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 24,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -2174,7 +2568,9 @@
     "designDescription": "N/A is not a component for design. Design defines distinct visual treatments per channel (e.g. web vs campaign landing). Clear rules documented to avoid fragmentation.",
     "developmentDescription": "Multiple XF variants created and managed. Additional authoring and governance complexity.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 24,
+    "aiDevEffort": 17,
     "assumptions": ""
   },
   {
@@ -2185,7 +2581,9 @@
     "designDescription": "N/A is not a component for design. Design treats XF as a high‑impact module (hero/banner) with clear hierarchy, spacing, and media usage rules.",
     "developmentDescription": "XF includes multiple components (image/video, text, CTA). Increased QA and integration effort.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 32,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -2196,7 +2594,9 @@
     "designDescription": "N/A is not a component for design. Design defines which elements may vary by context (e.g. CTA label, theme) and which must stay consistent.",
     "developmentDescription": "Conditional logic or multiple XF variants required. Custom governance needed.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 34,
+    "aiDevEffort": 23,
     "assumptions": ""
   },
   {
@@ -2207,7 +2607,9 @@
     "designDescription": "N/A is not a component for design. Design accounts for content changing by audience or rule. Visual parity across variants ensured.",
     "developmentDescription": "Integration with personalisation or targeting logic. Higher complexity and testing effort.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 72,
+    "aiDevEffort": 52,
     "assumptions": ""
   },
   {
@@ -2218,7 +2620,9 @@
     "designDescription": "N/A is not a component for design. XF contains structural layout and multiple components, effectively acting as a mini‑template.",
     "developmentDescription": "Very high integration complexity. Changes to XF impact many pages. Strong governance required.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 56,
+    "aiDevEffort": 40,
     "assumptions": ""
   },
   {
@@ -2229,7 +2633,9 @@
     "designDescription": "N/A is not a component for design. Highly creative or short‑lived fragment created for campaigns. Design prioritises impact over reuse.",
     "developmentDescription": "Often one‑off implementation. Increased QA, limited reuse, higher risk.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 40,
+    "aiDevEffort": 29,
     "assumptions": ""
   },
   {
@@ -2240,7 +2646,9 @@
     "designDescription": "Inline rendering of PDF within the page using default viewer UI. Design focuses on spacing, sizing, and alignment within layouts.",
     "developmentDescription": "Out‑of‑the‑box Core PDF Viewer component. Configuration only, no custom logic.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -2251,7 +2659,9 @@
     "designDescription": "Design defines fixed or minimum height to avoid layout shifts. Scroll behaviour clearly defined.",
     "developmentDescription": "Core viewer configured with height settings. CSS adjustments only.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -2262,7 +2672,9 @@
     "designDescription": "PDF displayed inline with surrounding content (text, headings). Visual hierarchy and separation defined.",
     "developmentDescription": "Structural placement only. Viewer remains unchanged.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -2273,7 +2685,9 @@
     "designDescription": "Design includes a clear fallback CTA to download the PDF if inline viewing fails. Visual priority defined.",
     "developmentDescription": "Uses Core component fallback behaviour. Minimal configuration.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 22,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -2284,7 +2698,9 @@
     "designDescription": "Design ensures focus order, clear affordance, and readable sizing. No bespoke controls added.",
     "developmentDescription": "Core accessibility support leveraged. No additional logic.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 22,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -2295,7 +2711,9 @@
     "designDescription": "Design wraps PDF viewer in bespoke UI (card, panel, branded container). Clear separation from surrounding content.",
     "developmentDescription": "Custom wrapper markup and CSS required. Viewer itself unchanged.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2306,7 +2724,9 @@
     "designDescription": "Design introduces branded or simplified controls (e.g. page navigation, zoom affordance). States clearly defined.",
     "developmentDescription": "Custom JavaScript required. Core viewer controls overridden or supplemented.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -2317,7 +2737,9 @@
     "designDescription": "Design includes dynamic messaging such as legal notices, version labels, or usage guidance alongside the PDF.",
     "developmentDescription": "Additional authoring fields and conditional rendering logic required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -2328,7 +2750,9 @@
     "designDescription": "Design supports viewing or switching between multiple PDFs in one area. Interaction states defined.",
     "developmentDescription": "Custom logic required to manage multiple documents and state.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 32,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -2339,7 +2763,9 @@
     "designDescription": "Design treats the PDF as central page content (e.g. reports, whitepapers). Strong hierarchy and layout emphasis.",
     "developmentDescription": "Integration with layout, analytics, and fallback logic. Higher QA and performance effort.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 32,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -2350,7 +2776,9 @@
     "designDescription": "Simple horizontal progress indicator using default styling. Design focuses on colour, label placement, and basic accessibility.",
     "developmentDescription": "Out‑of‑the‑box Core Progress Bar component. Static percentage value configured by authors.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -2361,7 +2789,9 @@
     "designDescription": "Design defines placement and formatting of progress label (e.g. percentage, step name). No dynamic states.",
     "developmentDescription": "Uses Core component label support. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -2372,7 +2802,9 @@
     "designDescription": "Design assumes a known total (e.g. 100%). Visual clarity prioritised over animation or interaction.",
     "developmentDescription": "Core configuration only. No dynamic calculation.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -2383,7 +2815,9 @@
     "designDescription": "Design defines limited colour or style themes aligned with design system (e.g. success, info).",
     "developmentDescription": "Style system or CSS modifiers applied to Core component.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -2394,7 +2828,9 @@
     "designDescription": "Design treats bar as a static status representation (e.g. completion level). No time‑based expectation set.",
     "developmentDescription": "Visual indicator only, no business logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -2405,7 +2841,9 @@
     "designDescription": "Design accounts for live or changing progress values. Motion, update behaviour, and edge cases defined.",
     "developmentDescription": "Requires dynamic data source or logic to update values. Custom JS or backend logic needed.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 34,
+    "aiDevEffort": 23,
     "assumptions": ""
   },
   {
@@ -2416,7 +2854,9 @@
     "designDescription": "Design represents progress across steps or phases. Labels and hierarchy clearly defined.",
     "developmentDescription": "Custom rendering logic required. Core component insufficient.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 28,
+    "aiDevEffort": 19,
     "assumptions": ""
   },
   {
@@ -2427,7 +2867,9 @@
     "designDescription": "Design includes motion rules (fill animation, easing). Motion supports clarity, not decoration.",
     "developmentDescription": "JavaScript or enhanced CSS animation required. Performance and accessibility considerations apply.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 28,
+    "aiDevEffort": 19,
     "assumptions": ""
   },
   {
@@ -2438,7 +2880,9 @@
     "designDescription": "Design defines different behaviours or visuals based on state, user journey, or context.",
     "developmentDescription": "Conditional logic required. Increased complexity and QA effort.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 34,
+    "aiDevEffort": 23,
     "assumptions": ""
   },
   {
@@ -2449,7 +2893,9 @@
     "designDescription": "Progress bar becomes central to the experience (e.g. onboarding, forms, campaigns). Strong UX definition required.",
     "developmentDescription": "Often part of a larger bespoke flow. High integration and testing effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 42,
+    "aiDevEffort": 31,
     "assumptions": ""
   },
   {
@@ -2460,7 +2906,9 @@
     "designDescription": "Simple horizontal rule used to visually separate content blocks. Design defines thickness, colour, and spacing according to the design system.",
     "developmentDescription": "Out‑of‑the‑box Core Separator component. Configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -2471,7 +2919,9 @@
     "designDescription": "Design defines multiple spacing options (tight, default, generous) to control vertical rhythm.",
     "developmentDescription": "Style system or CSS modifiers applied to Core component. No custom logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -2482,7 +2932,9 @@
     "designDescription": "Design specifies full‑width vs constrained separators to align with grid and content width.",
     "developmentDescription": "CSS configuration used to control width and alignment. Core component remains intact.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -2493,7 +2945,9 @@
     "designDescription": "Design defines when the separator is used as a soft divider vs a strong section break. Visual hierarchy is subtle and consistent.",
     "developmentDescription": "Reuse of Core Separator with predefined styles. No functional changes.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -2504,7 +2958,9 @@
     "designDescription": "Design introduces branded or decorative treatments (icons, gradients, patterns). Separator becomes a visual motif.",
     "developmentDescription": "Bespoke markup and styling required. Core component insufficient.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -2515,7 +2971,9 @@
     "designDescription": "Design includes inline text (e.g. “or”, “next section”) integrated into the separator. States defined clearly.",
     "developmentDescription": "Custom rendering required to combine text and rule. Additional authoring fields needed.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2526,7 +2984,9 @@
     "designDescription": "Design defines when separators appear or disappear based on layout, breakpoint, or content context.",
     "developmentDescription": "Conditional logic required. Custom implementation needed.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2537,7 +2997,9 @@
     "designDescription": "Design includes motion (e.g. reveals, fades, scroll‑based appearance). Motion guidelines defined.",
     "developmentDescription": "CSS or JavaScript animation required. Accessibility considerations apply.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -2548,7 +3010,9 @@
     "designDescription": "Separator used as a storytelling or pacing element on long‑form pages. Strong visual intent defined.",
     "developmentDescription": "Often implemented as a bespoke component. Higher design and QA effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 28,
+    "aiDevEffort": 19,
     "assumptions": ""
   },
   {
@@ -2559,7 +3023,9 @@
     "designDescription": "Horizontal tab navigation with simple labels. Design focuses on typography, spacing, active/inactive states, and content separation using the design system.",
     "developmentDescription": "Out‑of‑the‑box Core Tabs component. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": "AEM Core Tabs component with horizontal tab navigation, active state, and accessible keyboard interaction."
   },
   {
@@ -2570,7 +3036,9 @@
     "designDescription": "Design includes optional icons alongside tab labels. Icon placement and spacing defined consistently.",
     "developmentDescription": "Core component supports icons. Minor styling only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 22,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2581,7 +3049,9 @@
     "designDescription": "Design defines behaviour when tabs exceed available width (wrap, scroll, truncate). Usability rules documented.",
     "developmentDescription": "Uses Core behaviour with CSS adjustments if needed.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 22,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2592,7 +3062,9 @@
     "designDescription": "Tabs used as content grouping only (not navigation). Visual hierarchy keeps tabs subordinate to page structure.",
     "developmentDescription": "Structural usage only. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 20,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2603,7 +3075,9 @@
     "designDescription": "Design ensures strong contrast, focus states, keyboard navigation visibility, and clear selected state.",
     "developmentDescription": "Core accessibility support leveraged. No additional logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 28,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -2614,7 +3088,9 @@
     "designDescription": "Design defines vertical orientation, alignment, and responsive behaviour (e.g. collapsing to horizontal or accordion).",
     "developmentDescription": "Custom layout and CSS required. Core tabs orientation extended.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 40,
+    "aiDevEffort": 26,
     "assumptions": ""
   },
   {
@@ -2625,7 +3101,9 @@
     "designDescription": "Design defines stickiness behaviour on scroll, offsets, and interaction with headers. UX edge cases documented.",
     "developmentDescription": "JavaScript required to manage sticky positioning and scroll behaviour.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -2636,7 +3114,9 @@
     "designDescription": "Design treats tabs as steps or stages with progress indication (e.g. step numbers, completion states).",
     "developmentDescription": "Custom logic required to track state and display progress. Core tabs insufficient.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 48,
+    "aiDevEffort": 34,
     "assumptions": ""
   },
   {
@@ -2647,7 +3127,9 @@
     "designDescription": "Tabs act as section navigation (deep‑linking, URL fragment handling). Design defines selected state and transitions.",
     "developmentDescription": "Custom routing and state management required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 60,
+    "aiDevEffort": 46,
     "assumptions": ""
   },
   {
@@ -2658,7 +3140,9 @@
     "designDescription": "Design includes animated transitions between panels. Motion guidelines and reduced‑motion behaviour defined.",
     "developmentDescription": "Custom CSS/JS animation logic. Accessibility considerations apply.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 34,
+    "aiDevEffort": 23,
     "assumptions": ""
   },
   {
@@ -2669,7 +3153,9 @@
     "designDescription": "Design accounts for tabs appearing/disappearing based on content or context. All states documented.",
     "developmentDescription": "Conditional rendering logic required. Custom implementation.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 72,
+    "aiDevEffort": 52,
     "assumptions": ""
   },
   {
@@ -2680,7 +3166,9 @@
     "designDescription": "",
     "developmentDescription": "",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 0,
+    "aiDevEffort": 0,
     "assumptions": ""
   },
   {
@@ -2691,7 +3179,9 @@
     "designDescription": "Simple teaser presenting headline, text, and CTA. Design focuses on hierarchy, spacing, and consistency within the design system.",
     "developmentDescription": "Out‑of‑the‑box Core Teaser component. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -2702,7 +3192,9 @@
     "designDescription": "Teaser includes an image with predefined aspect ratio. Design defines image placement, cropping behaviour, and content hierarchy.",
     "developmentDescription": "Core component image support used. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -2713,7 +3205,9 @@
     "designDescription": "Text‑only teaser variant. Design ensures balance and consistency without visual media.",
     "developmentDescription": "Core Teaser configured without image. No functional change.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -2724,7 +3218,9 @@
     "designDescription": "Teaser content stacked vertically (image → text → CTA). Default card‑like layout aligned to grid.",
     "developmentDescription": "Core layout and CSS only. No bespoke rendering.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -2735,7 +3231,9 @@
     "designDescription": "Design includes lightweight metadata (e.g. date, category). Visual priority and placement defined.",
     "developmentDescription": "Core component metadata support leveraged.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 18,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -2746,7 +3244,9 @@
     "designDescription": "Author manually enters title, description, image, and link. Design assumes full editorial control.",
     "developmentDescription": "Core Teaser in manual mode. No dynamic sourcing.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 20,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2757,7 +3257,9 @@
     "designDescription": "Visual cues indicate navigation destination. Consistent hover and focus states.",
     "developmentDescription": "Core link behaviour only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 22,
+    "aiDevEffort": 15,
     "assumptions": "Internal page link configured via AEM path picker in dialog. Rendered as CTA on teaser."
   },
   {
@@ -2768,7 +3270,9 @@
     "designDescription": "Teaser laid out horizontally (media beside text). Responsive stacking behaviour defined.",
     "developmentDescription": "Custom layout CSS and markup adjustments required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 17,
     "assumptions": ""
   },
   {
@@ -2779,7 +3283,9 @@
     "designDescription": "Design includes ribbon, tag, or badge (e.g. “New”, “Featured”). Placement and overlap rules defined.",
     "developmentDescription": "Additional markup and authoring logic required. Core component insufficient.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 30,
+    "aiDevEffort": 20,
     "assumptions": ""
   },
   {
@@ -2790,7 +3296,9 @@
     "designDescription": "Teaser content is sourced dynamically (e.g. page properties, content fragments). Design handles content variability.",
     "developmentDescription": "Custom logic required to map source data.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 42,
+    "aiDevEffort": 31,
     "assumptions": ""
   },
   {
@@ -2801,7 +3309,9 @@
     "designDescription": "Design accounts for repeatable usage, density rules, and responsive behaviour across collections.",
     "developmentDescription": "Often combined with List or CF List logic. Increased QA effort.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 44,
+    "aiDevEffort": 32,
     "assumptions": ""
   },
   {
@@ -2812,7 +3322,9 @@
     "designDescription": "Teaser features a video preview or poster image. Design defines play affordance and fallback states.",
     "developmentDescription": "Custom media handling. Video logic extends beyond Core Teaser.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 42,
+    "aiDevEffort": 31,
     "assumptions": ""
   },
   {
@@ -2823,7 +3335,9 @@
     "designDescription": "Teaser uses video instead of image (autoplay, muted, or click‑to‑play). Clear UX and accessibility rules defined.",
     "developmentDescription": "Bespoke implementation required. Video loading, fallback, and performance logic needed.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 46,
+    "aiDevEffort": 36,
     "assumptions": ""
   },
   {
@@ -2834,7 +3348,9 @@
     "designDescription": "Design defines different layouts or elements based on context (e.g. featured vs standard).",
     "developmentDescription": "Conditional rendering logic required. Core Teaser not sufficient.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 44,
+    "aiDevEffort": 32,
     "assumptions": ""
   },
   {
@@ -2845,7 +3361,9 @@
     "designDescription": "Teaser acts as narrative content with strong visual emphasis (campaigns, landing pages).",
     "developmentDescription": "Often effectively a bespoke card component. High design and dev effort.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 46,
+    "aiDevEffort": 36,
     "assumptions": ""
   },
   {
@@ -2856,7 +3374,9 @@
     "designDescription": "Teaser includes rich hover interactions such as layered reveals, animated media zoom, text transitions, icon motion, or overlay effects. Design defines hover‑in, hover‑out, focus, and touch behaviour, including fallbacks for non‑hover devices.",
     "developmentDescription": "Custom CSS and/or JavaScript animations required. Careful handling of hover vs focus, mobile behaviour, reduced‑motion preferences, and performance considerations. Core Teaser insufficient.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 46,
+    "aiDevEffort": 36,
     "assumptions": ""
   },
   {
@@ -2867,7 +3387,9 @@
     "designDescription": "Basic text content using default typography styles. Design focuses on font, line height, spacing, and readability.",
     "developmentDescription": "Out‑of‑the‑box Core Text component. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -2878,7 +3400,9 @@
     "designDescription": "Design defines heading hierarchy (H2–H6), spacing rules, and rhythm between headings and body copy.",
     "developmentDescription": "Core Text supports heading elements. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -2889,7 +3413,9 @@
     "designDescription": "Design defines link styling, hover/focus states, and contrast within body text.",
     "developmentDescription": "Core link handling. Configuration and CSS only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -2900,7 +3426,9 @@
     "designDescription": "Design defines list indentation, spacing, and marker styles consistent with the design system.",
     "developmentDescription": "Core rich text list support. No bespoke behaviour.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -2911,7 +3439,9 @@
     "designDescription": "Supports bold, italic, emphasis, and simple inline formatting. Design ensures consistency and restraint.",
     "developmentDescription": "Core rich text editor configuration.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": "RTE with bold, italic, headings, and list support. Toolbar options configured in dialog policies."
   },
   {
@@ -2922,7 +3452,9 @@
     "designDescription": "Design accounts for text behaviour inside narrow columns, banners, or cards. Truncation and wrapping rules defined.",
     "developmentDescription": "Layout-driven behaviour only. No custom logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 10,
+    "aiDevEffort": 6,
     "assumptions": ""
   },
   {
@@ -2933,7 +3465,9 @@
     "designDescription": "Design introduces bespoke typographic treatments (drop caps, pull quotes, callouts).",
     "developmentDescription": "Custom markup and CSS required. Core component insufficient.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 6,
+    "aiDevEffort": 4,
     "assumptions": ""
   },
   {
@@ -2944,7 +3478,9 @@
     "designDescription": "Design defines rules such as highlighting, emphasis, or warnings based on context or content type.",
     "developmentDescription": "Conditional rendering logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": "Apply conditional CSS modifier to text block based on author-selected type option in dialog."
   },
   {
@@ -2955,7 +3491,9 @@
     "designDescription": "Design allows rich content within text flow (e.g. inline icons, CTAs, media references).",
     "developmentDescription": "Custom RTE plugins or rendering logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 22,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -2966,7 +3504,9 @@
     "designDescription": "Design supports long‑form reading with strong rhythm, sectioning, and scannability.",
     "developmentDescription": "Often requires additional styling, anchors, or enhancements.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -2977,7 +3517,9 @@
     "designDescription": "N/A not a component for design. Text content sourced from Content Fragments or data models. Design accounts for variability and missing fields.",
     "developmentDescription": "Custom data mapping and rendering logic required.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 26,
+    "aiDevEffort": 15,
     "assumptions": ""
   },
   {
@@ -2988,7 +3530,9 @@
     "designDescription": "Design defines very strict rules on allowed formatting to preserve consistency (e.g. legal or regulated content).",
     "developmentDescription": "Custom RTE configuration and validation required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -2999,7 +3543,9 @@
     "designDescription": "Displays a single heading using default typography. Design defines font, spacing, and visual weight according to the design system.",
     "developmentDescription": "Out‑of‑the‑box Core Title component. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -3010,7 +3556,9 @@
     "designDescription": "Design defines rules for heading levels (H1–H6) and when each is allowed. Visual consistency maintained regardless of semantic level.",
     "developmentDescription": "Core Title heading level selection. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -3021,7 +3569,9 @@
     "designDescription": "Title functions as a navigational element. Design defines link styling, hover/focus states, and affordance.",
     "developmentDescription": "Core link support used. Configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -3032,7 +3582,9 @@
     "designDescription": "Design defines left, centre, or right alignment options. Usage constrained to avoid inconsistency.",
     "developmentDescription": "Style system or CSS modifiers applied.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -3043,7 +3595,9 @@
     "designDescription": "Design accounts for title behaviour inside columns, banners, or constrained widths. Line breaks and wrapping rules defined.",
     "developmentDescription": "Layout-driven behaviour only. No custom logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 18,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -3054,7 +3608,9 @@
     "designDescription": "Design ensures contrast, readable size, and correct semantic structure. Visual styling decoupled from semantic level.",
     "developmentDescription": "Core accessibility support leveraged.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": "Heading level selectable in dialog (H1–H6). Core component ARIA attributes applied by default."
   },
   {
@@ -3065,7 +3621,9 @@
     "designDescription": "Design introduces non-standard treatments (lines, accents, background shapes). Title becomes a visual motif.",
     "developmentDescription": "Custom markup and CSS required. Core component insufficient.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -3076,7 +3634,9 @@
     "designDescription": "Design includes subtitles, eyebrow text, or contextual labels. Hierarchy and spacing clearly defined.",
     "developmentDescription": "Additional authoring fields and rendering logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -3087,7 +3647,9 @@
     "designDescription": "Design defines different title styles based on context (page type, section, breakpoint).",
     "developmentDescription": "Conditional logic or multiple variants required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -3098,7 +3660,9 @@
     "designDescription": "Title doubles as in‑page navigation or anchor target. Visual and interaction behaviour clearly defined.",
     "developmentDescription": "Custom logic for anchors, offsets, or scroll behaviour required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 22,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -3109,7 +3673,9 @@
     "designDescription": "Title is treated as a dominant visual element (e.g. hero headline). Strong typographic rules defined.",
     "developmentDescription": "Often combined with bespoke banner or container logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -3120,7 +3686,9 @@
     "designDescription": "N/A not a component for design. This is dev work, component covered on product pdp components. Renders commerce-related content (e.g. product name, description, price reference) using default styling. Design focuses on typography and spacing consistency.",
     "developmentDescription": "Out‑of‑the‑box Commerce Content Fragment v1 rendering. Configuration only.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -3131,7 +3699,9 @@
     "designDescription": "N/A not a component for design. This is dev work, component covered on product pdp components. Design defines which commerce attributes are shown (e.g. title, short description). No conditional logic.",
     "developmentDescription": "Uses standard attribute selection. No custom mapping.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 24,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -3142,7 +3712,9 @@
     "designDescription": "N/A not a component for design. This is dev work, component covered on product pdp components. Design accounts for currency, language, and regional formatting. Visual hierarchy remains consistent.",
     "developmentDescription": "Core commerce localization support leveraged.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 56,
+    "aiDevEffort": 36,
     "assumptions": ""
   },
   {
@@ -3153,7 +3725,9 @@
     "designDescription": "N/A not a component for design. This is dev work, component covered on product pdp components. Design accounts for commerce content within containers, grids, or tabs. No unique visual identity applied.",
     "developmentDescription": "Structural placement only. No bespoke logic.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -3164,7 +3738,9 @@
     "designDescription": "N/A not a component for design. This is dev work, component covered on product pdp components. Commerce content shown for reference (no CTA emphasis). Design does not imply purchase or interaction.",
     "developmentDescription": "Read‑only display. No commerce interaction logic.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -3175,7 +3751,9 @@
     "designDescription": "N/A not a component for design. This is dev work, component covered on product pdp components. Design highlights price, offers, or promotions. Hierarchy clearly communicates commercial priority.",
     "developmentDescription": "Custom rendering logic required for price emphasis or formatting.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 48,
+    "aiDevEffort": 34,
     "assumptions": ""
   },
   {
@@ -3186,7 +3764,9 @@
     "designDescription": "N/A not a component for design. This is dev work, component covered on product pdp components. Design defines what happens when attributes are missing, variant-specific, or unavailable. All edge cases documented.",
     "developmentDescription": "Conditional rendering logic and validation required.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 64,
+    "aiDevEffort": 46,
     "assumptions": ""
   },
   {
@@ -3197,7 +3777,9 @@
     "designDescription": "N/A not a component for design. This is dev work, component covered on product pdp components. Commerce fragment rendered as a card or preview (e.g. product tile). Visual identity defined beyond defaults.",
     "developmentDescription": "Often overlaps with bespoke teaser logic. Custom HTL and styling required.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 56,
+    "aiDevEffort": 42,
     "assumptions": ""
   },
   {
@@ -3208,7 +3790,9 @@
     "designDescription": "N/A not a component for design. This is dev work, component covered on product pdp components. Design includes CTAs such as “View product” or “Buy now”. Visual and interaction hierarchy defined.",
     "developmentDescription": "Integration with commerce actions required. Core CF insufficient.",
     "designEffort": 0,
+    "aiDesignEffort": 0,
     "devEffort": 72,
+    "aiDevEffort": 54,
     "assumptions": ""
   },
   {
@@ -3219,7 +3803,9 @@
     "designDescription": "Displays basic product information (name, description, price) using default layout. Design focuses on typography, spacing, and baseline hierarchy.",
     "developmentDescription": "Out‑of‑the‑box Core Commerce Product component. Minimal configuration.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 12,
+    "aiDevEffort": 8,
     "assumptions": "Render product name, description, image, and price from CIF data. OOTB commerce component, minimal config."
   },
   {
@@ -3230,7 +3816,9 @@
     "designDescription": "Product includes a single primary image. Design defines image size, aspect ratio, and alignment relative to text.",
     "developmentDescription": "Core product media support leveraged. No custom behaviour.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -3241,7 +3829,9 @@
     "designDescription": "Design includes a basic “Add to cart” or action CTA, visually aligned with product information.",
     "developmentDescription": "Core commerce CTA integration. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 32,
+    "aiDevEffort": 22,
     "assumptions": ""
   },
   {
@@ -3252,7 +3842,9 @@
     "designDescription": "Product component placed within a standard page or container layout. No layout logic inside the product itself.",
     "developmentDescription": "Structural placement only. Product component unchanged.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -3263,7 +3855,9 @@
     "designDescription": "Design includes a media gallery or carousel (multiple images, zoom behaviour). Placement relative to product info defined.",
     "developmentDescription": "Custom integration with carousel/media components. Increased complexity.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -3274,7 +3868,9 @@
     "designDescription": "Two‑column layout (media + details) with clear hierarchy. Responsive collapse rules defined.",
     "developmentDescription": "Layout logic implemented via containers and CSS grid/flex. Integration effort required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -3285,7 +3881,9 @@
     "designDescription": "Media, title, price, description stacked vertically for storytelling or campaign‑led PDPs.",
     "developmentDescription": "Custom layout implementation. Increased design and front‑end work.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -3296,7 +3894,9 @@
     "designDescription": "Design defines sticky behaviour on scroll (position, breakpoints, offset from headers). Accessibility states defined.",
     "developmentDescription": "JavaScript required for sticky behaviour and state management.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -3307,7 +3907,9 @@
     "designDescription": "Design supports configurable options (size, colour, bundles). States and edge cases clearly documented.",
     "developmentDescription": "Integration with commerce variant logic. High complexity.",
     "designEffort": 16,
+    "aiDesignEffort": 8,
     "devEffort": 64,
+    "aiDevEffort": 44,
     "assumptions": ""
   },
   {
@@ -3318,7 +3920,9 @@
     "designDescription": "Design defines how price, imagery, and availability update when variants change.",
     "developmentDescription": "Dynamic updates required. JS and backend integration needed.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 32,
+    "aiDevEffort": 22,
     "assumptions": ""
   },
   {
@@ -3329,7 +3933,9 @@
     "designDescription": "Design accounts for stock states, promotions, discounts, or urgency messaging.",
     "developmentDescription": "Conditional rendering and commerce logic required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 64,
+    "aiDevEffort": 44,
     "assumptions": ""
   },
   {
@@ -3340,7 +3946,9 @@
     "designDescription": "PDP treated as a flagship or campaign experience (rich media, storytelling, interaction).",
     "developmentDescription": "Effectively a custom PDP build. Highest effort tier.",
     "designEffort": 16,
+    "aiDesignEffort": 8,
     "devEffort": 12,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -3351,7 +3959,9 @@
     "designDescription": "Displays basic product info (image, name, price, link) as a simple card. Design focuses on hierarchy, spacing, and baseline visual consistency.",
     "developmentDescription": "Out‑of‑the‑box Commerce Product Teaser component. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -3362,7 +3972,9 @@
     "designDescription": "Product image displayed with fixed aspect ratio. Design defines cropping, fallback behaviour, and content priority.",
     "developmentDescription": "Core image handling. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": "Product image rendered with DAM asset picker. Responsive srcset applied via Core Image behaviour."
   },
   {
@@ -3373,7 +3985,9 @@
     "designDescription": "Design defines price prominence relative to title and CTA. No promotional logic assumed.",
     "developmentDescription": "Core price rendering. Configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -3384,7 +3998,9 @@
     "designDescription": "Simple CTA (e.g. “View product”). Visual hierarchy established but no interaction beyond navigation.",
     "developmentDescription": "Core CTA behaviour only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": "Add CTA below product info. Link resolves to PDP via product slug configured in dialog."
   },
   {
@@ -3395,7 +4011,9 @@
     "designDescription": "Product teaser used repeatedly in grids or listings. Density and rhythm rules defined.",
     "developmentDescription": "Structural usage only. No bespoke behaviour.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -3406,7 +4024,9 @@
     "designDescription": "Product teaser laid out horizontally (image beside text). Responsive stacking behaviour defined.",
     "developmentDescription": "Custom layout and CSS required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": "Horizontal layout (image left, content right) applied via CSS style-system modifier. No markup changes."
   },
   {
@@ -3417,7 +4037,9 @@
     "designDescription": "Design includes ribbons or badges (e.g. “New”, “Sale”, “Limited”). Placement, overlap, and priority rules defined.",
     "developmentDescription": "Additional markup, authoring options, and conditional rendering required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -3428,7 +4050,9 @@
     "designDescription": "Design supports colour or variant swatches directly on the teaser. States clearly defined (selected, unavailable).",
     "developmentDescription": "Integration with product variant data required. Custom logic and JS needed.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 60,
+    "aiDevEffort": 44,
     "assumptions": ""
   },
   {
@@ -3439,7 +4063,9 @@
     "designDescription": "Design defines hover behaviour (image swap, reveal CTA, change of shape, elevation, micro‑animation). Motion and accessibility rules defined.",
     "developmentDescription": "Custom CSS/JS interactions required. Increased QA and accessibility effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -3450,7 +4076,9 @@
     "designDescription": "Design accounts for availability, promotions, discounts, or price changes. Visual rules documented for all states.",
     "developmentDescription": "Conditional rendering and commerce logic required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 88,
+    "aiDevEffort": 64,
     "assumptions": ""
   },
   {
@@ -3461,7 +4089,9 @@
     "designDescription": "Design includes interaction without leaving the listing (e.g. add to cart, modal view). UX flows and states defined.",
     "developmentDescription": "JavaScript‑driven interactions. Integration with cart or modal logic required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 80,
+    "aiDevEffort": 60,
     "assumptions": ""
   },
   {
@@ -3472,7 +4102,9 @@
     "designDescription": "Teaser uses video or animated media instead of static image. Auto‑play, hover, and fallback behaviour defined.",
     "developmentDescription": "Bespoke media handling required. Performance and accessibility considerations apply.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -3483,7 +4115,9 @@
     "designDescription": "Teaser becomes a strong brand or campaign element with expressive visuals and behaviour.",
     "developmentDescription": "Fully bespoke implementation. Highest design and dev effort.",
     "designEffort": 16,
+    "aiDesignEffort": 8,
     "devEffort": 38,
+    "aiDevEffort": 28,
     "assumptions": ""
   },
   {
@@ -3494,7 +4128,9 @@
     "designDescription": "Displays multiple product teasers in a horizontal carousel. Design focuses on spacing, card rhythm, and basic navigation controls.",
     "developmentDescription": "Out‑of‑the‑box Commerce Product Carousel component. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -3505,7 +4141,9 @@
     "designDescription": "Design defines arrows, pagination dots, and active states. Placement and accessibility rules defined.",
     "developmentDescription": "Core carousel navigation enabled. Minimal CSS adjustments only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -3516,7 +4154,9 @@
     "designDescription": "Products are manually curated. Design assumes controlled content and predictable ordering.",
     "developmentDescription": "Core manual product selection. No dynamic logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 10,
     "assumptions": ""
   },
   {
@@ -3527,7 +4167,9 @@
     "designDescription": "Carousel used as a secondary content block. Visual hierarchy ensures it doesn’t overpower the page.",
     "developmentDescription": "Structural usage only. No bespoke behaviour.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 14,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -3538,7 +4180,9 @@
     "designDescription": "All product teasers in carousel share the same fixed structure and size.",
     "developmentDescription": "Reuse of standard Product Teaser rendering. No custom logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 10,
+    "aiDevEffort": 6,
     "assumptions": ""
   },
   {
@@ -3549,7 +4193,9 @@
     "designDescription": "Products populated dynamically (e.g. category, recommendations). Design accounts for content variability.",
     "developmentDescription": "Integration with commerce queries or recommendations logic required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 96,
+    "aiDevEffort": 70,
     "assumptions": ""
   },
   {
@@ -3560,7 +4206,9 @@
     "designDescription": "Design defines hover behaviours (image swap, CTA reveal, elevation, shape changes). Motion rules defined clearly.",
     "developmentDescription": "Custom CSS/JS interactions required. Increased QA effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -3571,7 +4219,9 @@
     "designDescription": "Design includes ribbons/badges per product (e.g. “Sale”, “New”). Priority and overlap rules defined.",
     "developmentDescription": "Conditional rendering logic required. Often shared with Product Teaser customisation.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 32,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -3582,7 +4232,9 @@
     "designDescription": "Design displays variant swatches directly in the carousel cards. Behaviour for hover/selection defined.",
     "developmentDescription": "Variant data integration and client‑side state management required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 80,
+    "aiDevEffort": 58,
     "assumptions": ""
   },
   {
@@ -3593,7 +4245,9 @@
     "designDescription": "Carousel supports quick add‑to‑cart or quick‑view without leaving the page. UX flows and states defined.",
     "developmentDescription": "JavaScript‑driven interactions and cart/modal integration required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 88,
+    "aiDevEffort": 62,
     "assumptions": ""
   },
   {
@@ -3604,7 +4258,9 @@
     "designDescription": "Carousel includes product videos, animated media, or rich imagery. Fallback and performance rules defined.",
     "developmentDescription": "Bespoke media handling logic required. Performance and accessibility considerations apply.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -3615,7 +4271,9 @@
     "designDescription": "Carousel used as a brand or campaign storytelling element. Strong visual and motion treatments applied.",
     "developmentDescription": "Fully bespoke implementation. Highest design and dev effort tier.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 52,
+    "aiDevEffort": 40,
     "assumptions": ""
   },
   {
@@ -3626,7 +4284,9 @@
     "designDescription": "Displays a basic list or row of related product teasers derived from commerce relationships. Visual treatment is simple and secondary to the PDP.",
     "developmentDescription": "Uses out‑of‑the‑box Related Products component with default data source and rendering. Configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 10,
     "assumptions": ""
   },
   {
@@ -3637,7 +4297,9 @@
     "designDescription": "Related products reuse the existing product teaser/card design to maintain consistency across listings and carousels.",
     "developmentDescription": "Core integration with Product Teaser component. No bespoke logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -3648,7 +4310,9 @@
     "designDescription": "Design defines row vs grid presentation with fixed density and predictable responsive behaviour.",
     "developmentDescription": "Layout handled via container and CSS. Core component logic unchanged.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -3659,7 +4323,9 @@
     "designDescription": "Related products positioned near PDP content (e.g. below product details). Visual hierarchy keeps it clearly secondary.",
     "developmentDescription": "Uses current product context automatically. No additional logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -3670,7 +4336,9 @@
     "designDescription": "Related products presented in a carousel format. Navigation, density, and interaction behaviour defined by design.",
     "developmentDescription": "Combination of related products logic with carousel functionality. Increased front‑end integration effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 56,
+    "aiDevEffort": 40,
     "assumptions": ""
   },
   {
@@ -3681,7 +4349,9 @@
     "designDescription": "Bespoke product card layout created specifically for related products (e.g. condensed or simplified).",
     "developmentDescription": "Custom rendering or templating required. Core teaser insufficient.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 34,
+    "aiDevEffort": 23,
     "assumptions": ""
   },
   {
@@ -3692,7 +4362,9 @@
     "designDescription": "Design includes discounts, promotions, or badges within related product cards. Priority and clash rules defined.",
     "developmentDescription": "Conditional rendering required based on commerce data.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 40,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -3703,7 +4375,9 @@
     "designDescription": "Hover behaviour added (image swap, CTA reveal, elevation, micro‑animation). Interaction rules defined clearly.",
     "developmentDescription": "Custom CSS/JS interactions required. Increased QA and accessibility effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 18,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -3714,7 +4388,9 @@
     "designDescription": "Users can interact directly (e.g. quick add to cart, quick view). UX flows and states defined.",
     "developmentDescription": "JavaScript‑driven interactions with cart or modal integration required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 88,
+    "aiDevEffort": 62,
     "assumptions": ""
   },
   {
@@ -3725,7 +4401,9 @@
     "designDescription": "Related products curated and styled as part of a campaign or storytelling experience.",
     "developmentDescription": "Hybrid of manual curation and bespoke presentation logic. High integration and QA effort.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 60,
+    "aiDevEffort": 46,
     "assumptions": ""
   },
   {
@@ -3736,7 +4414,9 @@
     "designDescription": "Displays a basic grid of product teasers with consistent density and hierarchy. Design focuses on spacing, alignment, and scanability.",
     "developmentDescription": "Out‑of‑the‑box Commerce Product List component with default query and rendering.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 24,
+    "aiDevEffort": 16,
     "assumptions": "Grid of product cards with pagination. CIF query builder used for product data; default sort and filters."
   },
   {
@@ -3747,7 +4427,9 @@
     "designDescription": "Design defines a single, fixed grid layout with predictable responsive behaviour. No layout switching.",
     "developmentDescription": "Core grid configuration only. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 10,
+    "aiDevEffort": 6,
     "assumptions": ""
   },
   {
@@ -3758,7 +4440,9 @@
     "designDescription": "Design defines pagination placement, controls, and disabled states. Behaviour is explicit and predictable.",
     "developmentDescription": "Core pagination support enabled. Minimal configuration.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -3769,7 +4453,9 @@
     "designDescription": "Design includes simple sort options (e.g. relevance, price). Visual hierarchy kept minimal.",
     "developmentDescription": "Core sorting options used. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -3780,7 +4466,9 @@
     "designDescription": "PLP used as primary page content with surrounding content blocks. Visual hierarchy clearly established.",
     "developmentDescription": "Structural placement only. Product List component unchanged.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -3791,7 +4479,9 @@
     "designDescription": "Design supports multiple view modes (e.g. list, 2x2, 4x4). Transitions and persistence rules defined.",
     "developmentDescription": "Custom state management and layout switching logic required.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 36,
+    "aiDevEffort": 22,
     "assumptions": ""
   },
   {
@@ -3802,7 +4492,9 @@
     "designDescription": "Filters positioned above the product list. Design defines grouping, priority, and responsive collapse behaviour.",
     "developmentDescription": "Integration with commerce filters plus custom layout and interaction logic.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 96,
+    "aiDevEffort": 72,
     "assumptions": ""
   },
   {
@@ -3813,7 +4505,9 @@
     "designDescription": "Filters displayed in a left or right sidebar. Responsive behaviour and collapse rules defined.",
     "developmentDescription": "Custom layout logic and filter integration required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 72,
+    "aiDevEffort": 56,
     "assumptions": ""
   },
   {
@@ -3824,7 +4518,9 @@
     "designDescription": "Filter or control bar remains visible while scrolling. Offset and collision rules defined.",
     "developmentDescription": "JavaScript required for sticky behaviour and scroll handling.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -3835,7 +4531,9 @@
     "designDescription": "Products load continuously instead of paginated pages. Loading, empty, and end states designed clearly.",
     "developmentDescription": "Custom loading logic and state management required. Core pagination insufficient.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 56,
+    "aiDevEffort": 42,
     "assumptions": ""
   },
   {
@@ -3846,7 +4544,9 @@
     "designDescription": "Design includes transitions, item reveal animations, or scroll‑based motion. Reduced‑motion behaviour defined.",
     "developmentDescription": "Custom CSS/JS animation logic required. Performance considerations apply.",
     "designEffort": 3,
+    "aiDesignEffort": 1.5,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -3857,7 +4557,9 @@
     "designDescription": "Product list adapts based on rules, categories, or personalisation. Design accounts for content variability.",
     "developmentDescription": "Integration with recommendation or personalisation logic required.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 88,
+    "aiDevEffort": 68,
     "assumptions": ""
   },
   {
@@ -3868,7 +4570,9 @@
     "designDescription": "PLP treated as a branded experience with visual storytelling elements and layout variation.",
     "developmentDescription": "High level of bespoke layout, logic, and QA effort.",
     "designEffort": 16,
+    "aiDesignEffort": 8,
     "devEffort": 56,
+    "aiDevEffort": 45,
     "assumptions": ""
   },
   {
@@ -3879,7 +4583,9 @@
     "designDescription": "Displays a horizontal carousel of category cards with basic imagery and labels. Design focuses on spacing, hierarchy, and clarity.",
     "developmentDescription": "Out‑of‑the‑box Category Carousel component. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -3890,7 +4596,9 @@
     "designDescription": "Uses standard arrow controls for navigation. Design defines placement, size, and hover states.",
     "developmentDescription": "Core navigation controls enabled. No custom logic required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 10,
     "assumptions": ""
   },
   {
@@ -3901,7 +4609,9 @@
     "designDescription": "Each category card uses a consistent image format and text placement. No layout variation across categories.",
     "developmentDescription": "Core rendering with CSS configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -3912,7 +4622,9 @@
     "designDescription": "Carousel positioned as a discovery or navigation aid (e.g. homepage or landing pages). Kept visually secondary.",
     "developmentDescription": "Structural placement only. Logic unchanged.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 10,
     "assumptions": ""
   },
   {
@@ -3923,7 +4635,9 @@
     "designDescription": "Design includes hover states such as image zoom, overlay reveal, elevation, or subtle motion. Reduced‑motion behaviour defined.",
     "developmentDescription": "Custom CSS/JS interactions required. Increased QA and accessibility effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 24,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -3934,7 +4648,9 @@
     "designDescription": "Categories automatically advance. Design defines timing, pause on interaction, and visibility of controls.",
     "developmentDescription": "JavaScript required to manage autoplay behaviour and state.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 24,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -3945,7 +4661,9 @@
     "designDescription": "Navigation replaces arrows with a progress bar or timeline indicator. Active state and timing clearly designed.",
     "developmentDescription": "Custom navigation logic required. Core carousel insufficient.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -3956,7 +4674,9 @@
     "designDescription": "Design supports mixed imagery (square, landscape, portrait, icons). Aspect‑ratio rules and fallbacks defined.",
     "developmentDescription": "Custom styling and conditional rendering to support multiple formats.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 40,
+    "aiDevEffort": 26,
     "assumptions": ""
   },
   {
@@ -3967,7 +4687,9 @@
     "designDescription": "Carousel remains visible or partially visible while scrolling to support persistent category navigation. Offset, breakpoints, and collision with headers defined.",
     "developmentDescription": "JavaScript and layout logic required for sticky behaviour and scroll handling. Higher integration and QA effort.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -3978,7 +4700,9 @@
     "designDescription": "Categories treated as brand or editorial elements with strong imagery and emphasis.",
     "developmentDescription": "Bespoke card layouts and styling required. Higher design effort.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -3989,7 +4713,9 @@
     "designDescription": "Categories driven by commerce rules or taxonomy instead of manual curation. Design handles variability and empty states.",
     "developmentDescription": "Integration with commerce category logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 96,
+    "aiDevEffort": 70,
     "assumptions": ""
   },
   {
@@ -4000,7 +4726,9 @@
     "designDescription": "Expressive, campaign‑driven usage with motion, layout variation, or strong brand treatment.",
     "developmentDescription": "Fully bespoke implementation. Highest effort tier.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 52,
+    "aiDevEffort": 40,
     "assumptions": ""
   },
   {
@@ -4011,7 +4739,9 @@
     "designDescription": "Displays a curated list of featured categories with image and label. Design focuses on clarity, spacing, and basic hierarchy.",
     "developmentDescription": "Out‑of‑the‑box Featured Category List component. Configuration only.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -4022,7 +4752,9 @@
     "designDescription": "Categories displayed in a fixed grid (e.g. 2‑up, 3‑up, 4‑up). Image ratio and text placement consistent.",
     "developmentDescription": "Core rendering with CSS configuration only. No additional logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 8,
+    "aiDevEffort": 5,
     "assumptions": ""
   },
   {
@@ -4033,7 +4765,9 @@
     "designDescription": "Categories presented in a horizontal list or band without carousel behaviour. Visual rhythm and alignment defined.",
     "developmentDescription": "Core component used with layout/container styles. No scrolling logic.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -4044,7 +4778,9 @@
     "designDescription": "List used as a discovery or navigation aid (homepage or section landing). Visual hierarchy kept secondary to hero content.",
     "developmentDescription": "Structural placement only. Component logic unchanged.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -4055,7 +4791,9 @@
     "designDescription": "Design includes hover states (image zoom, overlay reveal, elevation, subtle transitions). Reduced‑motion behaviour defined.",
     "developmentDescription": "Custom CSS/JS interactions required. Increased QA and accessibility effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 16,
+    "aiDevEffort": 10,
     "assumptions": ""
   },
   {
@@ -4066,7 +4804,9 @@
     "designDescription": "Authors can select between predefined layouts (e.g. grid, stacked, horizontal). Clear constraints defined.",
     "developmentDescription": "Custom layout switching logic and styling required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -4077,7 +4817,9 @@
     "designDescription": "Categories displayed with varying sizes or emphasis (editorial/masonry feel). Visual balance carefully designed.",
     "developmentDescription": "Bespoke layout logic and CSS required. Core component insufficient.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -4088,7 +4830,9 @@
     "designDescription": "Design supports mixed imagery (square, landscape, portrait, icon‑based). Aspect‑ratio rules and fallbacks defined.",
     "developmentDescription": "Conditional styling and rendering required to support multiple formats.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 34,
+    "aiDevEffort": 23,
     "assumptions": ""
   },
   {
@@ -4099,7 +4843,9 @@
     "designDescription": "Category list remains visible or partially visible while scrolling to support persistent category navigation. Offset and breakpoint rules defined.",
     "developmentDescription": "JavaScript and layout logic required for sticky behaviour and collision handling.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 14,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -4110,7 +4856,9 @@
     "designDescription": "Categories driven dynamically from commerce taxonomy or rules instead of manual curation.",
     "developmentDescription": "Integration with commerce category logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 80,
+    "aiDevEffort": 60,
     "assumptions": ""
   },
   {
@@ -4121,7 +4869,9 @@
     "designDescription": "One‑off or campaign usage with expressive layouts, motion hints, or strong branding.",
     "developmentDescription": "Fully bespoke implementation. Highest effort tier.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 56,
+    "aiDevEffort": 41,
     "assumptions": ""
   },
   {
@@ -4132,7 +4882,9 @@
     "designDescription": "Displays basic commerce teaser content (image, title, description, link). Design focuses on hierarchy, spacing, and visual consistency.",
     "developmentDescription": "Out‑of‑the‑box Commerce Teaser component. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -4143,7 +4895,9 @@
     "designDescription": "Teaser includes a single image with fixed aspect ratio. Design defines cropping, focal point, and priority of media vs text.",
     "developmentDescription": "Core image support used. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 16,
+    "aiDevEffort": 9,
     "assumptions": ""
   },
   {
@@ -4154,7 +4908,9 @@
     "designDescription": "Text‑only teaser variant. Design ensures balance and clarity without visual media.",
     "developmentDescription": "Core teaser configured without image.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": "Commerce teaser rendered in text-only mode. Image slot hidden via author toggle in dialog."
   },
   {
@@ -4165,7 +4921,9 @@
     "designDescription": "Teaser includes one primary CTA (e.g. “View product” or “Learn more”). Hierarchy clearly defined.",
     "developmentDescription": "Core CTA configuration. No interaction logic beyond navigation.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": ""
   },
   {
@@ -4176,7 +4934,9 @@
     "designDescription": "Design includes lightweight metadata (e.g. category, label). Visual priority defined.",
     "developmentDescription": "Core metadata support leveraged.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 24,
+    "aiDevEffort": 14,
     "assumptions": "Display commerce metadata (price, SKU, badge) in teaser. Data sourced from CIF product model."
   },
   {
@@ -4187,7 +4947,9 @@
     "designDescription": "Design includes more than one CTA (primary + secondary). Hierarchy, spacing, and clash rules defined.",
     "developmentDescription": "Additional authoring fields and rendering logic required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -4198,7 +4960,9 @@
     "designDescription": "Icons added to CTAs or metadata. Design defines usage rules and alignment with typography.",
     "developmentDescription": "Custom markup and styling required. Core teaser insufficient.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -4209,7 +4973,9 @@
     "designDescription": "Design includes ribbons or badges (e.g. “New”, “Sale”, “Limited”). Placement and priority rules clearly defined.",
     "developmentDescription": "Conditional rendering logic and extra fields required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 40,
+    "aiDevEffort": 26,
     "assumptions": ""
   },
   {
@@ -4220,7 +4986,9 @@
     "designDescription": "Hover states include image swap, CTA reveal, elevation, shape change, or micro‑animation. Reduced‑motion behaviour defined.",
     "developmentDescription": "Custom CSS/JS interactions required. Increased QA and accessibility effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 44,
+    "aiDevEffort": 30,
     "assumptions": ""
   },
   {
@@ -4231,7 +4999,9 @@
     "designDescription": "Design supports portrait, landscape, or square imagery. Aspect‑ratio rules and fallbacks defined.",
     "developmentDescription": "Conditional styling and rendering required to support multiple formats.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 40,
+    "aiDevEffort": 26,
     "assumptions": ""
   },
   {
@@ -4242,7 +5012,9 @@
     "designDescription": "Teaser content populated dynamically (e.g. commerce data, rules, context). Design handles variability and missing data.",
     "developmentDescription": "Custom mapping and conditional logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 52,
+    "aiDevEffort": 38,
     "assumptions": ""
   },
   {
@@ -4253,7 +5025,9 @@
     "designDescription": "Teaser used as a strong editorial or campaign element with expressive visuals and layout emphasis.",
     "developmentDescription": "Bespoke layout and styling. High design and development effort.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 44,
+    "aiDevEffort": 32,
     "assumptions": ""
   },
   {
@@ -4264,7 +5038,9 @@
     "designDescription": "Simple text link used for navigation or actions. Design focuses on typography, spacing, and basic affordance.",
     "developmentDescription": "Out‑of‑the‑box Link component. Configuration only.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -4275,7 +5051,9 @@
     "designDescription": "Link styled consistently with design system for internal navigation. No additional visual emphasis.",
     "developmentDescription": "Uses standard internal link resolution. No custom logic.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -4286,7 +5064,9 @@
     "designDescription": "Design defines visual cue for external links (e.g. icon or styling).",
     "developmentDescription": "External link handling using default configuration.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 12,
+    "aiDevEffort": 7,
     "assumptions": ""
   },
   {
@@ -4297,7 +5077,9 @@
     "designDescription": "Link includes a leading or trailing icon. Design defines icon placement, size, and alignment with text.",
     "developmentDescription": "Core icon support used. Minimal styling configuration.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -4308,7 +5090,9 @@
     "designDescription": "Link visually styled as a button or call‑to‑action using existing design system styles.",
     "developmentDescription": "Styling applied via CSS or style system. No functional change.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 20,
+    "aiDevEffort": 11,
     "assumptions": ""
   },
   {
@@ -4319,7 +5103,9 @@
     "designDescription": "Link embedded within text or other content blocks. Visual distinction remains clear but subtle.",
     "developmentDescription": "Used as part of Text or layout components. No bespoke logic.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 14,
+    "aiDevEffort": 8,
     "assumptions": ""
   },
   {
@@ -4330,7 +5116,9 @@
     "designDescription": "Design defines different link behaviours (e.g. navigate, download, open modal). Visual differentiation rules defined.",
     "developmentDescription": "Conditional logic required to handle different behaviours.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -4341,7 +5129,9 @@
     "designDescription": "Design includes visual states based on context (e.g. active, visited, disabled).",
     "developmentDescription": "Custom state handling and styling logic required.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -4352,7 +5142,9 @@
     "designDescription": "Link behaves as a navigation control (e.g. tabs, step links, in‑page anchors).",
     "developmentDescription": "Custom interaction or scroll logic required.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 24,
+    "aiDevEffort": 13,
     "assumptions": ""
   },
   {
@@ -4363,7 +5155,9 @@
     "designDescription": "Design does not change significantly, but link placement and prominence considered for tracking.",
     "developmentDescription": "Custom analytics hooks or data‑layer integration required.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 26,
+    "aiDevEffort": 15,
     "assumptions": ""
   },
   {
@@ -4374,7 +5168,9 @@
     "designDescription": "Link treated as a branded or decorative element (backgrounds, underlines, animations).",
     "developmentDescription": "Bespoke markup, styling, and possible motion logic required.",
     "designEffort": 1,
+    "aiDesignEffort": 0.5,
     "devEffort": 24,
+    "aiDevEffort": 15,
     "assumptions": ""
   },
   {
@@ -4385,7 +5181,9 @@
     "designDescription": "Link triggers form submission, workflow step, or portal action. UX feedback states defined clearly.",
     "developmentDescription": "Integration with forms or workflow logic required. Higher QA effort.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 40,
+    "aiDevEffort": 26,
     "assumptions": ""
   },
   {
@@ -4396,7 +5194,9 @@
     "designDescription": "Displays a list of search results based on user input. Design focuses on clarity, spacing, and basic result hierarchy.",
     "developmentDescription": "Out‑of‑the‑box Search Lister component with default search configuration.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 28,
+    "aiDevEffort": 18,
     "assumptions": ""
   },
   {
@@ -4407,7 +5207,9 @@
     "designDescription": "Results displayed in a simple vertical list with title and metadata. Visual consistency prioritised.",
     "developmentDescription": "Core rendering and templating only. No custom logic.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 24,
+    "aiDevEffort": 16,
     "assumptions": ""
   },
   {
@@ -4418,7 +5220,9 @@
     "designDescription": "Results split across pages. Design defines pagination placement, states, and affordance.",
     "developmentDescription": "Core pagination support enabled. Configuration only.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 52,
+    "aiDevEffort": 34,
     "assumptions": ""
   },
   {
@@ -4429,7 +5233,9 @@
     "designDescription": "Simple sort options (e.g. relevance, date) exposed. Visual treatment kept minimal.",
     "developmentDescription": "Core sorting configuration used.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 20,
+    "aiDevEffort": 12,
     "assumptions": "Sort control (relevance, date, name) added to search lister. Sort parameter passed to query builder."
   },
   {
@@ -4440,7 +5246,9 @@
     "designDescription": "Search results embedded within a portal page layout alongside other components. Clear hierarchy maintained.",
     "developmentDescription": "Structural placement only. Component logic unchanged.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 44,
+    "aiDevEffort": 30,
     "assumptions": ""
   },
   {
@@ -4451,7 +5259,9 @@
     "designDescription": "Filters presented above or to the side of results. Grouping, priority, and responsive behaviour defined.",
     "developmentDescription": "Custom filter layout and integration required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 88,
+    "aiDevEffort": 62,
     "assumptions": ""
   },
   {
@@ -4462,7 +5272,9 @@
     "designDescription": "Filters or search controls remain visible while scrolling through results. Offset and collision rules defined.",
     "developmentDescription": "JavaScript required for sticky behaviour and scroll handling.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 68,
+    "aiDevEffort": 44,
     "assumptions": ""
   },
   {
@@ -4473,7 +5285,9 @@
     "designDescription": "Search results rendered as bespoke cards with richer layout, metadata, or actions.",
     "developmentDescription": "Custom rendering templates required. Core list insufficient.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 64,
+    "aiDevEffort": 46,
     "assumptions": ""
   },
   {
@@ -4484,7 +5298,9 @@
     "designDescription": "Users can switch between list, compact, or card views. Transitions and persistence rules defined.",
     "developmentDescription": "Custom layout switching and state management required.",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 44,
+    "aiDevEffort": 30,
     "assumptions": ""
   },
   {
@@ -4495,7 +5311,9 @@
     "designDescription": "Results load continuously as user scrolls. Loading, empty, and end‑of‑results states designed.",
     "developmentDescription": "Custom loading logic required. Core pagination not used.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 80,
+    "aiDevEffort": 54,
     "assumptions": ""
   },
   {
@@ -4506,7 +5324,9 @@
     "designDescription": "Keyword matches or important fields highlighted visually. Highlight rules defined clearly.",
     "developmentDescription": "Custom rendering and text‑processing logic required.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 36,
+    "aiDevEffort": 24,
     "assumptions": ""
   },
   {
@@ -4517,7 +5337,9 @@
     "designDescription": "Results influenced by user role, permissions, or context. Design accounts for variability and edge cases.",
     "developmentDescription": "Integration with permissions or personalisation logic required.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 88,
+    "aiDevEffort": 62,
     "assumptions": ""
   },
   {
@@ -4528,7 +5350,9 @@
     "designDescription": "Search results treated as a branded or campaign‑led experience with expressive visuals.",
     "developmentDescription": "Bespoke templates and styling. High design and QA effort.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 72,
+    "aiDevEffort": 52,
     "assumptions": ""
   },
   {
@@ -4539,7 +5363,9 @@
     "designDescription": "Using reusable forms",
     "developmentDescription": "Using reusable forms",
     "designEffort": 6,
+    "aiDesignEffort": 3,
     "devEffort": 48,
+    "aiDevEffort": 32,
     "assumptions": "Multi-step registration form using reusable form components. Audience-conditional fields, submission to registration endpoint."
   },
   {
@@ -4550,7 +5376,9 @@
     "designDescription": "Registration includes third‑party sign‑up options with clear visual separation.",
     "developmentDescription": "Front‑end integration logic for social sign‑up triggers and states.",
     "designEffort": 2,
+    "aiDesignEffort": 1,
     "devEffort": 104,
+    "aiDevEffort": 70,
     "assumptions": ""
   },
   {
@@ -4561,7 +5389,9 @@
     "designDescription": "Registration content and fields adapt based on selected audience or account type.",
     "developmentDescription": "Conditional rendering logic based on audience selection.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 96,
+    "aiDevEffort": 70,
     "assumptions": ""
   },
   {
@@ -4572,7 +5402,9 @@
     "designDescription": "Registration split into multiple steps with progress indication and contextual guidance.",
     "developmentDescription": "Front‑end state handling across steps with validation and navigation logic.",
     "designEffort": 8,
+    "aiDesignEffort": 4,
     "devEffort": 96,
+    "aiDevEffort": 70,
     "assumptions": ""
   },
   {
@@ -4583,7 +5415,9 @@
     "designDescription": "Registration includes third‑party sign‑up options with clear visual separation.",
     "developmentDescription": "Front‑end integration logic for social sign‑up triggers and states.",
     "designEffort": 4,
+    "aiDesignEffort": 2,
     "devEffort": 96,
+    "aiDevEffort": 70,
     "assumptions": ""
   }
 ]

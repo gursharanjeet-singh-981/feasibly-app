@@ -6,7 +6,9 @@ export interface Component {
   designDescription: string;
   developmentDescription: string;
   designEffort: number;
+  aiDesignEffort: number;
   devEffort: number;
+  aiDevEffort: number;
   assumptions: string;
 }
 
@@ -20,8 +22,10 @@ export interface Template {
   category: string;
   description: string;
   designEffortBase: number;
+  aiDesignEffortBase: number;
   designEffortPerPage: number;
   devEffortBase: number;
+  aiDevEffortBase: number;
   devEffortPerPage: number;
 }
 
