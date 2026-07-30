@@ -132,10 +132,10 @@ feasibly-app/
 
 ### Screen 2: Components Selection (`/components`)
 
-**Layout:** Top-level flex row — left column (AppHeader + scrollable table) and right column (estimation panel, full viewport height). The header does NOT span the full page width; it only spans the left content area. The estimation panel sits alongside from the very top of the page.
+**Layout:** Top-level 12-column CSS grid — left column (`lg:col-span-8`, contains AppHeader + scrollable table) and right column (`lg:col-span-4`, estimation panel, full viewport height). The header does NOT span the full page width; it sits INSIDE the left 8-column area. The estimation panel sits alongside from the very top of the page.
 
 **AppHeader:**
-- Structure is a flex row with three sections:
+- Structure is a flex-wrap row with two sections:
   1. **Feasibly Logo** (separate, top-aligned with `items-start`): Red arrow icon (`text-[#F1012F]`) + "Feasibly" bold text (`text-[#020E4E]`) + "a Merkle tool" small subtitle (opacity 50%). This is a standalone flex item, NOT nested inside the Project section.
   2. **Header Content** (flex-1, contains Project info + Tabs in a flex row with `items-end` so Input and Tabs bottom-align):
      - Left: Sky-blue folder badge (30×30, `rounded-[9px]`) + "Project" label above, editable project name input (pill, `h-[60px]`, `w-[245px]`) below. Gap of 10px between label row and input.
@@ -213,6 +213,23 @@ Same layout as Components page, but:
 - "Export PDF Report" — cobalt filled pill button
 - "Export Excel Report" — cobalt outlined pill button
 
+**Info Sidebar (Development/Design):**
+- Each card (Development, Design) has an info icon button
+- Clicking the info icon opens a slide-in sidebar overlay from the right
+- Shows "What's included" heading with numbered sections (01-06) in cobalt color
+- Each section has a title and bullet list of items
+- Close via X button or clicking the backdrop
+- State managed with `useState<"dev" | "design" | null>(null)`
+
+---
+
+## Add Component / Add Template Behavior
+
+- **"Add component/template" button** (top toolbar): Creates a NEW accordion group with a unique name ("New Component", "New Component 2", etc.), auto-expands it, and scrolls to bottom
+- **"+" button inside accordion** (bottom-right of expanded group): Adds a new variant row within that existing group
+- **Custom group headers**: Accordion headers for custom groups (where all items have `assumptions === "__custom__"` for components, or `isCustom === true` for templates) are editable inline with a dashed underline border
+- **Renaming groups**: Uses `renameGroup(oldName, newName)` that updates all items in the group and transfers the open state
+
 ---
 
 ## TypeScript Interfaces
@@ -225,8 +242,10 @@ interface Component {
   category: string;
   designDescription: string;
   developmentDescription: string;
-  designEffort: number;     // days
-  devEffort: number;        // days
+  designEffort: number;     // hours
+  aiDesignEffort: number;   // AI-reduced design hours
+  devEffort: number;        // hours
+  aiDevEffort: number;      // AI-reduced dev hours
   assumptions: string;
 }
 
@@ -240,14 +259,17 @@ interface Template {
   category: string;
   description: string;
   designEffortBase: number;
+  aiDesignEffortBase: number;   // AI-reduced design hours
   designEffortPerPage: number;
   devEffortBase: number;
+  aiDevEffortBase: number;      // AI-reduced dev hours
   devEffortPerPage: number;
 }
 
 interface SelectedTemplate extends Template {
   isSelected: boolean;
   additionalPages: number;  // user input
+  isCustom?: boolean;       // marks user-added templates
 }
 
 interface Project {
@@ -303,13 +325,13 @@ devWeeks = Math.ceil(devDaysWithBuffer / 5)
 - components: SelectedComponent[]
 - setComponents(components)
 - toggleComponent(id)         // toggle isSelected
-- addComponent(group)         // add blank editable row to group (marked with assumptions="__custom__")
+- addComponent(group)         // add blank editable row to group (marked with assumptions="__custom__", aiDesignEffort=0, aiDevEffort=0)
 - updateComponent(id, updates) // update any field on a component (for editable custom rows)
 - templates: SelectedTemplate[]
 - setTemplates(templates)
 - toggleTemplate(id)          // toggle isSelected
 - setAdditionalPages(id, pages)
-- addTemplate(group)          // add blank editable row
+- addTemplate(group)          // add blank editable row (isCustom=true, aiDesignEffortBase=0, aiDevEffortBase=0)
 - updateTemplate(id, updates) // update any field on a template (for editable custom rows)
 - resetStore()                 // clears project, components, templates back to defaults (called on onboarding mount)
 - getEstimation(): EstimationSummary  // computed from selections
@@ -368,7 +390,9 @@ Sample component:
   "designDescription": "CTA may include an icon positioned left, right, or shown on hover...",
   "developmentDescription": "Uses Core Button component with icon support...",
   "designEffort": 2,
+  "aiDesignEffort": 1,
   "devEffort": 8,
+  "aiDevEffort": 5,
   "assumptions": ""
 }
 ```
@@ -385,8 +409,10 @@ Sample template:
   "category": "Core",
   "description": "High-level layout defining key entry points, hero areas...",
   "designEffortBase": 32,
+  "aiDesignEffortBase": 16,
   "designEffortPerPage": 8,
   "devEffortBase": 24,
+  "aiDevEffortBase": 14,
   "devEffortPerPage": 6
 }
 ```
@@ -427,7 +453,7 @@ Generates a branded A4 PDF with:
 2. **Project details** — Name, URL, Scope, Platform, Date
 3. **Estimation summary** — Dev days/weeks, Design days/weeks (with buffer)
 4. **Components table** — Grouped by category, with effort columns
-5. **Templates table** — With base + additional page effort
+5. **Templates table** — With base + additional page effort. Template names shown as "PageName - VariantDescription" format (e.g., "My Account - Account Dashboard")
 
 Use Feasibly color tokens for styling (cobalt headers, sky-blue group rows, alternating row backgrounds).
 
@@ -446,7 +472,13 @@ Styling: Cobalt headers with white text, sky-blue group headers, alternating row
 
 ## Key Implementation Details
 
-1. **Tailwind v4**: No `tailwind.config.js`. All tokens defined as CSS custom properties in `globals.css` using `@theme inline {}` block.
+1. **Tailwind v4**: No `tailwind.config.js`. All tokens defined as CSS custom properties in `globals.css` using `@theme inline {}` block. Always use shorthand utilities over arbitrary values (e.g., `w-7.5` instead of `w-[30px]`, `gap-2.5` instead of `gap-[10px]`, `lg:px-15` instead of `lg:px-[60px]`).
+
+2. **12-Column Grid Layout**: All content pages use `grid grid-cols-1 lg:grid-cols-12` with left content in `lg:col-span-8` and estimation panel in `lg:col-span-4`. The AppHeader lives INSIDE the left column, not above the grid.
+
+3. **Horizontal Scroll Tables**: Accordion content areas use `accordion-scroll overflow-x-auto` class with `min-w-max` inner wrapper so table headers and row backgrounds extend across scrolled columns. Custom scrollbar styling defined in globals.css (6px height, #d9d9d9 thumb).
+
+4. **Flex Wrap Header**: The AppHeader uses `flex flex-wrap` so logo, project info, and tabs flow within available width without overflowing.
 
 2. **Shadcn v4**: Install via `npx shadcn@latest init`. Components needed: Button, Input, Checkbox, Card, Table, Accordion, Tabs, Label.
 

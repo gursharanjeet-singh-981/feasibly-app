@@ -22,7 +22,7 @@ export function AppHeader() {
   );
 
   return (
-    <header className="flex flex-col gap-4 lg:flex-row lg:gap-[109px] lg:items-start px-4 md:px-8 lg:px-[60px] pt-6 lg:pt-[60px] pb-4">
+    <header className="flex flex-wrap items-start gap-4 lg:gap-6 px-4 md:px-8 lg:px-15 pt-6 lg:pt-15 pb-4">
       {/* Feasibly Logo — top-aligned, separate from header content */}
       <Link href="/" className="flex items-center gap-2 shrink-0">
         <SvgIcon name="feasibly-logo" width={24} height={24} className="text-[#F1012F]" />
@@ -33,11 +33,11 @@ export function AppHeader() {
       </Link>
 
       {/* Header Content: Project info + Tabs — bottom-aligned with each other */}
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between flex-1">
+      <div className="flex flex-wrap gap-4 lg:items-end lg:justify-between flex-1 min-w-0">
         {/* Left: Project icon/text + Input */}
-        <div className="flex flex-col gap-[10px]">
+        <div className="flex flex-col gap-2.5">
           <div className="flex items-center gap-5">
-            <div className="flex items-center justify-center w-[30px] h-[30px] bg-sky-blue rounded-[9px] shrink-0">
+            <div className="flex items-center justify-center w-7.5 h-7.5 bg-sky-blue rounded-[9px] shrink-0">
               <SvgIcon name="folder-shared" width={12} height={12} className="text-white" />
             </div>
             <p className="text-xl font-semibold text-black">Project</p>
@@ -45,7 +45,7 @@ export function AppHeader() {
           <Input
             value={project.projectName}
             onChange={(e) => setProject({ ...project, projectName: e.target.value })}
-            className="h-12 lg:h-[60px] rounded-full px-6 text-base border-strokes w-full lg:w-[245px] bg-white"
+            className="h-12 lg:h-15 rounded-full px-6 text-base border-strokes w-full lg:w-61.25 bg-white"
           />
         </div>
 
@@ -57,7 +57,7 @@ export function AppHeader() {
               <Link
                 key={tab.href}
                 href={tab.href}
-                className={`flex items-center gap-[5px] p-3 rounded-full text-sm whitespace-nowrap transition-colors ${
+                className={`flex items-center gap-1.25 p-3 rounded-full text-sm whitespace-nowrap transition-colors ${
                   isActive
                     ? "bg-background-blue border border-cobalt text-black font-medium"
                     : "text-light-grey-text hover:bg-gray-50"

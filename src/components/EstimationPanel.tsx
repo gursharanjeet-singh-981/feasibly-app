@@ -91,15 +91,15 @@ export function EstimationPanel() {
     <div className="bg-[#e3e7ef] flex flex-col justify-between rounded-3xl lg:rounded-[60px] p-6 md:p-8 lg:p-10 w-full h-full overflow-y-auto">
       <div className="flex flex-col gap-8 lg:gap-10">
         {/* Title + Stats */}
-        <div className="flex flex-col gap-[30px]">
+        <div className="flex flex-col gap-7.5">
           <h2 className="text-2xl lg:text-[30px] font-semibold text-black">
             Your estimation
           </h2>
 
           {/* Stats Row 1: Components */}
           {project.scope.components && (
-            <div className="flex gap-[30px] items-start">
-              <div className="flex flex-col gap-[10px]">
+            <div className="flex gap-7.5 items-start">
+              <div className="flex flex-col gap-2.5">
                 <div className="flex items-center gap-1.5">
                   <SvgIcon name="components" width={16} height={16} className="text-black" />
                   <p className="text-sm lg:text-base font-bold text-black">
@@ -114,9 +114,9 @@ export function EstimationPanel() {
                 </p>
               </div>
 
-              <div className="w-px h-[73px] bg-[#d9d9d9] self-center shrink-0" />
+              <div className="w-px h-18.25 bg-[#d9d9d9] self-center shrink-0" />
 
-              <div className="flex flex-col gap-[10px]">
+              <div className="flex flex-col gap-2.5">
                 <div className="flex items-center gap-1.5">
                   <SvgIcon name="graph" width={16} height={16} className="text-black" />
                   <p className="text-sm lg:text-base font-bold text-black">
@@ -135,8 +135,8 @@ export function EstimationPanel() {
 
           {/* Stats Row 2: Templates */}
           {project.scope.templates && (
-            <div className="flex gap-[30px] items-start">
-              <div className="flex flex-col gap-[10px]">
+            <div className="flex gap-7.5 items-start">
+              <div className="flex flex-col gap-2.5">
                 <div className="flex items-center gap-1.5">
                   <SvgIcon name="file-copy" width={16} height={16} className="text-black opacity-54" />
                   <p className="text-sm lg:text-base font-bold text-black">
@@ -151,9 +151,9 @@ export function EstimationPanel() {
                 </p>
               </div>
 
-              <div className="w-px h-[73px] bg-[#d9d9d9] self-center shrink-0" />
+              <div className="w-px h-18.25 bg-[#d9d9d9] self-center shrink-0" />
 
-              <div className="flex flex-col gap-[10px]">
+              <div className="flex flex-col gap-2.5">
                 <div className="flex items-center gap-1.5">
                   <SvgIcon name="add-to-queue" width={16} height={16} className="text-black opacity-54" />
                   <p className="text-sm lg:text-base font-bold text-black">
@@ -173,10 +173,10 @@ export function EstimationPanel() {
 
         {/* Development Card */}
         <div className="bg-white border-b border-r border-strokes rounded-2xl lg:rounded-[40px] p-5">
-          <div className="flex flex-col gap-[11px]">
+          <div className="flex flex-col gap-2.75">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-[30px] h-[30px] bg-cobalt rounded-lg">
+                <div className="flex items-center justify-center w-7.5 h-7.5 bg-cobalt rounded-lg">
                   <SvgIcon name="developer-mode" width={14} height={8} className="text-white" />
                 </div>
                 <p className="text-base font-bold text-black">Development</p>
@@ -202,10 +202,10 @@ export function EstimationPanel() {
 
         {/* Design Card */}
         <div className="bg-white border-b border-r border-strokes rounded-2xl lg:rounded-[40px] p-5">
-          <div className="flex flex-col gap-[11px]">
+          <div className="flex flex-col gap-2.75">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-[30px] h-[30px] bg-cobalt rounded-lg">
+                <div className="flex items-center justify-center w-7.5 h-7.5 bg-cobalt rounded-lg">
                   <SvgIcon name="pencil" width={14} height={14} className="text-white" />
                 </div>
                 <p className="text-base font-bold text-black">Design</p>
@@ -237,7 +237,7 @@ export function EstimationPanel() {
         <Button
           onClick={handleExportPDF}
           disabled={exporting !== null}
-          className="h-12 md:h-14 lg:h-[60px] rounded-full bg-cobalt hover:bg-cobalt/90 text-white text-base w-full gap-2"
+          className="h-12 md:h-14 lg:h-15 rounded-full bg-cobalt hover:bg-cobalt/90 text-white text-base w-full gap-2"
         >
           {exporting === "pdf" ? "Exporting…" : "Export PDF Report"}
           <Download className="w-5 h-5" />
@@ -245,7 +245,7 @@ export function EstimationPanel() {
         <Button
           onClick={handleExportExcel}
           disabled={exporting !== null}
-          className="h-12 md:h-14 lg:h-[60px] rounded-full bg-white border border-cobalt text-cobalt hover:bg-cobalt/5 text-base w-full gap-2"
+          className="h-12 md:h-14 lg:h-15 rounded-full bg-white border border-cobalt text-cobalt hover:bg-cobalt/5 text-base w-full gap-2"
         >
           {exporting === "excel" ? "Exporting…" : "Export Excel Report"}
           <Download className="w-5 h-5" />
@@ -262,7 +262,7 @@ export function EstimationPanel() {
           >
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <div className="flex items-center justify-center w-[30px] h-[30px] bg-cobalt rounded-lg">
+                <div className="flex items-center justify-center w-7.5 h-7.5 bg-cobalt rounded-lg">
                   {infoSidebar === "dev" ? (
                     <SvgIcon name="developer-mode" width={14} height={8} className="text-white" />
                   ) : (

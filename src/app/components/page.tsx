@@ -117,11 +117,11 @@ export default function ComponentsPage() {
 
   return (
     <div className="min-h-screen bg-background-blue flex flex-col">
-      <AppHeader />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 flex-1">
       {/* Left: Content - 8 columns */}
       <div className="lg:col-span-8 min-w-0">
-        <div className="px-4 md:px-8 lg:px-[60px] py-6 lg:py-10">
+        <AppHeader />
+        <div className="px-4 md:px-8 lg:px-15 py-6 lg:py-10">
           <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
             {/* Toolbar */}
             <div className="flex flex-col gap-4 mb-8 lg:mb-10">
@@ -131,7 +131,7 @@ export default function ComponentsPage() {
                 </h2>
                 <label className="flex items-center gap-2 text-sm lg:text-base text-black cursor-pointer">
                   <Checkbox
-                    className="w-[18px] h-[18px] rounded-[5px] border-dark-background"
+                    className="w-4.5 h-4.5 rounded-[5px] border-dark-background"
                     checked={components.length > 0 && components.every((c) => c.isSelected)}
                     onCheckedChange={toggleAllOnPage}
                   />
@@ -149,7 +149,7 @@ export default function ComponentsPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Search for component"
-                    className="h-12 lg:h-[60px] rounded-full pl-5 pr-12 text-sm lg:text-base border-strokes bg-white w-full sm:w-[220px]"
+                    className="h-12 lg:h-15 rounded-full pl-5 pr-12 text-sm lg:text-base border-strokes bg-white w-full sm:w-55"
                   />
                   <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder-text" />
                 </div>
@@ -199,19 +199,19 @@ export default function ComponentsPage() {
                         <div className="min-w-max">
                         {/* Table Header */}
                         <div className="hidden lg:flex min-w-max bg-background-blue text-sm font-semibold text-black">
-                          <div className="flex items-center gap-3 px-4 py-4 w-[220px] shrink-0">
+                          <div className="flex items-center gap-3 px-4 py-4 w-55 shrink-0">
                             <Checkbox
                               checked={allSelected}
                               onCheckedChange={() => toggleAllInGroup(group)}
-                              className="w-[18px] h-[18px] rounded-[5px] border-dark-background"
+                              className="w-4.5 h-4.5 rounded-[5px] border-dark-background"
                             />
                             <span>Variant</span>
                           </div>
-                          <div className="px-4 py-4 w-[100px] shrink-0">Category</div>
-                          <div className="px-4 py-4 w-[200px] shrink-0">Design</div>
-                          <div className="px-4 py-4 w-[200px] shrink-0">Development</div>
-                          <div className="px-4 py-4 w-[100px] shrink-0">Design Effort</div>
-                          <div className="px-4 py-4 w-[100px] shrink-0">Dev Effort</div>
+                          <div className="px-4 py-4 w-25 shrink-0">Category</div>
+                          <div className="px-4 py-4 w-50 shrink-0">Design</div>
+                          <div className="px-4 py-4 w-50 shrink-0">Development</div>
+                          <div className="px-4 py-4 w-25 shrink-0">Design Effort</div>
+                          <div className="px-4 py-4 w-25 shrink-0">Dev Effort</div>
                         </div>
 
                         {/* Rows */}
@@ -271,11 +271,11 @@ function ComponentRow({
     <div className="border-b border-strokes/50 last:border-b-0">
       {/* Desktop row */}
       <div className="hidden lg:flex min-w-max items-stretch text-xs text-black">
-        <div className="flex items-start gap-3 px-4 py-3 w-[220px] shrink-0 border-r border-strokes/50">
+        <div className="flex items-start gap-3 px-4 py-3 w-55 shrink-0 border-r border-strokes/50">
           <Checkbox
             checked={component.isSelected}
             onCheckedChange={onToggle}
-            className="w-[18px] h-[18px] rounded-[5px] border-dark-background mt-0.5"
+            className="w-4.5 h-4.5 rounded-[5px] border-dark-background mt-0.5"
           />
           {isEditable ? (
             <input
@@ -288,7 +288,7 @@ function ComponentRow({
             <span className="leading-snug">{component.name}</span>
           )}
         </div>
-        <div className="flex items-start px-4 py-3 w-[100px] shrink-0 border-r border-strokes/50">
+        <div className="flex items-start px-4 py-3 w-25 shrink-0 border-r border-strokes/50">
           {isEditable ? (
             <input
               value={component.category}
@@ -300,7 +300,7 @@ function ComponentRow({
             <CategoryLabel category={component.category} />
           )}
         </div>
-        <div className="flex items-start px-4 py-3 w-[200px] shrink-0 border-r border-strokes/50 leading-snug">
+        <div className="flex items-start px-4 py-3 w-50 shrink-0 border-r border-strokes/50 leading-snug">
           {isEditable ? (
             <input
               value={component.designDescription}
@@ -312,7 +312,7 @@ function ComponentRow({
             component.designDescription
           )}
         </div>
-        <div className="flex items-start px-4 py-3 w-[200px] shrink-0 border-r border-strokes/50 leading-snug">
+        <div className="flex items-start px-4 py-3 w-50 shrink-0 border-r border-strokes/50 leading-snug">
           {isEditable ? (
             <input
               value={component.developmentDescription}
@@ -324,7 +324,7 @@ function ComponentRow({
             component.developmentDescription
           )}
         </div>
-        <div className="flex items-start px-4 py-3 w-[100px] shrink-0 border-r border-strokes/50">
+        <div className="flex items-start px-4 py-3 w-25 shrink-0 border-r border-strokes/50">
           {isEditable ? (
             <input
               type="number"
@@ -337,7 +337,7 @@ function ComponentRow({
             <>{component.designEffort}h</>
           )}
         </div>
-        <div className="flex items-start px-4 py-3 w-[100px] shrink-0">
+        <div className="flex items-start px-4 py-3 w-25 shrink-0">
           {isEditable ? (
             <input
               type="number"
@@ -357,7 +357,7 @@ function ComponentRow({
         <Checkbox
           checked={component.isSelected}
           onCheckedChange={onToggle}
-          className="w-[18px] h-[18px] rounded-[5px] border-dark-background mt-1 shrink-0"
+          className="w-4.5 h-4.5 rounded-[5px] border-dark-background mt-1 shrink-0"
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">

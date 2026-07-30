@@ -13,11 +13,11 @@ export default function GlobalPrinciplesPage() {
   }, []);
   return (
     <div className="min-h-screen bg-background-blue flex flex-col">
-      <AppHeader />
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 flex-1">
       {/* Left: Content - 8 columns */}
       <div className="lg:col-span-8 min-w-0">
-        <div className="px-4 md:px-8 lg:px-[60px] py-6 lg:py-10">
+        <AppHeader />
+        <div className="px-4 md:px-8 lg:px-15 py-6 lg:py-10">
           <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
             <h2 className="text-xl md:text-2xl lg:text-[30px] font-semibold text-black mb-8 lg:mb-10">
               Global Principles
@@ -26,11 +26,11 @@ export default function GlobalPrinciplesPage() {
             <div className="border border-strokes/50 rounded-2xl overflow-hidden">
               {/* Table Header — Desktop */}
               <div className="hidden lg:flex bg-background-blue text-sm font-semibold text-black">
-                <div className="flex items-center gap-3 px-4 py-4 w-[200px] shrink-0">
+                <div className="flex items-center gap-3 px-4 py-4 w-50 shrink-0">
                   <span>Global Parameter</span>
                 </div>
-                <div className="px-4 py-4 flex-1 min-w-[200px]">Design Description</div>
-                <div className="px-4 py-4 flex-1 min-w-[200px]">Development Description</div>
+                <div className="px-4 py-4 flex-1 min-w-50">Design Description</div>
+                <div className="px-4 py-4 flex-1 min-w-50">Development Description</div>
               </div>
 
               {/* Rows */}
@@ -41,15 +41,15 @@ export default function GlobalPrinciplesPage() {
                 >
                   {/* Desktop */}
                   <div className="hidden lg:flex items-stretch text-xs text-black">
-                    <div className="flex items-start px-4 py-4 w-[200px] shrink-0 border-r border-strokes/50">
+                    <div className="flex items-start px-4 py-4 w-50 shrink-0 border-r border-strokes/50">
                       <span className="text-sm font-medium leading-snug">
                         {principle.name}
                       </span>
                     </div>
-                    <div className="flex items-start px-4 py-4 flex-1 min-w-[200px] border-r border-strokes/50 leading-snug break-words">
+                    <div className="flex items-start px-4 py-4 flex-1 min-w-50 border-r border-strokes/50 leading-snug break-words">
                       {principle.designDescription}
                     </div>
-                    <div className="flex items-start px-4 py-4 flex-1 min-w-[200px] leading-snug break-words">
+                    <div className="flex items-start px-4 py-4 flex-1 min-w-50 leading-snug break-words">
                       {principle.developmentDescription}
                     </div>
                   </div>
