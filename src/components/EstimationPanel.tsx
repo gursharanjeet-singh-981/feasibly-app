@@ -75,6 +75,16 @@ export function EstimationPanel() {
     }
   };
 
+  const handleExportExcel = async () => {
+    setExporting("excel");
+    try {
+      const { exportExcel } = await import("@/lib/exportExcel");
+      exportExcel(project, components, templates, estimation);
+    } finally {
+      setExporting(null);
+    }
+  };
+
 
 
   return (
@@ -222,14 +232,22 @@ export function EstimationPanel() {
         </div>
       </div>
 
-      {/* Export Button */}
-      <div className="mt-8 lg:mt-10">
+      {/* Export Buttons */}
+      <div className="mt-8 lg:mt-10 flex flex-col gap-3">
         <Button
           onClick={handleExportPDF}
           disabled={exporting !== null}
           className="h-12 md:h-14 lg:h-[60px] rounded-full bg-cobalt hover:bg-cobalt/90 text-white text-base w-full gap-2"
         >
           {exporting === "pdf" ? "Exporting…" : "Export PDF Report"}
+          <Download className="w-5 h-5" />
+        </Button>
+        <Button
+          onClick={handleExportExcel}
+          disabled={exporting !== null}
+          className="h-12 md:h-14 lg:h-[60px] rounded-full bg-white border border-cobalt text-cobalt hover:bg-cobalt/5 text-base w-full gap-2"
+        >
+          {exporting === "excel" ? "Exporting…" : "Export Excel Report"}
           <Download className="w-5 h-5" />
         </Button>
       </div>
