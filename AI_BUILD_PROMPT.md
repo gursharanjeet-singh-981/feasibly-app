@@ -4,6 +4,16 @@
 
 ---
 
+## Guiding Principles
+
+- Approach this as if it were your own project. Focus on building a solution that is robust, maintainable, and something we're proud to use and continue enhancing over time.
+- Although this project leverages AI-assisted (vibe) coding to accelerate development, every AI-generated change should be carefully reviewed and refined. Treat AI output as a starting point rather than the final implementation and ensure it aligns with our engineering standards and best practices.
+- Keep the codebase clean, maintainable, and easy to extend. Avoid code duplication, centralize reusable logic, and write code that is easy to understand so future enhancements or handovers can be done with minimal effort. Ensure failure scenarios are handled gracefully with appropriate user feedback.
+- Be mindful of performance as the tool grows. Avoid unnecessary re-renders, keep state management simple, and ensure the solution scales well as more platforms and estimation types are added.
+- Take end-to-end ownership of this implementation. This tool will be used by Project Managers and above for estimations, so the overall quality, usability, and reliability are important. It is also expected to evolve to support additional platforms in the future, so build it with scalability in mind.
+
+---
+
 ## What is Feasibly?
 
 Feasibly is a **project estimation tool** for design-to-code workflows. It helps teams scope components and templates for web projects (AEM platform) and generates effort estimates with a 20% buffer. Users onboard a project, select components/templates from a categorized library, see real-time dev + design day estimates, and export reports as PDF or Excel.
