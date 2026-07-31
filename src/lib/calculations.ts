@@ -5,28 +5,29 @@ const DAYS_PER_WEEK = 5;
 
 export function calculateEstimation(
   components: SelectedComponent[],
-  templates: SelectedTemplate[]
+  templates: SelectedTemplate[],
+  useAi = false
 ): EstimationSummary {
   const selectedComponents = components.filter((c) => c.isSelected);
   const selectedTemplates = templates.filter((t) => t.isSelected);
 
   const componentDesignDays = selectedComponents.reduce(
-    (sum, c) => sum + c.designEffort,
+    (sum, c) => sum + (useAi ? c.aiDesignEffort : c.designEffort),
     0
   );
   const componentDevDays = selectedComponents.reduce(
-    (sum, c) => sum + c.devEffort,
+    (sum, c) => sum + (useAi ? c.aiDevEffort : c.devEffort),
     0
   );
 
   const templateDesignDays = selectedTemplates.reduce(
     (sum, t) =>
-      sum + t.designEffortBase + t.additionalPages * t.designEffortPerPage,
+      sum + (useAi ? t.aiDesignEffortBase : t.designEffortBase) + t.additionalPages * t.designEffortPerPage,
     0
   );
   const templateDevDays = selectedTemplates.reduce(
     (sum, t) =>
-      sum + t.devEffortBase + t.additionalPages * t.devEffortPerPage,
+      sum + (useAi ? t.aiDevEffortBase : t.devEffortBase) + t.additionalPages * t.devEffortPerPage,
     0
   );
 
@@ -36,8 +37,11 @@ export function calculateEstimation(
   const designDaysWithBuffer = designDays * BUFFER_MULTIPLIER;
   const devDaysWithBuffer = devDays * BUFFER_MULTIPLIER;
 
+  const uniqueGroups = new Set(selectedComponents.map((c) => c.group));
+
   return {
-    totalComponents: selectedComponents.length,
+    totalComponents: uniqueGroups.size,
+    totalVariants: selectedComponents.length,
     totalTemplates: selectedTemplates.length,
     totalAdditionalPages: selectedTemplates.reduce(
       (sum, t) => sum + t.additionalPages,

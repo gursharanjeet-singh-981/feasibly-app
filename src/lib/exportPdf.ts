@@ -163,7 +163,7 @@ export function exportPDF(
   // Stats row
   const stats = [
     { label: "Total Components", value: String(estimation.totalComponents) },
-    { label: "Total Variants", value: String(estimation.totalComponents) },
+    { label: "Total Variants", value: String(estimation.totalVariants) },
     { label: "Total Templates", value: String(estimation.totalTemplates) },
     { label: "Additional Pages", value: String(estimation.totalAdditionalPages) },
   ];

@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { calculateEstimation } from "@/lib/calculations";
 import type {
   Project,
   SelectedComponent,
@@ -12,10 +13,15 @@ interface AppState {
   project: Project;
   setProject: (project: Project) => void;
 
+  // AI Estimation
+  useAiEstimation: boolean;
+  toggleAiEstimation: () => void;
+
   // Components
   components: SelectedComponent[];
   setComponents: (components: SelectedComponent[]) => void;
   toggleComponent: (id: number) => void;
+  setComponentsSelection: (ids: number[], isSelected: boolean) => void;
   addComponent: (group: string) => void;
   updateComponent: (id: number, updates: Partial<SelectedComponent>) => void;
 
@@ -23,6 +29,7 @@ interface AppState {
   templates: SelectedTemplate[];
   setTemplates: (templates: SelectedTemplate[]) => void;
   toggleTemplate: (id: number) => void;
+  setTemplatesSelection: (ids: number[], isSelected: boolean) => void;
   setAdditionalPages: (id: number, pages: number) => void;
   addTemplate: (group: string) => void;
   updateTemplate: (id: number, updates: Partial<SelectedTemplate>) => void;
@@ -33,9 +40,6 @@ interface AppState {
   // Reset
   resetStore: () => void;
 }
-
-const BUFFER_MULTIPLIER = 1.2;
-const DAYS_PER_WEEK = 5;
 
 export const useAppStore = create<AppState>()(
   persist(
@@ -49,6 +53,11 @@ export const useAppStore = create<AppState>()(
       },
       setProject: (project) => set({ project }),
 
+      // AI Estimation
+      useAiEstimation: false,
+      toggleAiEstimation: () =>
+        set((state) => ({ useAiEstimation: !state.useAiEstimation })),
+
       // Reset
       resetStore: () =>
         set({
@@ -60,6 +69,7 @@ export const useAppStore = create<AppState>()(
           },
           components: [],
           templates: [],
+          useAiEstimation: false,
         }),
 
       // Components
@@ -71,6 +81,15 @@ export const useAppStore = create<AppState>()(
             c.id === id ? { ...c, isSelected: !c.isSelected } : c
           ),
         })),
+      setComponentsSelection: (ids, isSelected) =>
+        set((state) => {
+          const idSet = new Set(ids);
+          return {
+            components: state.components.map((c) =>
+              idSet.has(c.id) ? { ...c, isSelected } : c
+            ),
+          };
+        }),
       addComponent: (group) =>
         set((state) => {
           const maxId = state.components.reduce((max, c) => Math.max(max, c.id), 0);
@@ -106,6 +125,15 @@ export const useAppStore = create<AppState>()(
             t.id === id ? { ...t, isSelected: !t.isSelected } : t
           ),
         })),
+      setTemplatesSelection: (ids, isSelected) =>
+        set((state) => {
+          const idSet = new Set(ids);
+          return {
+            templates: state.templates.map((t) =>
+              idSet.has(t.id) ? { ...t, isSelected } : t
+            ),
+          };
+        }),
       setAdditionalPages: (id, pages) =>
         set((state) => ({
           templates: state.templates.map((t) =>
@@ -141,51 +169,8 @@ export const useAppStore = create<AppState>()(
 
       // Estimation
       getEstimation: () => {
-        const { components, templates } = get();
-
-        const selectedComponents = components.filter((c) => c.isSelected);
-        const selectedTemplates = templates.filter((t) => t.isSelected);
-
-        const componentDesignDays = selectedComponents.reduce(
-          (sum, c) => sum + c.designEffort,
-          0
-        );
-        const componentDevDays = selectedComponents.reduce(
-          (sum, c) => sum + c.devEffort,
-          0
-        );
-
-        const templateDesignDays = selectedTemplates.reduce(
-          (sum, t) =>
-            sum + t.designEffortBase + t.additionalPages * t.designEffortPerPage,
-          0
-        );
-        const templateDevDays = selectedTemplates.reduce(
-          (sum, t) =>
-            sum + t.devEffortBase + t.additionalPages * t.devEffortPerPage,
-          0
-        );
-
-        const designDays = componentDesignDays + templateDesignDays;
-        const devDays = componentDevDays + templateDevDays;
-
-        const designDaysWithBuffer = designDays * BUFFER_MULTIPLIER;
-        const devDaysWithBuffer = devDays * BUFFER_MULTIPLIER;
-
-        return {
-          totalComponents: selectedComponents.length,
-          totalTemplates: selectedTemplates.length,
-          totalAdditionalPages: selectedTemplates.reduce(
-            (sum, t) => sum + t.additionalPages,
-            0
-          ),
-          designDays,
-          designDaysWithBuffer,
-          designWeeks: Math.ceil(designDaysWithBuffer / DAYS_PER_WEEK),
-          devDays,
-          devDaysWithBuffer,
-          devWeeks: Math.ceil(devDaysWithBuffer / DAYS_PER_WEEK),
-        };
+        const { components, templates, useAiEstimation } = get();
+        return calculateEstimation(components, templates, useAiEstimation);
       },
     }),
     {

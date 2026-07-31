@@ -2,12 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { useAppStore } from "@/store";
+import { calculateEstimation } from "@/lib/calculations";
 import { Button } from "@/components/ui/button";
 import { SvgIcon } from "@/components/SvgIcon";
 import { Download, X } from "lucide-react";
-
-const BUFFER_MULTIPLIER = 1.2;
-const DAYS_PER_WEEK = 5;
 
 const DEV_INCLUDED = [
   { title: "Engineering Analysis & Planning", items: ["Reviewing design documentation", "Understanding migration constraints", "Mapping to core components or deciding on custom build", "Authoring model definition", "Technical feasibility notes", "Task breakdown & estimation"] },
@@ -31,45 +29,28 @@ export function EstimationPanel() {
   const components = useAppStore((s) => s.components);
   const templates = useAppStore((s) => s.templates);
   const project = useAppStore((s) => s.project);
+  const useAiEstimation = useAppStore((s) => s.useAiEstimation);
   const [exporting, setExporting] = useState<"pdf" | "excel" | null>(null);
+  const [exportMessage, setExportMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [infoSidebar, setInfoSidebar] = useState<"dev" | "design" | null>(null);
 
   const estimation = useMemo(() => {
-    const selectedComponents = components.filter((c) => c.isSelected);
-    const selectedTemplates = templates.filter((t) => t.isSelected);
+    return calculateEstimation(components, templates, useAiEstimation);
+  }, [components, templates, useAiEstimation]);
 
-    const componentDesignDays = selectedComponents.reduce((sum, c) => sum + c.designEffort, 0);
-    const componentDevDays = selectedComponents.reduce((sum, c) => sum + c.devEffort, 0);
-    const templateDesignDays = selectedTemplates.reduce(
-      (sum, t) => sum + t.designEffortBase + t.additionalPages * t.designEffortPerPage, 0
-    );
-    const templateDevDays = selectedTemplates.reduce(
-      (sum, t) => sum + t.devEffortBase + t.additionalPages * t.devEffortPerPage, 0
-    );
-
-    const designDays = componentDesignDays + templateDesignDays;
-    const devDays = componentDevDays + templateDevDays;
-    const designDaysWithBuffer = designDays * BUFFER_MULTIPLIER;
-    const devDaysWithBuffer = devDays * BUFFER_MULTIPLIER;
-
-    return {
-      totalComponents: selectedComponents.length,
-      totalTemplates: selectedTemplates.length,
-      totalAdditionalPages: selectedTemplates.reduce((sum, t) => sum + t.additionalPages, 0),
-      designDays,
-      designDaysWithBuffer,
-      designWeeks: Math.ceil(designDaysWithBuffer / DAYS_PER_WEEK),
-      devDays,
-      devDaysWithBuffer,
-      devWeeks: Math.ceil(devDaysWithBuffer / DAYS_PER_WEEK),
-    };
-  }, [components, templates]);
+  const showExportMessage = (type: "success" | "error", text: string) => {
+    setExportMessage({ type, text });
+    setTimeout(() => setExportMessage(null), 3000);
+  };
 
   const handleExportPDF = async () => {
     setExporting("pdf");
     try {
       const { exportPDF } = await import("@/lib/exportPdf");
       exportPDF(project, components, templates, estimation);
+      showExportMessage("success", "PDF report exported successfully!");
+    } catch {
+      showExportMessage("error", "Failed to export PDF report. Please try again.");
     } finally {
       setExporting(null);
     }
@@ -80,6 +61,9 @@ export function EstimationPanel() {
     try {
       const { exportExcel } = await import("@/lib/exportExcel");
       exportExcel(project, components, templates, estimation);
+      showExportMessage("success", "Excel report exported successfully!");
+    } catch {
+      showExportMessage("error", "Failed to export Excel report. Please try again.");
     } finally {
       setExporting(null);
     }
@@ -127,7 +111,7 @@ export function EstimationPanel() {
                   This is the variants within a component
                 </p>
                 <p className="text-3xl lg:text-[40px] text-black">
-                  {estimation.totalComponents}
+                  {estimation.totalVariants}
                 </p>
               </div>
             </div>
@@ -234,6 +218,15 @@ export function EstimationPanel() {
 
       {/* Export Buttons */}
       <div className="mt-8 lg:mt-10 flex flex-col gap-3">
+        {exportMessage && (
+          <div className={`text-center text-sm py-2 px-4 rounded-full ${
+            exportMessage.type === "success"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}>
+            {exportMessage.text}
+          </div>
+        )}
         <Button
           onClick={handleExportPDF}
           disabled={exporting !== null}

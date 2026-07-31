@@ -1,6 +1,9 @@
-const ExcelJS = require("exceljs");
-const fs = require("fs");
-const path = require("path");
+import ExcelJS from "exceljs";
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function convertExcel() {
   const wb = new ExcelJS.Workbook();

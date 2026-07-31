@@ -1,30 +1,41 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AppHeader } from "@/components/AppHeader";
-import { EstimationPanel } from "@/components/EstimationPanel";
+import { PageLayout } from "@/components/PageLayout";
 import { loadGlobalPrinciples, type GlobalPrinciple } from "@/lib/data";
 
 export default function GlobalPrinciplesPage() {
   const [principles, setPrinciples] = useState<GlobalPrinciple[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    loadGlobalPrinciples().then(setPrinciples);
+    loadGlobalPrinciples()
+      .then(setPrinciples)
+      .catch(() => setError("Failed to load global principles. Please refresh the page."))
+      .finally(() => setLoading(false));
   }, []);
   return (
-    <div className="min-h-screen bg-background-blue flex flex-col">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 flex-1">
-      {/* Left: Content - 8 columns */}
-      <div className="lg:col-span-8 min-w-0">
-        <AppHeader />
-        <div className="px-4 md:px-8 lg:px-15 py-6 lg:py-10">
-          <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
+    <PageLayout>
+        <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
             <h2 className="text-xl md:text-2xl lg:text-[30px] font-semibold text-black mb-8 lg:mb-10">
               Global Principles
             </h2>
 
             <div className="border border-strokes/50 rounded-2xl overflow-hidden">
+              {loading && (
+                <div className="p-8 text-center text-sm text-light-grey-text">Loading global principles…</div>
+              )}
+              {error && (
+                <div className="p-8 text-center text-sm text-red-600">{error}</div>
+              )}
+              {!loading && !error && principles.length === 0 && (
+                <div className="p-8 text-center text-sm text-light-grey-text">No global principles found.</div>
+              )}
+
               {/* Table Header — Desktop */}
+              {!loading && !error && principles.length > 0 && (
+              <>
               <div className="hidden lg:flex bg-background-blue text-sm font-semibold text-black">
                 <div className="flex items-center gap-3 px-4 py-4 w-50 shrink-0">
                   <span>Global Parameter</span>
@@ -80,17 +91,10 @@ export default function GlobalPrinciplesPage() {
                   </div>
                 </div>
               ))}
+              </>
+              )}
             </div>
           </div>
-        </div>
-
-      </div>
-
-      {/* Right: Estimation Panel - 4 columns */}
-      <div className="px-4 pb-4 md:px-6 md:pb-6 lg:col-span-4 lg:p-5 lg:pl-0 lg:sticky lg:top-0 lg:h-screen lg:self-start">
-        <EstimationPanel />
-      </div>
-      </div>
-    </div>
+    </PageLayout>
   );
 }

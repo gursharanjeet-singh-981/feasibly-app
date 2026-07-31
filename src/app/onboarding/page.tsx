@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import React from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useAppStore } from "@/store";
@@ -35,7 +35,7 @@ export default function OnboardingPage() {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(
@@ -52,8 +52,8 @@ export default function OnboardingPage() {
     },
   });
 
-  const scopeComponents = watch("scopeComponents");
-  const scopeTemplates = watch("scopeTemplates");
+  const scopeComponents = useWatch({ control, name: "scopeComponents" });
+  const scopeTemplates = useWatch({ control, name: "scopeTemplates" });
 
   const onSubmit = (data: FormData) => {
     setProject({
@@ -71,7 +71,7 @@ export default function OnboardingPage() {
   return (
     <div className="flex flex-col lg:flex-row min-h-screen bg-background-blue">
       {/* Left Panel */}
-      <div className="flex flex-col justify-between lg:w-[624px] bg-cobalt p-8 md:p-12 lg:p-[60px] text-white">
+      <div className="flex flex-col justify-between lg:w-[524px] bg-cobalt p-8 md:p-12 lg:p-[60px] text-white">
         <div className="flex items-center gap-2">
           <SvgIcon name="feasibly-logo" width={24} height={24} className="text-red-500" />
           <div className="flex flex-col">

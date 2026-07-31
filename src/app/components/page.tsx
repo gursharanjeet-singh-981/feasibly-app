@@ -1,40 +1,52 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { useAppStore } from "@/store";
 import { loadComponents } from "@/lib/data";
-import { AppHeader } from "@/components/AppHeader";
-import { EstimationPanel } from "@/components/EstimationPanel";
+import { PageLayout } from "@/components/PageLayout";
+import { CategoryLabel } from "@/components/CategoryLabel";
+import { EditableGroupName } from "@/components/EditableGroupName";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { ChevronDown, Search, CirclePlus } from "lucide-react";
-import { SvgIcon } from "@/components/SvgIcon";
+import {
+  toggleGroup as toggleGroupHelper,
+  toggleAllInGroup as toggleAllInGroupHelper,
+  renameGroupItems,
+  addItemAndScroll,
+} from "@/lib/groupHelpers";
 import type { SelectedComponent } from "@/types";
 
 export default function ComponentsPage() {
   const components = useAppStore((s) => s.components);
   const setComponents = useAppStore((s) => s.setComponents);
   const toggleComponent = useAppStore((s) => s.toggleComponent);
+  const setComponentsSelection = useAppStore((s) => s.setComponentsSelection);
   const addComponent = useAppStore((s) => s.addComponent);
   const updateComponent = useAppStore((s) => s.updateComponent);
+  const useAiEstimation = useAppStore((s) => s.useAiEstimation);
+  const toggleAiEstimation = useAppStore((s) => s.toggleAiEstimation);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(components.length === 0);
+  const [error, setError] = useState<string | null>(null);
 
-  // Load data on mount
   useEffect(() => {
     if (components.length === 0) {
-      loadComponents().then((data) => {
-        const selected: SelectedComponent[] = data.map((c) => ({
-          ...c,
-          isSelected: false,
-        }));
-        setComponents(selected);
-      });
+      loadComponents()
+        .then((data) => {
+          const selected: SelectedComponent[] = data.map((c) => ({
+            ...c,
+            isSelected: false,
+          }));
+          setComponents(selected);
+        })
+        .catch(() => setError("Failed to load components. Please refresh the page."))
+        .finally(() => setLoading(false));
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Group by group field
   const grouped = useMemo(() => {
     const map = new Map<string, SelectedComponent[]>();
     const filtered = components.filter(
@@ -52,34 +64,10 @@ export default function ComponentsPage() {
     return map;
   }, [components, search]);
 
-  const toggleGroup = (group: string) => {
-    setOpenGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(group)) next.delete(group);
-      else next.add(group);
-      return next;
-    });
-  };
+  const toggleGroup = useCallback((group: string) => toggleGroupHelper(group, setOpenGroups), []);
+  const toggleAllInGroup = useCallback((group: string) => toggleAllInGroupHelper(group, grouped, setComponentsSelection), [grouped, setComponentsSelection]);
 
-  const toggleAllInGroup = (group: string) => {
-    const items = grouped.get(group);
-    if (!items) return;
-    const allSelected = items.every((c) => c.isSelected);
-    for (const item of items) {
-      if (allSelected && item.isSelected) toggleComponent(item.id);
-      if (!allSelected && !item.isSelected) toggleComponent(item.id);
-    }
-  };
-
-  const toggleAllOnPage = () => {
-    const allSelected = components.every((c) => c.isSelected);
-    for (const item of components) {
-      if (allSelected && item.isSelected) toggleComponent(item.id);
-      if (!allSelected && !item.isSelected) toggleComponent(item.id);
-    }
-  };
-
-  const handleAddComponentGroup = () => {
+  const handleAddComponentGroup = useCallback(() => {
     const existingGroups = new Set(components.map((c) => c.group));
     let name = "New Component";
     let counter = 2;
@@ -87,56 +75,35 @@ export default function ComponentsPage() {
       name = `New Component ${counter}`;
       counter++;
     }
-    addComponent(name);
-    setOpenGroups((prev) => new Set(prev).add(name));
-    setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), 100);
-  };
+    addItemAndScroll(() => addComponent(name), name, setOpenGroups);
+  }, [components, addComponent]);
 
-  const renameGroup = (oldName: string, newName: string) => {
-    const trimmed = newName.trim();
-    if (!trimmed || trimmed === oldName) return;
-    const existingGroups = new Set(components.map((c) => c.group));
-    if (existingGroups.has(trimmed)) return;
-    for (const c of components) {
-      if (c.group === oldName) {
-        updateComponent(c.id, { group: trimmed });
-      }
-    }
-    setOpenGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(oldName)) {
-        next.delete(oldName);
-        next.add(trimmed);
-      }
-      return next;
-    });
-  };
+  const renameGroup = useCallback(
+    (oldName: string, newName: string) =>
+      renameGroupItems(oldName, newName, components, "group", updateComponent, setOpenGroups),
+    [components, updateComponent]
+  );
 
   const isCustomGroup = (items: SelectedComponent[]) =>
     items.every((c) => c.assumptions === "__custom__");
 
   return (
-    <div className="min-h-screen bg-background-blue flex flex-col">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 flex-1">
-      {/* Left: Content - 8 columns */}
-      <div className="lg:col-span-8 min-w-0">
-        <AppHeader />
-        <div className="px-4 md:px-8 lg:px-15 py-6 lg:py-10">
-          <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
+    <PageLayout>
+        <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
             {/* Toolbar */}
             <div className="flex flex-col gap-4 mb-8 lg:mb-10">
               <div className="flex flex-wrap items-center gap-4">
                 <h2 className="text-xl md:text-2xl lg:text-[30px] font-semibold text-black mr-auto">
                   Components List
                 </h2>
-                <label className="flex items-center gap-2 text-sm lg:text-base text-black cursor-pointer">
+                <label className="flex items-center gap-2 text-sm lg:text-base text-black cursor-pointer whitespace-nowrap">
                   <Checkbox
                     className="w-4.5 h-4.5 rounded-[5px] border-dark-background"
-                    checked={components.length > 0 && components.every((c) => c.isSelected)}
-                    onCheckedChange={toggleAllOnPage}
+                    checked={useAiEstimation}
+                    onCheckedChange={toggleAiEstimation}
                   />
+                  Activate AI-Powered Estimation
                 </label>
-                <span className="text-sm lg:text-base text-black whitespace-nowrap">Activate AI-Powered Estimation</span>
                 <button
                   onClick={handleAddComponentGroup}
                   className="flex items-center gap-2.5 px-5 py-3 rounded-full bg-cobalt text-white text-base font-medium hover:bg-cobalt/90 transition-colors whitespace-nowrap"
@@ -156,6 +123,17 @@ export default function ComponentsPage() {
               </div>
             </div>
 
+            {/* Loading / Error / Empty States */}
+            {loading && (
+              <div className="p-8 text-center text-sm text-light-grey-text">Loading components…</div>
+            )}
+            {error && (
+              <div className="p-8 text-center text-sm text-red-600">{error}</div>
+            )}
+            {!loading && !error && grouped.size === 0 && (
+              <div className="p-8 text-center text-sm text-light-grey-text">No components found.</div>
+            )}
+
             {/* Accordion Groups */}
             <div className="flex flex-col gap-5">
               {Array.from(grouped.entries()).map(([group, items]) => {
@@ -174,13 +152,7 @@ export default function ComponentsPage() {
                       }`}
                     >
                       {isCustomGroup(items) ? (
-                        <input
-                          value={group}
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => renameGroup(group, e.target.value)}
-                          className="text-sm lg:text-base font-semibold text-black bg-transparent outline-none border-b border-dashed border-cobalt/40 focus:border-cobalt"
-                          placeholder="Group name"
-                        />
+                        <EditableGroupName value={group} onRename={(newName) => renameGroup(group, newName)} />
                       ) : (
                         <span className="text-sm lg:text-base font-semibold text-black">
                           {group}
@@ -242,16 +214,7 @@ export default function ComponentsPage() {
               })}
             </div>
           </div>
-        </div>
-
-      </div>
-
-      {/* Right: Estimation Panel - 4 columns */}
-      <div className="px-4 pb-4 md:px-6 md:pb-6 lg:col-span-4 lg:p-5 lg:pl-0 lg:sticky lg:top-0 lg:h-screen lg:self-start">
-        <EstimationPanel />
-      </div>
-      </div>
-    </div>
+    </PageLayout>
   );
 }
 
@@ -401,25 +364,5 @@ function ComponentRow({
         </div>
       </div>
     </div>
-  );
-}
-
-function CategoryLabel({ category }: { category: string }) {
-  if (!category) return null;
-
-  const isCore = category.toLowerCase() === "core";
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 p-2 rounded-full text-xs whitespace-nowrap ${
-        isCore
-          ? "bg-[#f4e4e7] text-black"
-          : "bg-[#e4ecf4] text-black"
-      }`}
-    >
-      {isCore && (
-        <SvgIcon name="heart" width={12} height={12} className="text-red-500" />
-      )}
-      {category}
-    </span>
   );
 }

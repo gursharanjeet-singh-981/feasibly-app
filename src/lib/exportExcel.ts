@@ -121,7 +121,7 @@ export async function exportExcel(
 
   const statRows = [
     ["Total Components", estimation.totalComponents, "", ""],
-    ["Total Variants", estimation.totalComponents, "", ""],
+    ["Total Variants", estimation.totalVariants, "", ""],
     ["Total Templates", estimation.totalTemplates, "", ""],
     ["Additional Pages", estimation.totalAdditionalPages, "", ""],
     [

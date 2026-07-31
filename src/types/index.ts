@@ -47,6 +47,7 @@ export interface Project {
 
 export interface EstimationSummary {
   totalComponents: number;
+  totalVariants: number;
   totalTemplates: number;
   totalAdditionalPages: number;
   designDays: number;

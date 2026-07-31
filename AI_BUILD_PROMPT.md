@@ -54,17 +54,18 @@ feasibly-app/
 │   │   ├── SvgIcon.tsx          # SVG sprite renderer
 │   │   └── ui/                  # Shadcn components (button, input, checkbox, etc.)
 │   ├── lib/
-│   │   ├── calculations.ts     # Estimation math
-│   │   ├── data.ts             # JSON data loaders
+│   │   ├── calculations.ts     # Centralized estimation math (single source of truth)
+│   │   ├── data.ts             # JSON data loaders with error handling
 │   │   ├── exportPdf.ts        # jsPDF branded report
 │   │   ├── exportExcel.ts      # ExcelJS styled workbook
+│   │   ├── groupHelpers.ts     # Shared toggle/rename/add helpers for accordion groups
 │   │   └── utils.ts            # cn() utility
 │   ├── store/
 │   │   └── index.ts            # Zustand store with persist
 │   └── types/
 │       └── index.ts            # All TypeScript interfaces
 ├── scripts/
-│   └── importExcel.js          # Data conversion script
+│   └── importExcel.mjs         # Data conversion script (ESM)
 ├── package.json
 ├── next.config.ts
 ├── tsconfig.json
@@ -100,7 +101,7 @@ feasibly-app/
 
 **Layout:** Split — cobalt (#0029DA) left panel + white/light-grey right panel with form.
 
-**Left Panel (624px on desktop):**
+**Left Panel (524px on desktop):**
 - Feasibly logo + "a Merkle tool" subtitle
 - Headline: "Great projects start with great scope"
 - Subtext: "Build accurate design-to-code project estimates in minutes..."
@@ -126,7 +127,7 @@ feasibly-app/
 
 **State Reset:** On mount of the onboarding page, call `resetStore()` to clear all previous project data (components, templates, project info). This ensures a fresh start each time.
 
-**Validation:** Zod schema — projectName required, URL optional (valid if provided), at least 1 scope checkbox required.
+**Validation:** Zod schema — projectName required, URL optional (valid if provided), at least 1 scope checkbox required. Use `useWatch` (not `watch()`) from react-hook-form to read checkbox state reactively and avoid React Compiler warnings.
 
 ---
 
@@ -143,7 +144,7 @@ feasibly-app/
 - Key alignment: Logo is top-aligned with Project text. Input field and Tabs container are bottom-aligned with each other. The Tabs must NOT float up to the Project text level.
 
 **Left Column — Component Table:**
-- Toolbar: page title "Components List", checkbox (selects/deselects all components on the page), "Activate AI-Powered Estimation" placeholder label, "Add component" button (cobalt pill, circle-plus icon ⊕), search input
+- Toolbar: page title "Components List", "Activate AI-Powered Estimation" checkbox (toggles between standard and AI effort values — does NOT select/deselect items), "Add component" button (cobalt pill, circle-plus icon ⊕), search input
 - Table grouped by `group` field into collapsible accordion sections
 - Each group header: checkbox to select/deselect all in group + group name + chevron
 - Each row: checkbox | component name | category label | design description | dev description | design effort | dev effort
@@ -158,6 +159,7 @@ feasibly-app/
 ### Screen 3: Templates Selection (`/templates`)
 
 Same layout as Components page, but:
+- "Activate AI-Powered Estimation" checkbox (same behavior as Components — toggles AI effort values, does NOT select/deselect items)
 - Title: "Templates List"
 - Grouped by template `name` field
 - Extra column: "Additional effort per page" with numeric input per template
@@ -192,8 +194,8 @@ Same layout as Components page, but:
 **Container:** The estimation panel wrapper uses `lg:sticky lg:top-0 lg:h-screen` so it sticks to the viewport and spans full height. The panel itself uses `h-full overflow-y-auto` to fill its container and scroll internally if content overflows. Background: `#e3e7ef`, `rounded-[60px]` on desktop, `w-[529px]` fixed width on desktop.
 
 **Metrics displayed (conditionally based on project scope):**
-- Total Components (components icon) — only shown if `project.scope.components` is true
-- Total Variants (graph icon) — same count as components, only shown if `project.scope.components` is true
+- Total Components (components icon) — count of unique groups among selected components, only shown if `project.scope.components` is true
+- Total Variants (graph icon) — count of individual selected components (variants within groups), only shown if `project.scope.components` is true
 - Total Templates (file-copy icon) — only shown if `project.scope.templates` is true
 - Additional Pages (add-to-queue icon) — only shown if `project.scope.templates` is true
 
@@ -212,6 +214,9 @@ Same layout as Components page, but:
 **Export Buttons:**
 - "Export PDF Report" — cobalt filled pill button
 - "Export Excel Report" — cobalt outlined pill button
+- On success, show a green toast message (e.g., "PDF report exported successfully!")
+- On failure, show a red toast message (e.g., "Failed to export PDF report. Please try again.")
+- Toast auto-dismisses after 3 seconds
 
 **Info Sidebar (Development/Design):**
 - Each card (Development, Design) has an info icon button
@@ -227,8 +232,8 @@ Same layout as Components page, but:
 
 - **"Add component/template" button** (top toolbar): Creates a NEW accordion group with a unique name ("New Component", "New Component 2", etc.), auto-expands it, and scrolls to bottom
 - **"+" button inside accordion** (bottom-right of expanded group): Adds a new variant row within that existing group
-- **Custom group headers**: Accordion headers for custom groups (where all items have `assumptions === "__custom__"` for components, or `isCustom === true` for templates) are editable inline with a dashed underline border
-- **Renaming groups**: Uses `renameGroup(oldName, newName)` that updates all items in the group and transfers the open state
+- **Custom group headers**: Accordion headers for custom groups (where all items have `assumptions === "__custom__"` for components, or `isCustom === true` for templates) use an `EditableGroupName` component with **local state** to prevent focus loss. The rename is committed on blur or Enter, not on every keystroke.
+- **Renaming groups**: Uses shared `renameGroupItems()` helper from `groupHelpers.ts` that updates all items in the group and transfers the open state
 
 ---
 
@@ -280,7 +285,8 @@ interface Project {
 }
 
 interface EstimationSummary {
-  totalComponents: number;
+  totalComponents: number;    // unique groups among selected
+  totalVariants: number;      // individual selected components
   totalTemplates: number;
   totalAdditionalPages: number;
   designDays: number;
@@ -300,7 +306,8 @@ interface EstimationSummary {
 const BUFFER_MULTIPLIER = 1.2;  // 20% buffer
 const DAYS_PER_WEEK = 5;
 
-// Component effort = sum of selected components' designEffort / devEffort
+// When AI estimation is active, use aiDesignEffort / aiDevEffort instead
+// Component effort = sum of selected components' designEffort / devEffort (or AI variants)
 
 // Template effort per template:
 templateDesignEffort = designEffortBase + (additionalPages * designEffortPerPage)
@@ -322,6 +329,8 @@ devWeeks = Math.ceil(devDaysWithBuffer / 5)
 // State:
 - project: Project
 - setProject(project)
+- useAiEstimation: boolean     // toggles between standard and AI effort values
+- toggleAiEstimation()         // flip AI estimation on/off
 - components: SelectedComponent[]
 - setComponents(components)
 - toggleComponent(id)         // toggle isSelected
@@ -333,8 +342,8 @@ devWeeks = Math.ceil(devDaysWithBuffer / 5)
 - setAdditionalPages(id, pages)
 - addTemplate(group)          // add blank editable row (isCustom=true, aiDesignEffortBase=0, aiDevEffortBase=0)
 - updateTemplate(id, updates) // update any field on a template (for editable custom rows)
-- resetStore()                 // clears project, components, templates back to defaults (called on onboarding mount)
-- getEstimation(): EstimationSummary  // computed from selections
+- resetStore()                 // clears project, components, templates, useAiEstimation back to defaults (called on onboarding mount)
+- getEstimation(): EstimationSummary  // delegates to calculateEstimation() from calculations.ts
 ```
 
 Use `persist` middleware from `zustand/middleware` with localStorage.
@@ -356,21 +365,24 @@ export interface GlobalPrinciple {
 
 export async function loadComponents(): Promise<Component[]> {
   const response = await fetch("/data/components.json");
+  if (!response.ok) throw new Error("Failed to load components data");
   return response.json();
 }
 
 export async function loadTemplates(): Promise<Template[]> {
   const response = await fetch("/data/templates.json");
+  if (!response.ok) throw new Error("Failed to load templates data");
   return response.json();
 }
 
 export async function loadGlobalPrinciples(): Promise<GlobalPrinciple[]> {
   const response = await fetch("/data/global-principles.json");
+  if (!response.ok) throw new Error("Failed to load global principles data");
   return response.json();
 }
 ```
 
-On mount, if store is empty, load data and map to `SelectedComponent[]` / `SelectedTemplate[]` (with `isSelected: false`, `additionalPages: 0`). Global Principles page loads its own data independently via `loadGlobalPrinciples()`.
+On mount, if store is empty, load data and map to `SelectedComponent[]` / `SelectedTemplate[]` (with `isSelected: false`, `additionalPages: 0`). All `.then()` calls must have `.catch()` handlers that set page-level error state. Each page shows loading, error, and empty fallback UI states. Global Principles page loads its own data independently via `loadGlobalPrinciples()`.
 
 ---
 
@@ -490,11 +502,17 @@ Styling: Cobalt headers with white text, sky-blue group headers, alternating row
 
 6. **Export code splitting**: PDF and Excel exports use dynamic `import()` to avoid bundling large libraries on initial load.
 
-7. **Estimation Panel**: Shared component used on Components, Templates, and Global Principles pages.
+7. **Estimation Panel**: Shared component used on Components, Templates, and Global Principles pages. Uses `calculateEstimation()` from `calculations.ts` as the single source of truth (no duplicated logic).
 
 8. **Search/Filter**: Components and Templates pages have a search input that filters by name, group/category, and descriptions.
 
 9. **Group accordions**: Click chevron to expand/collapse. Click group checkbox to select/deselect all items in that group.
+
+10. **Shared group helpers** (`lib/groupHelpers.ts`): `toggleGroup`, `toggleAllInGroup`, `toggleAllOnPage`, `renameGroupItems`, `addItemAndScroll` are extracted into reusable functions to eliminate duplication across Components and Templates pages.
+
+11. **AI Estimation toggle**: The "Activate AI-Powered Estimation" checkbox toggles `useAiEstimation` in the store, switching calculations between standard effort values (`designEffort`, `devEffort`) and AI values (`aiDesignEffort`, `aiDevEffort`).
+
+12. **Fallback UI**: All pages display loading spinners during data fetch, error messages on failure, and empty-state messages when no data is available.
 
 ---
 
@@ -595,20 +613,23 @@ Key responsive patterns:
 
 ## Excel-to-JSON Import Script
 
-The project includes `scripts/importExcel.js` for converting Excel data to JSON. It reads 3 sheets:
+The project includes `scripts/importExcel.mjs` (ESM) for converting Excel data to JSON. It reads 3 sheets:
 - **Components** → `public/data/components.json`
 - **Templates** → `public/data/templates.json`
 - **Global Principles** → `public/data/global-principles.json`
 
 ```javascript
-// scripts/importExcel.js
-// Usage: node scripts/importExcel.js
+// scripts/importExcel.mjs
+// Usage: node scripts/importExcel.mjs
 // Reads from "FF - Data Set 1.xlsx" (relative to project root)
-// Uses ExcelJS (not xlsx package) for parsing
+// Uses ExM imports (not CommonJS require)
 
-const ExcelJS = require('exceljs');
-const fs = require('fs');
-const path = require('path');
+import ExcelJS from 'exceljs';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 async function convertExcel() {
   const wb = new ExcelJS.Workbook();
@@ -649,7 +670,7 @@ convertExcel().catch(console.error);
 ]
 ```
 
-To update data: modify Excel → run `node scripts/importExcel.js` → refresh app. No rebuild needed.
+To update data: modify Excel → run `node scripts/importExcel.mjs` → refresh app. No rebuild needed.
 
 ---
 
