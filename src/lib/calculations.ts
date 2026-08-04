@@ -1,7 +1,5 @@
 import type { SelectedComponent, SelectedTemplate, EstimationSummary } from "@/types";
-
-const BUFFER_MULTIPLIER = 1.2;
-const DAYS_PER_WEEK = 5;
+import { BUFFER_MULTIPLIER, DAYS_PER_WEEK } from "@/lib/constants";
 
 export function calculateEstimation(
   components: SelectedComponent[],

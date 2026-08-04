@@ -5,11 +5,12 @@ import { usePathname } from "next/navigation";
 import { useAppStore } from "@/store";
 import { Input } from "@/components/ui/input";
 import { SvgIcon } from "@/components/SvgIcon";
+import { ROUTES } from "@/lib/constants";
 
 const allTabs = [
-  { label: "Components", href: "/components", icon: "components", scope: "components" as const },
-  { label: "Templates", href: "/templates", icon: "file-copy", scope: "templates" as const },
-  { label: "Global Principles", href: "/global-principles", icon: "flag", scope: null },
+  { label: "Components", href: ROUTES.components, icon: "components", scope: "components" as const },
+  { label: "Templates", href: ROUTES.templates, icon: "file-copy", scope: "templates" as const },
+  { label: "Global Principles", href: ROUTES.globalPrinciples, icon: "flag", scope: null },
 ];
 
 export function AppHeader() {
@@ -24,10 +25,10 @@ export function AppHeader() {
   return (
     <header className="flex flex-wrap items-start gap-4 lg:gap-6 px-4 md:px-8 lg:px-15 pt-6 lg:pt-15 pb-4">
       {/* Feasibly Logo — top-aligned, separate from header content */}
-      <Link href="/" className="flex items-center gap-2 shrink-0">
-        <SvgIcon name="feasibly-logo" width={24} height={24} className="text-[#F1012F]" />
+      <Link href={ROUTES.home} className="flex items-center gap-2 shrink-0">
+        <SvgIcon name="feasibly-logo" width={24} height={24} className="text-brand-red" />
         <div className="flex flex-col">
-          <span className="text-base font-bold text-[#020E4E] leading-tight">Feasibly</span>
+          <span className="text-base font-bold text-brand-navy leading-tight">Feasibly</span>
           <span className="text-[9px] text-light-grey-text leading-tight opacity-50">a Merkle tool</span>
         </div>
       </Link>

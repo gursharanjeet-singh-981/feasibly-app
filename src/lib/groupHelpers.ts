@@ -1,4 +1,5 @@
 import type { Dispatch, SetStateAction } from "react";
+import { SCROLL_DELAY_MS } from "@/lib/constants";
 
 interface Identifiable {
   id: number;
@@ -34,12 +35,13 @@ export function renameGroupItems<T extends { id: number }>(
   items: T[],
   nameKey: keyof T,
   updateItem: (id: number, updates: Partial<T>) => void,
-  setOpenGroups: Dispatch<SetStateAction<Set<string>>>
-) {
+  setOpenGroups: Dispatch<SetStateAction<Set<string>>>,
+): { ok: boolean; reason?: "empty" | "unchanged" | "duplicate" } {
   const trimmed = newName.trim();
-  if (!trimmed || trimmed === oldName) return;
+  if (!trimmed) return { ok: false, reason: "empty" };
+  if (trimmed === oldName) return { ok: false, reason: "unchanged" };
   const existingNames = new Set(items.map((i) => i[nameKey] as string));
-  if (existingNames.has(trimmed)) return;
+  if (existingNames.has(trimmed)) return { ok: false, reason: "duplicate" };
   for (const item of items) {
     if (item[nameKey] === oldName) {
       updateItem(item.id, { [nameKey]: trimmed } as Partial<T>);
@@ -53,14 +55,18 @@ export function renameGroupItems<T extends { id: number }>(
     }
     return next;
   });
+  return { ok: true };
 }
 
 export function addItemAndScroll(
   addFn: () => void,
   groupName: string,
-  setOpenGroups: Dispatch<SetStateAction<Set<string>>>
+  setOpenGroups: Dispatch<SetStateAction<Set<string>>>,
 ) {
   addFn();
   setOpenGroups((prev) => new Set(prev).add(groupName));
-  setTimeout(() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }), 100);
+  setTimeout(
+    () => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" }),
+    SCROLL_DELAY_MS,
+  );
 }

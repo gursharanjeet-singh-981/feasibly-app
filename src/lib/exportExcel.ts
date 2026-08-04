@@ -6,12 +6,13 @@ import type {
   EstimationSummary,
 } from "@/types";
 
-const COBALT_HEX = "FF0029DA";
-const SKY_BLUE_HEX = "FF0094FA";
-const BG_BLUE_HEX = "FFF1F5F9";
-const WHITE_HEX = "FFFFFFFF";
-const LIGHT_GREY_HEX = "FF484A4B";
-const STROKES_HEX = "FFD9D9D9";
+import { BRAND } from "@/lib/theme";
+
+const COBALT_HEX = BRAND.cobalt.argb;
+const SKY_BLUE_HEX = BRAND.skyBlue.argb;
+const BG_BLUE_HEX = BRAND.bgBlue.argb;
+const WHITE_HEX = BRAND.white.argb;
+const STROKES_HEX = BRAND.strokes.argb;
 
 function applyHeaderStyle(row: ExcelJS.Row) {
   row.eachCell((cell) => {
