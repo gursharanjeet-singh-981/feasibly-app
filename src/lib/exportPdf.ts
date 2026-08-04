@@ -7,6 +7,12 @@ import type {
 } from "@/types";
 import { BRAND } from "@/lib/theme";
 import { BUFFER_LABEL } from "@/lib/constants";
+import {
+  componentDesignEffort,
+  componentDevEffort,
+  templateDesignBase,
+  templateDevBase,
+} from "@/lib/calculations";
 
 const COBALT = BRAND.cobalt.rgb;
 const LIGHT_GREY = BRAND.lightGrey.rgb;
@@ -92,7 +98,8 @@ export function exportPDF(
   project: Project,
   components: SelectedComponent[],
   templates: SelectedTemplate[],
-  estimation: EstimationSummary
+  estimation: EstimationSummary,
+  useAi = false,
 ) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -283,8 +290,8 @@ export function exportPDF(
           [
             { text: c.name, width: colWidths[0] },
             { text: c.category, width: colWidths[1] },
-            { text: `${c.designEffort}h`, width: colWidths[2] },
-            { text: `${c.devEffort}h`, width: colWidths[3] },
+            { text: `${componentDesignEffort(c, useAi)}h`, width: colWidths[2] },
+            { text: `${componentDevEffort(c, useAi)}h`, width: colWidths[3] },
           ],
           margin,
           y,
@@ -332,8 +339,8 @@ export function exportPDF(
         [
           { text: templateLabel, width: tColWidths[0] },
           { text: t.category, width: tColWidths[1] },
-          { text: `${t.designEffortBase}h`, width: tColWidths[2] },
-          { text: `${t.devEffortBase}h`, width: tColWidths[3] },
+          { text: `${templateDesignBase(t, useAi)}h`, width: tColWidths[2] },
+          { text: `${templateDevBase(t, useAi)}h`, width: tColWidths[3] },
           {
             text: `${t.designEffortPerPage}h + ${t.devEffortPerPage}h`,
             width: tColWidths[4],
