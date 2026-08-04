@@ -99,6 +99,7 @@ export function EstimationPanel() {
         components={components}
         templates={templates}
         estimation={estimation}
+        useAi={useAiEstimation}
       />
 
       {infoSidebar && (

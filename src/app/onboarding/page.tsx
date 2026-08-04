@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +15,9 @@ import {
   FormFieldSection,
   OutlineIcon,
 } from "@/components/onboarding/FormFieldSection";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES, SCAN_FEATURE_ENABLED } from "@/lib/constants";
+import { useScan } from "@/hooks/useScan";
+import { ScanProgressOverlay } from "@/components/scan/ScanProgressOverlay";
 
 const projectSchema = z
   .object({
@@ -34,6 +37,8 @@ export default function OnboardingPage() {
   const router = useRouter();
   const setProject = useAppStore((s) => s.setProject);
   const resetStore = useAppStore((s) => s.resetStore);
+  const scan = useScan();
+  const [overlayOpen, setOverlayOpen] = useState(false);
 
   const {
     register,
@@ -54,7 +59,7 @@ export default function OnboardingPage() {
   const scopeComponents = useWatch({ control, name: "scopeComponents" });
   const scopeTemplates = useWatch({ control, name: "scopeTemplates" });
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = async (data: FormData) => {
     resetStore();
     setProject({
       projectName: data.projectName,
@@ -65,7 +70,25 @@ export default function OnboardingPage() {
       },
       platform: "AEM",
     });
-    router.push(data.scopeComponents ? ROUTES.components : ROUTES.templates);
+    const nextRoute = data.scopeComponents ? ROUTES.components : ROUTES.templates;
+
+    if (SCAN_FEATURE_ENABLED && data.liveUrl) {
+      setOverlayOpen(true);
+      const result = await scan.start(data.liveUrl);
+      if (result) {
+        setOverlayOpen(false);
+        router.push(nextRoute);
+      }
+      // On error/cancel, keep overlay open so the user sees the message and can close it.
+      return;
+    }
+
+    router.push(nextRoute);
+  };
+
+  const closeOverlay = () => {
+    if (scan.isRunning) scan.cancel();
+    setOverlayOpen(false);
   };
 
   return (
@@ -222,6 +245,7 @@ export default function OnboardingPage() {
           </Button>
         </form>
       </div>
+      <ScanProgressOverlay open={overlayOpen} onCancel={closeOverlay} />
     </div>
   );
 }

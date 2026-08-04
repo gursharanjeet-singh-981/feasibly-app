@@ -28,6 +28,7 @@ export default function ComponentsPage() {
   const updateComponent = useAppStore((s) => s.updateComponent);
   const useAiEstimation = useAppStore((s) => s.useAiEstimation);
   const toggleAiEstimation = useAppStore((s) => s.toggleAiEstimation);
+  const matchedComponentIds = useAppStore((s) => s.scan.matchedComponentIds);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
@@ -43,7 +44,7 @@ export default function ComponentsPage() {
         setComponents(
           data.map<SelectedComponent>((c) => ({
             ...c,
-            isSelected: false,
+            isSelected: !!matchedComponentIds[c.id],
             isCustom: false,
           })),
         );
@@ -56,7 +57,7 @@ export default function ComponentsPage() {
     return () => {
       cancelled = true;
     };
-  }, [components.length, setComponents]);
+  }, [components.length, setComponents, matchedComponentIds]);
 
   const getGroup = useCallback((c: SelectedComponent) => c.group, []);
   const matchers = useCallback(

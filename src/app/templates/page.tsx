@@ -29,6 +29,7 @@ export default function TemplatesPage() {
   const updateTemplate = useAppStore((s) => s.updateTemplate);
   const useAiEstimation = useAppStore((s) => s.useAiEstimation);
   const toggleAiEstimation = useAppStore((s) => s.toggleAiEstimation);
+  const matchedTemplateIds = useAppStore((s) => s.scan.matchedTemplateIds);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
@@ -44,7 +45,7 @@ export default function TemplatesPage() {
         setTemplates(
           data.map<SelectedTemplate>((t) => ({
             ...t,
-            isSelected: false,
+            isSelected: !!matchedTemplateIds[t.id],
             additionalPages: 0,
             isCustom: false,
           })),
@@ -58,7 +59,7 @@ export default function TemplatesPage() {
     return () => {
       cancelled = true;
     };
-  }, [templates.length, setTemplates]);
+  }, [templates.length, setTemplates, matchedTemplateIds]);
 
   const getGroup = useCallback((t: SelectedTemplate) => t.name, []);
   const matchers = useCallback(

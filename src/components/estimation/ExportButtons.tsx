@@ -19,6 +19,7 @@ interface Props {
   components: SelectedComponent[];
   templates: SelectedTemplate[];
   estimation: EstimationSummary;
+  useAi: boolean;
 }
 
 export function ExportButtons({
@@ -26,6 +27,7 @@ export function ExportButtons({
   components,
   templates,
   estimation,
+  useAi,
 }: Props) {
   const [exporting, setExporting] = useState<Kind | null>(null);
   const [message, setMessage] = useState<Message>(null);
@@ -57,7 +59,7 @@ export function ExportButtons({
       "pdf",
       async () => {
         const { exportPDF } = await import("@/lib/exportPdf");
-        exportPDF(project, components, templates, estimation);
+        exportPDF(project, components, templates, estimation, useAi);
       },
       "PDF report exported successfully!",
       "Failed to export PDF report. Please try again.",
@@ -68,7 +70,7 @@ export function ExportButtons({
       "excel",
       async () => {
         const { exportExcel } = await import("@/lib/exportExcel");
-        await exportExcel(project, components, templates, estimation);
+        await exportExcel(project, components, templates, estimation, useAi);
       },
       "Excel report exported successfully!",
       "Failed to export Excel report. Please try again.",
