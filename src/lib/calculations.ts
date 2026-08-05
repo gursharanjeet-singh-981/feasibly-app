@@ -86,10 +86,7 @@ export function calculateEstimation(
     totalComponents: uniqueGroups.size,
     totalVariants: selectedComponents.length,
     totalTemplates: selectedTemplates.length,
-    totalAdditionalPages: selectedTemplates.reduce(
-      (sum, t) => sum + t.additionalPages,
-      0
-    ),
+    totalAdditionalPages: tmpl.additionalPages,
     designDays,
     designDaysWithBuffer,
     designWeeks: Math.ceil(designDaysWithBuffer / DAYS_PER_WEEK),
@@ -98,3 +95,4 @@ export function calculateEstimation(
     devWeeks: Math.ceil(devDaysWithBuffer / DAYS_PER_WEEK),
   };
 }
+

@@ -7,6 +7,16 @@ import type {
 } from "@/types";
 
 import { BRAND } from "@/lib/theme";
+import {
+  componentDesignEffort,
+  componentDevEffort,
+  componentsSubtotal,
+  templateDesignBase,
+  templateDevBase,
+  templateTotalDesign,
+  templateTotalDev,
+  templatesSubtotal,
+} from "@/lib/calculations";
 
 const COBALT_HEX = BRAND.cobalt.argb;
 const SKY_BLUE_HEX = BRAND.skyBlue.argb;
@@ -62,7 +72,8 @@ export async function exportExcel(
   project: Project,
   components: SelectedComponent[],
   templates: SelectedTemplate[],
-  estimation: EstimationSummary
+  estimation: EstimationSummary,
+  useAi = false,
 ) {
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "Feasibly";
@@ -187,8 +198,8 @@ export async function exportExcel(
           category: c.category,
           designDescription: c.designDescription,
           developmentDescription: c.developmentDescription,
-          designEffort: c.designEffort,
-          devEffort: c.devEffort,
+          designEffort: componentDesignEffort(c, useAi),
+          devEffort: componentDevEffort(c, useAi),
           assumptions: c.assumptions,
         });
         applyDataRowStyle(row, rowIdx % 2 === 0);
@@ -196,7 +207,7 @@ export async function exportExcel(
       }
     }
 
-    // Totals
+    const compTotals = componentsSubtotal(components, useAi);
     compSheet.addRow([]);
     const totalRow = compSheet.addRow([
       "",
@@ -204,8 +215,8 @@ export async function exportExcel(
       "",
       "",
       "",
-      selectedComponents.reduce((s, c) => s + c.designEffort, 0),
-      selectedComponents.reduce((s, c) => s + c.devEffort, 0),
+      compTotals.design,
+      compTotals.dev,
       "",
     ]);
     totalRow.font = { bold: true, size: 11 };
@@ -234,42 +245,34 @@ export async function exportExcel(
     applyHeaderStyle(templSheet.getRow(1));
 
     selectedTemplates.forEach((t, i) => {
-      const totalDesign = t.designEffortBase + t.additionalPages * t.designEffortPerPage;
-      const totalDev = t.devEffortBase + t.additionalPages * t.devEffortPerPage;
       const row = templSheet.addRow({
         name: t.name,
         category: t.category,
         description: t.description,
-        designEffortBase: t.designEffortBase,
+        designEffortBase: templateDesignBase(t, useAi),
         designEffortPerPage: t.designEffortPerPage,
-        devEffortBase: t.devEffortBase,
+        devEffortBase: templateDevBase(t, useAi),
         devEffortPerPage: t.devEffortPerPage,
         additionalPages: t.additionalPages,
-        totalDesign,
-        totalDev,
+        totalDesign: templateTotalDesign(t, useAi),
+        totalDev: templateTotalDev(t, useAi),
       });
       applyDataRowStyle(row, i % 2 === 0);
     });
 
-    // Totals
+    const tmplTotals = templatesSubtotal(templates, useAi);
     templSheet.addRow([]);
     const totalRow = templSheet.addRow([
       "TOTAL",
       "",
       "",
-      selectedTemplates.reduce((s, t) => s + t.designEffortBase, 0),
+      tmplTotals.designBase,
       "",
-      selectedTemplates.reduce((s, t) => s + t.devEffortBase, 0),
+      tmplTotals.devBase,
       "",
-      selectedTemplates.reduce((s, t) => s + t.additionalPages, 0),
-      selectedTemplates.reduce(
-        (s, t) => s + t.designEffortBase + t.additionalPages * t.designEffortPerPage,
-        0
-      ),
-      selectedTemplates.reduce(
-        (s, t) => s + t.devEffortBase + t.additionalPages * t.devEffortPerPage,
-        0
-      ),
+      tmplTotals.additionalPages,
+      tmplTotals.totalDesign,
+      tmplTotals.totalDev,
     ]);
     totalRow.font = { bold: true, size: 11 };
   }
