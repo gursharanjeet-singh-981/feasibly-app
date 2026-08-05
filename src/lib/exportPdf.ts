@@ -5,14 +5,21 @@ import type {
   SelectedTemplate,
   EstimationSummary,
 } from "@/types";
+import { BRAND } from "@/lib/theme";
+import { BUFFER_LABEL } from "@/lib/constants";
+import {
+  componentDesignEffort,
+  componentDevEffort,
+  templateDesignBase,
+  templateDevBase,
+} from "@/lib/calculations";
 
-const COBALT = [0, 41, 218] as const;
-const SKY_BLUE = [0, 148, 250] as const;
-const LIGHT_GREY = [72, 74, 75] as const;
-const STROKES = [217, 217, 217] as const;
-const BG_BLUE = [241, 245, 249] as const;
-const WHITE = [255, 255, 255] as const;
-const BLACK = [0, 0, 0] as const;
+const COBALT = BRAND.cobalt.rgb;
+const LIGHT_GREY = BRAND.lightGrey.rgb;
+const STROKES = BRAND.strokes.rgb;
+const BG_BLUE = BRAND.bgBlue.rgb;
+const WHITE = BRAND.white.rgb;
+const BLACK = BRAND.black.rgb;
 
 type RGB = readonly [number, number, number];
 
@@ -40,11 +47,59 @@ function checkPageBreak(doc: jsPDF, y: number, needed: number): number {
   return y;
 }
 
+interface Cell {
+  text: string;
+  width: number;
+}
+
+const LINE_HEIGHT = 4;
+const ROW_VPAD = 2;
+
+// jsPDF's built-in Helvetica is WinAnsi-only; substitute common Unicode punctuation.
+function sanitize(text: string): string {
+  return text
+    .replace(/[\u2010\u2011\u2012\u2013\u2014\u2212]/g, "-")
+    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+    .replace(/\u2026/g, "...")
+    .replace(/\u00A0/g, " ");
+}
+
+function drawTableRow(
+  doc: jsPDF,
+  cells: Cell[],
+  x: number,
+  y: number,
+  contentWidth: number,
+): number {
+  const wrapped = cells.map((c) => {
+    const lines = doc.splitTextToSize(sanitize(c.text), c.width - 4);
+    return Array.isArray(lines) ? lines : [lines];
+  });
+  const maxLines = Math.max(1, ...wrapped.map((w) => w.length));
+  const rowHeight = maxLines * LINE_HEIGHT + ROW_VPAD;
+
+  let cx = x;
+  for (let i = 0; i < cells.length; i++) {
+    const lines = wrapped[i];
+    for (let li = 0; li < lines.length; li++) {
+      doc.text(lines[li], cx + 2, y + li * LINE_HEIGHT);
+    }
+    cx += cells[i].width;
+  }
+
+  const lineY = y + rowHeight - ROW_VPAD;
+  setDrawColor(doc, STROKES);
+  doc.line(x, lineY, x + contentWidth, lineY);
+  return y + rowHeight;
+}
+
 export function exportPDF(
   project: Project,
   components: SelectedComponent[],
   templates: SelectedTemplate[],
-  estimation: EstimationSummary
+  estimation: EstimationSummary,
+  useAi = false,
 ) {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -67,7 +122,7 @@ export function exportPDF(
   doc.text("Project Estimation Report", margin, 60);
 
   doc.setFontSize(11);
-  doc.text(project.projectName || "Untitled Project", margin, 70);
+  doc.text(sanitize(project.projectName || "Untitled Project"), margin, 70);
 
   // ── Project Info ──
   let y = 95;
@@ -82,9 +137,9 @@ export function exportPDF(
   setColor(doc, LIGHT_GREY);
 
   const details = [
-    ["Project Name", project.projectName || "—"],
-    ["Live URL", project.liveUrl || "—"],
-    ["Scope", [project.scope.components && "Components", project.scope.templates && "Templates"].filter(Boolean).join(", ") || "—"],
+    ["Project Name", project.projectName || "-"],
+    ["Live URL", project.liveUrl || "-"],
+    ["Scope", [project.scope.components && "Components", project.scope.templates && "Templates"].filter(Boolean).join(", ") || "-"],
     ["Platform", project.platform],
     ["Generated", new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })],
   ];
@@ -93,7 +148,7 @@ export function exportPDF(
     setColor(doc, LIGHT_GREY);
     doc.text(label + ":", margin, y);
     setColor(doc, BLACK);
-    doc.text(String(value), margin + 40, y);
+    doc.text(sanitize(String(value)), margin + 40, y);
     y += 7;
   }
 
@@ -114,9 +169,10 @@ export function exportPDF(
   doc.roundedRect(margin, y, cardWidth, cardHeight, 4, 4, "F");
   setFillColor(doc, COBALT);
   doc.roundedRect(margin + 5, y + 6, 8, 8, 2, 2, "F");
-  doc.setFontSize(7);
+  doc.setFontSize(6);
   setColor(doc, WHITE);
-  doc.text("</>", margin + 6.5, y + 12);
+  doc.setFont("helvetica", "bold");
+  doc.text("DEV", margin + 5.5, y + 11);
 
   doc.setFontSize(10);
   setColor(doc, BLACK);
@@ -131,7 +187,7 @@ export function exportPDF(
   doc.text(`${estimation.devWeeks} weeks`, margin + 5, y + 33);
   setColor(doc, LIGHT_GREY);
   doc.setFontSize(7);
-  doc.text("Incl. 20% buffer time", margin + cardWidth - 35, y + 33);
+  doc.text(BUFFER_LABEL, margin + cardWidth - 35, y + 33);
 
   // Design card
   const cardX2 = margin + cardWidth + 10;
@@ -139,9 +195,10 @@ export function exportPDF(
   doc.roundedRect(cardX2, y, cardWidth, cardHeight, 4, 4, "F");
   setFillColor(doc, COBALT);
   doc.roundedRect(cardX2 + 5, y + 6, 8, 8, 2, 2, "F");
-  doc.setFontSize(7);
+  doc.setFontSize(6);
   setColor(doc, WHITE);
-  doc.text("✎", cardX2 + 7.5, y + 12);
+  doc.setFont("helvetica", "bold");
+  doc.text("UX", cardX2 + 6, y + 11);
 
   doc.setFontSize(10);
   setColor(doc, BLACK);
@@ -156,7 +213,7 @@ export function exportPDF(
   doc.text(`${estimation.designWeeks} weeks`, cardX2 + 5, y + 33);
   setColor(doc, LIGHT_GREY);
   doc.setFontSize(7);
-  doc.text("Incl. 20% buffer time", cardX2 + cardWidth - 35, y + 33);
+  doc.text(BUFFER_LABEL, cardX2 + cardWidth - 35, y + 33);
 
   y += cardHeight + 10;
 
@@ -227,19 +284,19 @@ export function exportPDF(
       doc.setFont("helvetica", "normal");
       setColor(doc, BLACK);
       for (const c of items) {
-        y = checkPageBreak(doc, y, 7);
-        cx = margin + 2;
-        doc.text(c.name, cx, y, { maxWidth: colWidths[0] - 4 });
-        cx += colWidths[0];
-        doc.text(c.category, cx, y, { maxWidth: colWidths[1] - 4 });
-        cx += colWidths[1];
-        doc.text(`${c.designEffort}h`, cx, y);
-        cx += colWidths[2];
-        doc.text(`${c.devEffort}h`, cx, y);
-
-        setDrawColor(doc, STROKES);
-        doc.line(margin, y + 2, margin + contentWidth, y + 2);
-        y += 6;
+        y = checkPageBreak(doc, y, 12);
+        y = drawTableRow(
+          doc,
+          [
+            { text: c.name, width: colWidths[0] },
+            { text: c.category, width: colWidths[1] },
+            { text: `${componentDesignEffort(c, useAi)}h`, width: colWidths[2] },
+            { text: `${componentDevEffort(c, useAi)}h`, width: colWidths[3] },
+          ],
+          margin,
+          y,
+          contentWidth,
+        );
       }
       y += 2;
     }
@@ -273,26 +330,27 @@ export function exportPDF(
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
     for (const t of selectedTemplates) {
-      y = checkPageBreak(doc, y, 7);
-      tx = margin + 2;
+      y = checkPageBreak(doc, y, 12);
       const templateLabel = t.description && t.description !== t.name
         ? `${t.name} - ${t.description}`
         : t.name;
-      doc.text(templateLabel, tx, y, { maxWidth: tColWidths[0] - 4 });
-      tx += tColWidths[0];
-      doc.text(t.category, tx, y, { maxWidth: tColWidths[1] - 4 });
-      tx += tColWidths[1];
-      doc.text(`${t.designEffortBase}h`, tx, y);
-      tx += tColWidths[2];
-      doc.text(`${t.devEffortBase}h`, tx, y);
-      tx += tColWidths[3];
-      doc.text(`${t.designEffortPerPage}h + ${t.devEffortPerPage}h`, tx, y);
-      tx += tColWidths[4];
-      doc.text(String(t.additionalPages), tx, y);
-
-      setDrawColor(doc, STROKES);
-      doc.line(margin, y + 2, margin + contentWidth, y + 2);
-      y += 6;
+      y = drawTableRow(
+        doc,
+        [
+          { text: templateLabel, width: tColWidths[0] },
+          { text: t.category, width: tColWidths[1] },
+          { text: `${templateDesignBase(t, useAi)}h`, width: tColWidths[2] },
+          { text: `${templateDevBase(t, useAi)}h`, width: tColWidths[3] },
+          {
+            text: `${t.designEffortPerPage}h + ${t.devEffortPerPage}h`,
+            width: tColWidths[4],
+          },
+          { text: String(t.additionalPages), width: tColWidths[5] },
+        ],
+        margin,
+        y,
+        contentWidth,
+      );
     }
   }
 
@@ -303,7 +361,7 @@ export function exportPDF(
     doc.setFontSize(7);
     setColor(doc, LIGHT_GREY);
     doc.text(
-      `Feasibly — ${project.projectName || "Project"} | Page ${i} of ${pageCount}`,
+      `Feasibly - ${sanitize(project.projectName || "Project")} | Page ${i} of ${pageCount}`,
       margin,
       doc.internal.pageSize.getHeight() - 10
     );

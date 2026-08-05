@@ -1,3 +1,4 @@
+import { DATA_URLS } from "@/lib/constants";
 import type { Component, Template } from "@/types";
 
 export interface GlobalPrinciple {
@@ -7,26 +8,19 @@ export interface GlobalPrinciple {
   developmentDescription: string;
 }
 
-export async function loadComponents(): Promise<Component[]> {
-  const response = await fetch("/data/components.json");
+async function loadJson<T>(url: string, label: string): Promise<T> {
+  const response = await fetch(url);
   if (!response.ok) {
-    throw new Error("Failed to load components data");
+    throw new Error(`Failed to load ${label} data`);
   }
   return response.json();
 }
 
-export async function loadTemplates(): Promise<Template[]> {
-  const response = await fetch("/data/templates.json");
-  if (!response.ok) {
-    throw new Error("Failed to load templates data");
-  }
-  return response.json();
-}
+export const loadComponents = () =>
+  loadJson<Component[]>(DATA_URLS.components, "components");
 
-export async function loadGlobalPrinciples(): Promise<GlobalPrinciple[]> {
-  const response = await fetch("/data/global-principles.json");
-  if (!response.ok) {
-    throw new Error("Failed to load global principles data");
-  }
-  return response.json();
-}
+export const loadTemplates = () =>
+  loadJson<Template[]>(DATA_URLS.templates, "templates");
+
+export const loadGlobalPrinciples = () =>
+  loadJson<GlobalPrinciple[]>(DATA_URLS.globalPrinciples, "global principles");

@@ -158,6 +158,7 @@ feasibly-app/
 - Table grouped by `group` field into collapsible accordion sections
 - Each group header: checkbox to select/deselect all in group + group name + chevron
 - Each row: checkbox | component name | category label | design description | dev description | design effort | dev effort
+- When "Activate AI-Powered Estimation" is checked, column headers change to "AI Design Effort" / "AI Dev Effort" and row values switch to `aiDesignEffort` / `aiDevEffort`
 - **Category label ("Core" tag):** Pill badge with `bg-[#f4e4e7]`, `p-2` (8px all around), `gap-1.5` (6px), red heart icon at 12×12 (`text-red-500`), `text-xs` (12px). Non-core categories use `bg-[#e4ecf4]` without a heart icon.
 - Rows are filterable by search
 - **Add row button:** Right-aligned (`justify-end`) within each accordion group. Clicking adds a new blank row where all fields are editable inline (name, category, descriptions, design/dev effort as `<input>` fields with placeholders). Pre-loaded data rows remain read-only.
@@ -520,7 +521,7 @@ Styling: Cobalt headers with white text, sky-blue group headers, alternating row
 
 10. **Shared group helpers** (`lib/groupHelpers.ts`): `toggleGroup`, `toggleAllInGroup`, `toggleAllOnPage`, `renameGroupItems`, `addItemAndScroll` are extracted into reusable functions to eliminate duplication across Components and Templates pages.
 
-11. **AI Estimation toggle**: The "Activate AI-Powered Estimation" checkbox toggles `useAiEstimation` in the store, switching calculations between standard effort values (`designEffort`, `devEffort`) and AI values (`aiDesignEffort`, `aiDevEffort`).
+11. **AI Estimation toggle**: The "Activate AI-Powered Estimation" checkbox toggles `useAiEstimation` in the store, switching column headers ("Design Effort" → "AI Design Effort", "Dev Effort" → "AI Dev Effort") and row values between standard effort values (`designEffort`, `devEffort`, `designEffortBase`, `devEffortBase`) and AI values (`aiDesignEffort`, `aiDevEffort`, `aiDesignEffortBase`, `aiDevEffortBase`).
 
 12. **Fallback UI**: All pages display loading spinners during data fetch, error messages on failure, and empty-state messages when no data is available.
 
@@ -739,3 +740,67 @@ Free tier is sufficient for this project (no backend, no database).
 - Historical project tracking & comparison
 - Budget/cost estimation (not just effort days)
 - Multi-platform support beyond AEM
+
+---
+
+## Conventions & Pitfalls (post-review, must follow)
+
+These conventions were introduced during a full refactor pass. Downstream agents/AI edits **must** honor them.
+
+### Constants & theme
+
+- `src/lib/constants.ts` is the single source of truth for routes (`ROUTES`), data URLs (`DATA_URLS`), the SVG sprite path (`ICON_SPRITE_URL`), storage keys/version (`STORAGE_KEY`, `STORAGE_VERSION`), buffer math (`BUFFER_RATIO`, `BUFFER_MULTIPLIER`, `DAYS_PER_WEEK`, `BUFFER_LABEL`), default group names (`DEFAULT_COMPONENT_GROUP`, `DEFAULT_TEMPLATE_GROUP`), timing (`SCROLL_DELAY_MS`, `TOAST_DURATION_MS`), and the `PLATFORMS`/`Platform` union.
+- Do **not** inline route strings, hex colors, magic numbers, or platform literals in components. Import from `@/lib/constants` (routes, numbers) or `@/lib/theme` (colors).
+- `src/lib/theme.ts` exports `BRAND` (cobalt, skyBlue, bgBlue, lightGrey, lightWhite, placeholder, strokes, darkBackground, white, black, brandRed, brandNavy, surfaceMuted, categoryCoreBg, categoryDefaultBg). Each entry exposes `{ hex, rgb, argb }` so PDF (jsPDF) and Excel (ExcelJS) share the same palette. Add new brand colors here, not inline.
+- CSS tokens live in `src/app/globals.css` under `:root` and are mapped through `@theme inline` (e.g. `--color-surface-muted`, `--color-brand-red`). Use the mapped Tailwind classes (`bg-surface-muted`, `text-brand-red`) instead of arbitrary `[#hex]` values.
+
+### State & persistence
+
+- `SelectedComponent` / `SelectedTemplate` use an explicit `isCustom?: boolean` flag. Do **not** stuff a magic sentinel (e.g. `"__custom__"`) into a data field.
+- The Zustand store (`src/store/index.ts`) is persisted with `version: STORAGE_VERSION` and a `migrate` function. Any change to persisted shape **must** bump `STORAGE_VERSION` in `@/lib/constants` and extend `migrate` to translate older payloads.
+- Numeric setters must clamp non-negative (`Math.max(0, n)` for pages, `Math.max(min, n)` for effort inputs). Never trust raw `Number(e.target.value)`.
+
+### Async & side effects
+
+- All export helpers that return `Promise` (e.g. `exportExcel`) **must** be `await`ed. Wrap exports in try/finally to reset the "exporting" UI state. See `src/components/estimation/ExportButtons.tsx` as the canonical pattern.
+- `useEffect` data loads must use a `cancelled` flag guard before `setState` to avoid updating an unmounted component. See `src/app/components/page.tsx` and `src/app/templates/page.tsx`.
+- Never call `resetStore()` unconditionally on mount. Reset only after an explicit user action (form submit, confirmed dialog).
+
+### Component patterns
+
+- Grouped tables share one accordion primitive: `src/components/table/GroupedAccordion.tsx`. It emits proper `aria-expanded` / `aria-controls`. Consumers pass `renderHeader({ allSelected, onToggleAll, group })` and `renderRow(item)`.
+- Editable cells use `EditableTextCell` / `EditableNumberCell` from `src/components/table/EditableCell.tsx`. Number cell clamps negatives via `Math.max(min, Number(v) || 0)`.
+- `useGroupedItems<T>(items, getGroup, search, matchers)` (from `src/hooks/useGroupedItems.ts`) hoists `search.toLowerCase()` outside the filter loop — reuse it instead of hand-rolling per-page grouping.
+- `EstimationPanel` is composed of `EstimationCard`, `StatTile`, `InfoSidebar`, `ExportButtons`. Add estimation UI as a new sub-component under `src/components/estimation/`, not by growing the panel file.
+- The onboarding form uses `FormFieldSection` (icon slot + title + description + children) from `src/components/onboarding/FormFieldSection.tsx`. Add form fields by composing that section, not by duplicating the header layout.
+
+### Accessibility
+
+- Every icon-only button (info, close, reset) must have `aria-label`. Overlays must set `role="dialog"` and `aria-modal="true"`.
+- Group-rename input must handle **Escape to cancel** and validate uniqueness (`existingNames?: Set<string>`) with `aria-invalid` on failure. See `src/components/EditableGroupName.tsx`.
+- Every interactive element must have an accessible name, even when the visual is purely iconographic (`SvgIcon` renders `aria-hidden`).
+
+### Data loading
+
+- All `public/data/*.json` reads go through `src/lib/data.ts` via `loadJson<T>(url, label)`. Client fetches use `loadComponents` / `loadTemplates`. `GlobalPrinciplesPage` is a **server component** that reads the file from `node:fs` at request time — do not re-add the client fetch there.
+
+### Exporters
+
+- PDF and Excel exporters (`src/lib/exportPdf.ts`, `src/lib/exportExcel.ts`) import colors from `@/lib/theme` (`.rgb` for jsPDF, `.argb` for ExcelJS). Do not hard-code hex codes.
+- Buffer copy must come from `BUFFER_LABEL` in constants (not string literal).
+- Do not use non-ASCII glyphs like `✎` or angle-bracket-heavy strings (`</>`) in jsPDF — they render as tofu. Use plain ASCII labels ("DEV", "UX").
+
+### Testing & tooling
+
+- Unit tests live next to the module: `src/lib/foo.test.ts`. Run with `npm test` (Vitest, node environment, `@/` alias configured in `vitest.config.ts`).
+- Formatting is Prettier + `prettier-plugin-tailwindcss` (`.prettierrc.json`). Run `npm run format`.
+- Type-check via `npm run typecheck` (`tsc --noEmit`). Lint via `npm run lint`.
+
+### Pitfalls to avoid
+
+- **Do not** duplicate table markup between the Components and Templates pages — extract into `GroupedAccordion` + row components.
+- **Do not** reintroduce hard-coded `"/components"`, `"/templates"`, `"/onboarding"`, `"/global-principles"` route strings.
+- **Do not** invent new hex values in JSX; add them to `BRAND` + globals.css tokens first.
+- **Do not** call `exportExcel(...)` (or any promise) without `await`.
+- **Do not** change persisted store shape without bumping `STORAGE_VERSION` and updating `migrate`.
+- **Do not** promote user input straight into `Number(...)` without a `Math.max` clamp.

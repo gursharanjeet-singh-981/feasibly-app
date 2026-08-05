@@ -1,3 +1,5 @@
+import type { Platform } from "@/lib/constants";
+
 export interface Component {
   id: number;
   group: string;
@@ -14,6 +16,7 @@ export interface Component {
 
 export interface SelectedComponent extends Component {
   isSelected: boolean;
+  isCustom?: boolean;
 }
 
 export interface Template {
@@ -42,7 +45,7 @@ export interface Project {
     components: boolean;
     templates: boolean;
   };
-  platform: "AEM";
+  platform: Platform;
 }
 
 export interface EstimationSummary {

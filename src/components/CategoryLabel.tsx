@@ -7,7 +7,7 @@ export function CategoryLabel({ category }: { category: string }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 p-2 rounded-full text-xs whitespace-nowrap ${
-        isCore ? "bg-[#f4e4e7] text-black" : "bg-[#e4ecf4] text-black"
+        isCore ? "bg-category-core-bg text-black" : "bg-category-default-bg text-black"
       }`}
     >
       {isCore && (

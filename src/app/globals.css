@@ -18,6 +18,11 @@
   --color-placeholder-text: var(--placeholder-text);
   --color-strokes: var(--strokes);
   --color-dark-background: var(--dark-background);
+  --color-surface-muted: var(--surface-muted);
+  --color-category-core-bg: var(--category-core-bg);
+  --color-category-default-bg: var(--category-default-bg);
+  --color-brand-red: var(--brand-red);
+  --color-brand-navy: var(--brand-navy);
   --color-chart-5: var(--chart-5);
   --color-chart-4: var(--chart-4);
   --color-chart-3: var(--chart-3);
@@ -83,6 +88,11 @@
   --placeholder-text: #a6a6a6;
   --strokes: #d9d9d9;
   --dark-background: #ccd3e1;
+  --surface-muted: #e3e7ef;
+  --category-core-bg: #f4e4e7;
+  --category-default-bg: #e4ecf4;
+  --brand-red: #f1012f;
+  --brand-navy: #020e4e;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
