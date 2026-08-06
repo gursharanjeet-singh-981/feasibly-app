@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +15,9 @@ import {
   FormFieldSection,
   OutlineIcon,
 } from "@/components/onboarding/FormFieldSection";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES, SCAN_FEATURE_ENABLED, SCAN_SINGLE_PAGE_OPTION_ENABLED } from "@/lib/constants";
+import { useScan } from "@/hooks/useScan";
+import { ScanProgressDialog } from "@/components/scan/ScanProgressDialog";
 
 const projectSchema = z
   .object({
@@ -34,6 +37,11 @@ export default function OnboardingPage() {
   const router = useRouter();
   const setProject = useAppStore((s) => s.setProject);
   const resetStore = useAppStore((s) => s.resetStore);
+  const useAiEstimation = useAppStore((s) => s.useAiEstimation);
+  const { startScan, cancelScan } = useScan();
+  const [scanOpen, setScanOpen] = useState(false);
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
+  const [scanMode, setScanMode] = useState<"single" | "full">("full");
 
   const {
     register,
@@ -53,6 +61,7 @@ export default function OnboardingPage() {
 
   const scopeComponents = useWatch({ control, name: "scopeComponents" });
   const scopeTemplates = useWatch({ control, name: "scopeTemplates" });
+  const liveUrl = useWatch({ control, name: "liveUrl" });
 
   const onSubmit = (data: FormData) => {
     resetStore();
@@ -65,7 +74,32 @@ export default function OnboardingPage() {
       },
       platform: "AEM",
     });
-    router.push(data.scopeComponents ? ROUTES.components : ROUTES.templates);
+    const nextRoute = data.scopeComponents ? ROUTES.components : ROUTES.templates;
+
+    if (SCAN_FEATURE_ENABLED && data.liveUrl) {
+      setPendingRoute(nextRoute);
+      setScanOpen(true);
+      void startScan(data.liveUrl, scanMode);
+      return;
+    }
+
+    router.push(nextRoute);
+  };
+
+  const handleScanCancel = () => {
+    cancelScan();
+    setScanOpen(false);
+    if (pendingRoute) router.push(pendingRoute);
+  };
+
+  const handleScanDismiss = () => {
+    setScanOpen(false);
+    if (pendingRoute) router.push(pendingRoute);
+  };
+
+  const handleScanProceed = () => {
+    setScanOpen(false);
+    if (pendingRoute) router.push(pendingRoute);
   };
 
   return (
@@ -155,6 +189,37 @@ export default function OnboardingPage() {
             )}
           </FormFieldSection>
 
+          {SCAN_FEATURE_ENABLED && SCAN_SINGLE_PAGE_OPTION_ENABLED && !!liveUrl && (
+            <FormFieldSection
+              iconSlot={
+                <OutlineIcon>
+                  <circle cx="11" cy="11" r="8" />
+                  <path d="m21 21-4.35-4.35" />
+                </OutlineIcon>
+              }
+              title="How should we scan?"
+              description="Choose whether to scan just the entered URL or crawl the whole site."
+            >
+              <div className="flex gap-3 pl-1">
+                {(["single", "full"] as const).map((opt) => (
+                  <button
+                    key={opt}
+                    type="button"
+                    onClick={() => setScanMode(opt)}
+                    className={[
+                      "flex-1 h-11 rounded-full border text-sm font-medium transition-colors",
+                      scanMode === opt
+                        ? "bg-cobalt border-cobalt text-white"
+                        : "border-strokes text-black hover:border-cobalt/50",
+                    ].join(" ")}
+                  >
+                    {opt === "single" ? "Single page" : "Whole site"}
+                  </button>
+                ))}
+              </div>
+            </FormFieldSection>
+          )}
+
           <FormFieldSection
             iconSlot={
               <OutlineIcon>
@@ -222,6 +287,13 @@ export default function OnboardingPage() {
           </Button>
         </form>
       </div>
+
+      <ScanProgressDialog
+        open={scanOpen}
+        onCancel={handleScanCancel}
+        onDismiss={handleScanDismiss}
+        onProceed={handleScanProceed}
+      />
     </div>
   );
 }

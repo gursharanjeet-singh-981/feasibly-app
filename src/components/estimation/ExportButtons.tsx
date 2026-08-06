@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { TOAST_DURATION_MS } from "@/lib/constants";
+import { TOAST_DURATION_MS, SCAN_FEATURE_ENABLED, SCAN_SINGLE_PAGE_OPTION_ENABLED } from "@/lib/constants";
+import { useAppStore } from "@/store";
 import type {
   Project,
   SelectedComponent,
@@ -11,7 +12,7 @@ import type {
   EstimationSummary,
 } from "@/types";
 
-type Kind = "pdf" | "excel";
+type Kind = "pdf" | "excel" | "scan";
 type Message = { type: "success" | "error"; text: string } | null;
 
 interface Props {
@@ -31,6 +32,8 @@ export function ExportButtons({
 }: Props) {
   const [exporting, setExporting] = useState<Kind | null>(null);
   const [message, setMessage] = useState<Message>(null);
+  const scan = useAppStore((s) => s.scan);
+  const hasScanData = scan.status === "complete" && scan.pagesScanned > 0;
 
   const notify = (type: "success" | "error", text: string) => {
     setMessage({ type, text });
@@ -76,6 +79,17 @@ export function ExportButtons({
       "Failed to export Excel report. Please try again.",
     );
 
+  const handleScanReport = () =>
+    runExport(
+      "scan",
+      async () => {
+        const { exportScanReport } = await import("@/lib/exportScanReport");
+        await exportScanReport(project, scan, components, templates);
+      },
+      "Scan report exported successfully!",
+      "Failed to export scan report. Please try again.",
+    );
+
   return (
     <div className="mt-8 lg:mt-10 flex flex-col gap-3">
       {message && (
@@ -106,6 +120,16 @@ export function ExportButtons({
         {exporting === "excel" ? "Exporting…" : "Export Excel Report"}
         <Download className="w-5 h-5" />
       </Button>
+      {SCAN_FEATURE_ENABLED && SCAN_SINGLE_PAGE_OPTION_ENABLED && hasScanData && (
+        <Button
+          onClick={handleScanReport}
+          disabled={exporting !== null}
+          className="h-12 md:h-14 lg:h-15 rounded-full bg-white border border-cobalt text-cobalt hover:bg-cobalt/5 text-base w-full gap-2"
+        >
+          {exporting === "scan" ? "Exporting…" : "Export Scan Report"}
+          <Download className="w-5 h-5" />
+        </Button>
+      )}
     </div>
   );
 }
