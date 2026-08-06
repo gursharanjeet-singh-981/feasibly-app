@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -14,7 +15,9 @@ import {
   FormFieldSection,
   OutlineIcon,
 } from "@/components/onboarding/FormFieldSection";
-import { ROUTES } from "@/lib/constants";
+import { ROUTES, SCAN_FEATURE_ENABLED } from "@/lib/constants";
+import { useScan } from "@/hooks/useScan";
+import { ScanProgressDialog } from "@/components/scan/ScanProgressDialog";
 
 const projectSchema = z
   .object({
@@ -34,6 +37,10 @@ export default function OnboardingPage() {
   const router = useRouter();
   const setProject = useAppStore((s) => s.setProject);
   const resetStore = useAppStore((s) => s.resetStore);
+  const useAiEstimation = useAppStore((s) => s.useAiEstimation);
+  const { startScan, cancelScan } = useScan();
+  const [scanOpen, setScanOpen] = useState(false);
+  const [pendingRoute, setPendingRoute] = useState<string | null>(null);
 
   const {
     register,
@@ -65,7 +72,32 @@ export default function OnboardingPage() {
       },
       platform: "AEM",
     });
-    router.push(data.scopeComponents ? ROUTES.components : ROUTES.templates);
+    const nextRoute = data.scopeComponents ? ROUTES.components : ROUTES.templates;
+
+    if (SCAN_FEATURE_ENABLED && data.liveUrl) {
+      setPendingRoute(nextRoute);
+      setScanOpen(true);
+      void startScan(data.liveUrl, useAiEstimation);
+      return;
+    }
+
+    router.push(nextRoute);
+  };
+
+  const handleScanCancel = () => {
+    cancelScan();
+    setScanOpen(false);
+    if (pendingRoute) router.push(pendingRoute);
+  };
+
+  const handleScanDismiss = () => {
+    setScanOpen(false);
+    if (pendingRoute) router.push(pendingRoute);
+  };
+
+  const handleScanProceed = () => {
+    setScanOpen(false);
+    if (pendingRoute) router.push(pendingRoute);
   };
 
   return (
@@ -222,6 +254,13 @@ export default function OnboardingPage() {
           </Button>
         </form>
       </div>
+
+      <ScanProgressDialog
+        open={scanOpen}
+        onCancel={handleScanCancel}
+        onDismiss={handleScanDismiss}
+        onProceed={handleScanProceed}
+      />
     </div>
   );
 }

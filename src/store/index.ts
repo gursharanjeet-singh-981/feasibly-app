@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { calculateEstimation } from "@/lib/calculations";
 import { STORAGE_KEY, STORAGE_VERSION } from "@/lib/constants";
+import { initialScanSliceState, type ScanSliceState } from "@/lib/scanner/types";
 import type {
   Project,
   SelectedComponent,
@@ -80,6 +81,10 @@ interface AppState {
 
   getEstimation: () => EstimationSummary;
   resetStore: () => void;
+
+  scan: ScanSliceState;
+  setScan: (partial: Partial<ScanSliceState>) => void;
+  resetScan: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -98,6 +103,7 @@ export const useAppStore = create<AppState>()(
           components: [],
           templates: [],
           useAiEstimation: false,
+          scan: { ...initialScanSliceState },
         }),
 
       components: [],
@@ -172,11 +178,17 @@ export const useAppStore = create<AppState>()(
         const { components, templates, useAiEstimation } = get();
         return calculateEstimation(components, templates, useAiEstimation);
       },
+
+      scan: { ...initialScanSliceState },
+      setScan: (partial) =>
+        set((state) => ({ scan: { ...state.scan, ...partial } })),
+      resetScan: () => set({ scan: { ...initialScanSliceState } }),
     }),
     {
       name: STORAGE_KEY,
       version: STORAGE_VERSION,
       // v1 -> v2: promote the `assumptions === "__custom__"` sentinel to explicit isCustom.
+      // v2 -> v3: seed empty scan slice for the live-site scan feature.
       migrate: (persisted, version) => {
         const state = persisted as Partial<AppState> | undefined;
         if (!state) return persisted as AppState;
@@ -191,6 +203,9 @@ export const useAppStore = create<AppState>()(
             ...t,
             isCustom: t.isCustom ?? false,
           }));
+        }
+        if (version < 3) {
+          state.scan = { ...initialScanSliceState };
         }
         return state as AppState;
       },

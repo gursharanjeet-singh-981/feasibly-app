@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PageLayout } from "@/components/PageLayout";
 import { GroupedAccordion } from "@/components/table/GroupedAccordion";
 import { TemplateRow } from "@/components/table/TemplateRow";
+import { ScanSummaryBanner } from "@/components/scan/ScanSummaryBanner";
 import { useGroupedItems } from "@/hooks/useGroupedItems";
 import { useAppStore } from "@/store";
 import { loadTemplates } from "@/lib/data";
@@ -29,6 +30,7 @@ export default function TemplatesPage() {
   const updateTemplate = useAppStore((s) => s.updateTemplate);
   const useAiEstimation = useAppStore((s) => s.useAiEstimation);
   const toggleAiEstimation = useAppStore((s) => s.toggleAiEstimation);
+  const matchedTemplateIds = useAppStore((s) => s.scan.matchedTemplateIds);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
@@ -44,7 +46,7 @@ export default function TemplatesPage() {
         setTemplates(
           data.map<SelectedTemplate>((t) => ({
             ...t,
-            isSelected: false,
+            isSelected: (matchedTemplateIds[t.id]?.confidence ?? 0) >= 0.5,
             additionalPages: 0,
             isCustom: false,
           })),
@@ -58,7 +60,7 @@ export default function TemplatesPage() {
     return () => {
       cancelled = true;
     };
-  }, [templates.length, setTemplates]);
+  }, [templates.length, setTemplates, matchedTemplateIds]);
 
   const getGroup = useCallback((t: SelectedTemplate) => t.name, []);
   const matchers = useCallback(
@@ -148,16 +150,18 @@ export default function TemplatesPage() {
         key={template.id}
         template={template}
         useAiEstimation={useAiEstimation}
+        match={matchedTemplateIds[template.id]}
         onToggle={() => toggleTemplate(template.id)}
         onSetPages={(pages) => setAdditionalPages(template.id, pages)}
         onUpdate={(updates) => updateTemplate(template.id, updates)}
       />
     ),
-    [useAiEstimation, toggleTemplate, setAdditionalPages, updateTemplate],
+    [useAiEstimation, toggleTemplate, setAdditionalPages, updateTemplate, matchedTemplateIds],
   );
 
   return (
     <PageLayout>
+      <ScanSummaryBanner kind="templates" />
       <GroupedAccordion
         title="Templates List"
         addLabel="Add template"
