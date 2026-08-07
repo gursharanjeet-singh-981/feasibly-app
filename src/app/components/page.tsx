@@ -5,6 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PageLayout } from "@/components/PageLayout";
 import { GroupedAccordion } from "@/components/table/GroupedAccordion";
 import { ComponentRow } from "@/components/table/ComponentRow";
+import { ScanSummaryBanner } from "@/components/scan/ScanSummaryBanner";
 import { useGroupedItems } from "@/hooks/useGroupedItems";
 import { useAppStore } from "@/store";
 import { loadComponents } from "@/lib/data";
@@ -28,6 +29,7 @@ export default function ComponentsPage() {
   const updateComponent = useAppStore((s) => s.updateComponent);
   const useAiEstimation = useAppStore((s) => s.useAiEstimation);
   const toggleAiEstimation = useAppStore((s) => s.toggleAiEstimation);
+  const matchedComponentIds = useAppStore((s) => s.scan.matchedComponentIds);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
@@ -43,7 +45,7 @@ export default function ComponentsPage() {
         setComponents(
           data.map<SelectedComponent>((c) => ({
             ...c,
-            isSelected: false,
+            isSelected: (matchedComponentIds[c.id]?.confidence ?? 0) >= 0.5,
             isCustom: false,
           })),
         );
@@ -56,7 +58,7 @@ export default function ComponentsPage() {
     return () => {
       cancelled = true;
     };
-  }, [components.length, setComponents]);
+  }, [components.length, setComponents, matchedComponentIds]);
 
   const getGroup = useCallback((c: SelectedComponent) => c.group, []);
   const matchers = useCallback(
@@ -149,15 +151,17 @@ export default function ComponentsPage() {
         key={component.id}
         component={component}
         useAiEstimation={useAiEstimation}
+        match={matchedComponentIds[component.id]}
         onToggle={() => toggleComponent(component.id)}
         onUpdate={(updates) => updateComponent(component.id, updates)}
       />
     ),
-    [useAiEstimation, toggleComponent, updateComponent],
+    [useAiEstimation, toggleComponent, updateComponent, matchedComponentIds],
   );
 
   return (
     <PageLayout>
+      <ScanSummaryBanner kind="components" />
       <GroupedAccordion
         title="Components List"
         addLabel="Add component"
