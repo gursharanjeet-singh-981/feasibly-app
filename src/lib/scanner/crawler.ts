@@ -52,8 +52,9 @@ export async function crawl(
   const warnings: string[] = [];
   const seen = new Set<string>();
   const pages: FetchedPage[] = [];
+  const abortRelay = createAbortRelay(signal);
 
-  const robots = await loadRobots(base, fetchImpl, userAgent, warnings, signal);
+  const robots = await loadRobots(base, fetchImpl, userAgent, warnings, signal, abortRelay);
   const isDisallowed = (url: string) =>
     robots?.isDisallowed(url, userAgent) === true;
 
@@ -65,68 +66,73 @@ export async function crawl(
     perPageTimeoutMs,
     warnings,
     signal,
+    abortRelay,
   );
+  try {
+    const limit = pLimit(concurrency);
+    const usedSitemap = seedUrls.length > 0;
+    const queue: Array<{ url: string; depth: number }> = [];
 
-  const limit = pLimit(concurrency);
-  const usedSitemap = seedUrls.length > 0;
-  const queue: Array<{ url: string; depth: number }> = [];
+    const enqueue = (url: string, depth: number) => {
+      const normalized = normalizeUrl(url, base);
+      if (!normalized) return;
+      if (seen.has(normalized)) return;
+      if (isDisallowed(normalized)) return;
+      if (depth > maxDepth) return;
+      if (queue.length + pages.length >= maxPages) return;
+      seen.add(normalized);
+      queue.push({ url: normalized, depth });
+    };
 
-  const enqueue = (url: string, depth: number) => {
-    const normalized = normalizeUrl(url, base);
-    if (!normalized) return;
-    if (seen.has(normalized)) return;
-    if (isDisallowed(normalized)) return;
-    if (depth > maxDepth) return;
-    if (queue.length + pages.length >= maxPages) return;
-    seen.add(normalized);
-    queue.push({ url: normalized, depth });
-  };
-
-  if (usedSitemap) {
-    for (const url of seedUrls) enqueue(url, 0);
-  } else {
-    enqueue(base.toString(), 0);
-  }
-
-  // Drain the queue in waves so BFS depth is honoured while still running
-  // `concurrency` fetches in parallel per wave.
-  while (queue.length > 0 && pages.length < maxPages) {
-    if (signal?.aborted) {
-      warnings.push("Crawl aborted");
-      break;
+    if (usedSitemap) {
+      for (const url of seedUrls) enqueue(url, 0);
+    } else {
+      enqueue(base.toString(), 0);
     }
-    const wave = queue.splice(0, Math.min(queue.length, maxPages - pages.length));
-    const results = await Promise.all(
-      wave.map((item) =>
-        limit(() =>
-          fetchPage(item, {
-            fetchImpl,
-            userAgent,
-            perPageTimeoutMs,
-            jitterMs,
-            signal,
-            warnings,
-          }),
+
+    // Drain the queue in waves so BFS depth is honoured while still running
+    // `concurrency` fetches in parallel per wave.
+    while (queue.length > 0 && pages.length < maxPages) {
+      if (signal?.aborted) {
+        warnings.push("Crawl aborted");
+        break;
+      }
+      const wave = queue.splice(0, Math.min(queue.length, maxPages - pages.length));
+      const results = await Promise.all(
+        wave.map((item) =>
+          limit(() =>
+            fetchPage(item, {
+              fetchImpl,
+              userAgent,
+              perPageTimeoutMs,
+              jitterMs,
+              signal,
+              warnings,
+              abortRelay,
+            }),
+          ),
         ),
-      ),
-    );
+      );
 
-    for (const { page, links } of results) {
-      if (!page) continue;
-      pages.push(page);
-      onPage?.(page);
-      if (pages.length >= maxPages) break;
-      if (usedSitemap) continue; // BFS only when we don't have a sitemap
-      for (const href of links) enqueue(href, page.depth + 1);
+      for (const { page, links } of results) {
+        if (!page) continue;
+        pages.push(page);
+        onPage?.(page);
+        if (pages.length >= maxPages) break;
+        if (usedSitemap) continue; // BFS only when we don't have a sitemap
+        for (const href of links) enqueue(href, page.depth + 1);
+      }
     }
-  }
 
-  return {
-    pages,
-    discoveredCount: seen.size,
-    usedSitemap,
-    warnings,
-  };
+    return {
+      pages,
+      discoveredCount: seen.size,
+      usedSitemap,
+      warnings,
+    };
+  } finally {
+    abortRelay?.dispose();
+  }
 }
 
 // ---------- internals ----------
@@ -137,6 +143,7 @@ async function loadRobots(
   userAgent: string,
   warnings: string[],
   signal: AbortSignal | undefined,
+  abortRelay: AbortRelay | undefined,
 ) {
   const robotsUrl = new URL("/robots.txt", base).toString();
   try {
@@ -145,6 +152,7 @@ async function loadRobots(
       userAgent,
       timeoutMs: 5_000,
       signal,
+      abortRelay,
     });
     if (!res.ok) return null;
     const text = await res.text();
@@ -163,6 +171,7 @@ async function collectSitemapUrls(
   perPageTimeoutMs: number,
   warnings: string[],
   signal: AbortSignal | undefined,
+  abortRelay: AbortRelay | undefined,
 ): Promise<string[]> {
   const candidates = new Set<string>([
     ...robotsSitemaps,
@@ -192,6 +201,7 @@ async function collectSitemapUrls(
         userAgent,
         timeoutMs: perPageTimeoutMs,
         signal,
+        abortRelay,
       });
       if (!res.ok) continue;
       const xml = await res.text();
@@ -231,6 +241,7 @@ interface FetchPageDeps {
   jitterMs: () => number;
   signal: AbortSignal | undefined;
   warnings: string[];
+  abortRelay: AbortRelay | undefined;
 }
 
 async function fetchPage(
@@ -257,6 +268,7 @@ async function fetchPage(
       userAgent: deps.userAgent,
       timeoutMs: deps.perPageTimeoutMs,
       signal: deps.signal,
+      abortRelay: deps.abortRelay,
     });
     const contentType = res.headers.get("content-type") ?? "";
     if (!contentType.includes("text/html")) {
@@ -295,13 +307,16 @@ interface TimedFetchOpts {
   userAgent: string;
   timeoutMs: number;
   signal: AbortSignal | undefined;
+  abortRelay: AbortRelay | undefined;
 }
 
 async function timedFetch(url: string, opts: TimedFetchOpts): Promise<Response> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), opts.timeoutMs);
-  const onOuterAbort = () => controller.abort();
-  opts.signal?.addEventListener("abort", onOuterAbort);
+  const unlinkAbortRelay = opts.abortRelay?.track(controller);
+  if (!opts.abortRelay && opts.signal?.aborted) {
+    controller.abort();
+  }
   try {
     return await opts.fetchImpl(url, {
       headers: { "user-agent": opts.userAgent, accept: "text/html,application/xhtml+xml,application/xml" },
@@ -310,8 +325,44 @@ async function timedFetch(url: string, opts: TimedFetchOpts): Promise<Response> 
     });
   } finally {
     clearTimeout(timeout);
-    opts.signal?.removeEventListener("abort", onOuterAbort);
+    unlinkAbortRelay?.();
   }
+}
+
+interface AbortRelay {
+  track: (controller: AbortController) => () => void;
+  dispose: () => void;
+}
+
+function createAbortRelay(signal?: AbortSignal): AbortRelay | undefined {
+  if (!signal) return undefined;
+
+  const controllers = new Set<AbortController>();
+  const onAbort = () => {
+    for (const controller of controllers) {
+      controller.abort();
+    }
+    controllers.clear();
+  };
+
+  signal.addEventListener("abort", onAbort, { once: true });
+
+  return {
+    track(controller: AbortController) {
+      if (signal.aborted) {
+        controller.abort();
+        return () => {};
+      }
+      controllers.add(controller);
+      return () => {
+        controllers.delete(controller);
+      };
+    },
+    dispose() {
+      signal.removeEventListener("abort", onAbort);
+      controllers.clear();
+    },
+  };
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
