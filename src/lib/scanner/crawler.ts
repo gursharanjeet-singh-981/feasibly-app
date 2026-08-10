@@ -17,6 +17,7 @@ export interface CrawlOptions {
   maxDepth?: number;
   concurrency?: number;
   perPageTimeoutMs?: number;
+  scopePathPrefix?: string;
   userAgent?: string;
   fetchImpl?: typeof fetch;
   signal?: AbortSignal;
@@ -29,6 +30,7 @@ export interface CrawlResult {
   pages: FetchedPage[];
   discoveredCount: number;
   usedSitemap: boolean;
+  sitemapUrls: string[];
   warnings: string[];
 }
 
@@ -42,6 +44,7 @@ export async function crawl(
     maxDepth = SCAN_DEFAULTS.maxDepth,
     concurrency = SCAN_DEFAULTS.crawlerConcurrency,
     perPageTimeoutMs = SCAN_DEFAULTS.perPageTimeoutMs,
+    scopePathPrefix,
     userAgent = DEFAULT_USER_AGENT,
     fetchImpl = fetch,
     signal,
@@ -70,34 +73,68 @@ export async function crawl(
   );
   try {
     const limit = pLimit(concurrency);
-    const usedSitemap = seedUrls.length > 0;
+    const scopedSitemapUrls = seedUrls.filter((url) => {
+      const normalized = normalizeUrl(url, base);
+      return normalized ? isWithinPathScope(normalized, scopePathPrefix) : false;
+    });
+    const usedSitemap = scopedSitemapUrls.length > 0;
+    // Ensure sitemap URLs are not dropped purely due to a low maxPages value.
+    const effectiveMaxPages = usedSitemap
+      ? Math.max(maxPages, scopedSitemapUrls.length + 1)
+      : maxPages;
     const queue: Array<{ url: string; depth: number }> = [];
+    const sitemapSkipWarned = new Set<string>();
+    const pendingSitemapUrls = new Set<string>();
 
-    const enqueue = (url: string, depth: number) => {
+    const enqueue = (url: string, depth: number, source: "crawl" | "sitemap" = "crawl") => {
       const normalized = normalizeUrl(url, base);
       if (!normalized) return;
+      if (!isWithinPathScope(normalized, scopePathPrefix)) return;
       if (seen.has(normalized)) return;
-      if (isDisallowed(normalized)) return;
+      if (isDisallowed(normalized)) {
+        if (source === "sitemap") {
+          const warning = `sitemap_skip ${normalized}: robots_disallow`;
+          if (!sitemapSkipWarned.has(warning)) {
+            warnings.push(warning);
+            sitemapSkipWarned.add(warning);
+          }
+        }
+        return;
+      }
       if (depth > maxDepth) return;
-      if (queue.length + pages.length >= maxPages) return;
+      if (queue.length + pages.length >= effectiveMaxPages) {
+        if (source === "sitemap") {
+          const warning = `sitemap_skip ${normalized}: max_pages_limit`;
+          if (!sitemapSkipWarned.has(warning)) {
+            warnings.push(warning);
+            sitemapSkipWarned.add(warning);
+          }
+        }
+        return;
+      }
       seen.add(normalized);
       queue.push({ url: normalized, depth });
+      if (source === "sitemap") {
+        pendingSitemapUrls.add(normalized);
+      }
     };
 
+    enqueue(base.toString(), 0, "crawl");
     if (usedSitemap) {
-      for (const url of seedUrls) enqueue(url, 0);
-    } else {
-      enqueue(base.toString(), 0);
+      for (const url of scopedSitemapUrls) enqueue(url, 0, "sitemap");
     }
 
     // Drain the queue in waves so BFS depth is honoured while still running
     // `concurrency` fetches in parallel per wave.
-    while (queue.length > 0 && pages.length < maxPages) {
+    while (queue.length > 0 && pages.length < effectiveMaxPages) {
       if (signal?.aborted) {
         warnings.push("Crawl aborted");
         break;
       }
-      const wave = queue.splice(0, Math.min(queue.length, maxPages - pages.length));
+      const wave = queue.splice(0, Math.min(queue.length, effectiveMaxPages - pages.length));
+      for (const item of wave) {
+        pendingSitemapUrls.delete(item.url);
+      }
       const results = await Promise.all(
         wave.map((item) =>
           limit(() =>
@@ -118,9 +155,20 @@ export async function crawl(
         if (!page) continue;
         pages.push(page);
         onPage?.(page);
-        if (pages.length >= maxPages) break;
-        if (usedSitemap) continue; // BFS only when we don't have a sitemap
-        for (const href of links) enqueue(href, page.depth + 1);
+        if (pages.length >= effectiveMaxPages) break;
+        for (const href of links) enqueue(href, page.depth + 1, "crawl");
+      }
+    }
+
+    // If scan ended before all queued sitemap URLs were processed (abort/timeout),
+    // emit a per-URL reason so report coverage doesn't fall back to generic text.
+    if (pendingSitemapUrls.size > 0) {
+      for (const url of pendingSitemapUrls) {
+        const warning = `sitemap_skip ${url}: scan_incomplete`;
+        if (!sitemapSkipWarned.has(warning)) {
+          warnings.push(warning);
+          sitemapSkipWarned.add(warning);
+        }
       }
     }
 
@@ -128,6 +176,7 @@ export async function crawl(
       pages,
       discoveredCount: seen.size,
       usedSitemap,
+      sitemapUrls: scopedSitemapUrls,
       warnings,
     };
   } finally {
@@ -181,10 +230,10 @@ async function collectSitemapUrls(
 
   const collected = new Set<string>();
   const visited = new Set<string>();
-  const stack = [...candidates];
+  const queue = [...candidates];
 
-  while (stack.length > 0 && visited.size < 20) {
-    const next = stack.pop();
+  while (queue.length > 0 && visited.size < 20) {
+    const next = queue.shift();
     if (!next || visited.has(next)) continue;
     visited.add(next);
 
@@ -207,7 +256,7 @@ async function collectSitemapUrls(
       const xml = await res.text();
       const { urls, sitemaps } = parseSitemap(xml);
       for (const u of urls) collected.add(u);
-      for (const s of sitemaps) if (!visited.has(s)) stack.push(s);
+      for (const s of sitemaps) if (!visited.has(s)) queue.push(s);
     } catch (err) {
       warnings.push(`sitemap ${next} failed: ${(err as Error).message}`);
     }
@@ -368,17 +417,41 @@ function createAbortRelay(signal?: AbortSignal): AbortRelay | undefined {
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   return new Promise((resolve, reject) => {
     if (signal?.aborted) return resolve();
-    const t = setTimeout(resolve, ms);
-    signal?.addEventListener("abort", () => {
+    let settled = false;
+    const cleanup = () => {
+      signal?.removeEventListener("abort", onAbort);
+    };
+    const onTimeout = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve();
+    };
+    const onAbort = () => {
+      if (settled) return;
+      settled = true;
       clearTimeout(t);
+      cleanup();
       reject(new Error("aborted"));
-    });
+    };
+    const t = setTimeout(onTimeout, ms);
+    signal?.addEventListener("abort", onAbort, { once: true });
   });
 }
 
 function isSameOrigin(candidate: string, base: URL): boolean {
   try {
     return new URL(candidate).origin === base.origin;
+  } catch {
+    return false;
+  }
+}
+
+function isWithinPathScope(url: string, scopePathPrefix?: string): boolean {
+  if (!scopePathPrefix) return true;
+  try {
+    const pathname = new URL(url).pathname;
+    return pathname === scopePathPrefix || pathname.startsWith(`${scopePathPrefix}/`);
   } catch {
     return false;
   }

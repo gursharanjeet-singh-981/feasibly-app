@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   DEFAULT_USER_AGENT,
   classifyPageType,
@@ -101,9 +101,10 @@ describe("parseSitemap", () => {
 describe("crawl", () => {
   const noJitter = () => 0;
 
-  it("uses sitemap URLs when present", async () => {
+  it("uses sitemap URLs when present and still follows links", async () => {
     const routes: Record<string, Route> = {
       "https://x.com/robots.txt": { body: "" },
+      "https://x.com/": { body: page("Home") },
       "https://x.com/sitemap.xml": {
         contentType: "application/xml",
         body: `<urlset><url><loc>https://x.com/a</loc></url><url><loc>https://x.com/b</loc></url></urlset>`,
@@ -111,6 +112,7 @@ describe("crawl", () => {
       "https://x.com/sitemap_index.xml": { status: 404, body: "" },
       "https://x.com/a": { body: page("A", ["/c"]) },
       "https://x.com/b": { body: page("B") },
+      "https://x.com/c": { body: page("C") },
     };
     const { stub } = makeFetchStub(routes);
     const result = await crawl("https://x.com/", {
@@ -121,13 +123,15 @@ describe("crawl", () => {
     expect(result.pages.map((p) => p.url).sort()).toEqual([
       "https://x.com/a",
       "https://x.com/b",
+      "https://x.com/c",
+      "https://x.com/",
     ]);
-    // BFS is disabled when sitemap succeeds: /c is not fetched.
   });
 
   it("follows sitemap index recursively", async () => {
     const routes: Record<string, Route> = {
       "https://x.com/robots.txt": { body: "" },
+      "https://x.com/": { body: page("Home") },
       "https://x.com/sitemap.xml": {
         contentType: "application/xml",
         body: `<sitemapindex><sitemap><loc>https://x.com/nested.xml</loc></sitemap></sitemapindex>`,
@@ -137,14 +141,126 @@ describe("crawl", () => {
         contentType: "application/xml",
         body: `<urlset><url><loc>https://x.com/deep</loc></url></urlset>`,
       },
-      "https://x.com/deep": { body: page("Deep") },
+      "https://x.com/deep": { body: page("Deep", ["/deeper"]) },
+      "https://x.com/deeper": { body: page("Deeper") },
     };
     const { stub } = makeFetchStub(routes);
     const result = await crawl("https://x.com/", {
       fetchImpl: stub,
       jitterMs: noJitter,
     });
-    expect(result.pages.map((p) => p.url)).toEqual(["https://x.com/deep"]);
+    expect(result.pages.map((p) => p.url).sort()).toEqual([
+      "https://x.com/",
+      "https://x.com/deep",
+      "https://x.com/deeper",
+    ]);
+  });
+
+  it("does not bias toward the last sitemap entry when maxPages limits are hit", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/": { body: page("Home") },
+      "https://x.com/sitemap.xml": {
+        contentType: "application/xml",
+        body: `<sitemapindex>
+          <sitemap><loc>https://x.com/sm-a.xml</loc></sitemap>
+          <sitemap><loc>https://x.com/sm-b.xml</loc></sitemap>
+        </sitemapindex>`,
+      },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/sm-a.xml": {
+        contentType: "application/xml",
+        body: `<urlset>
+          <url><loc>https://x.com/a1</loc></url>
+          <url><loc>https://x.com/a2</loc></url>
+        </urlset>`,
+      },
+      "https://x.com/sm-b.xml": {
+        contentType: "application/xml",
+        body: `<urlset>
+          <url><loc>https://x.com/b1</loc></url>
+          <url><loc>https://x.com/b2</loc></url>
+        </urlset>`,
+      },
+      "https://x.com/a1": { body: page("A1") },
+      "https://x.com/a2": { body: page("A2") },
+      "https://x.com/b1": { body: page("B1") },
+      "https://x.com/b2": { body: page("B2") },
+    };
+
+    const { stub } = makeFetchStub(routes);
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      maxPages: 3,
+    });
+
+    const urls = result.pages.map((p) => p.url);
+    expect(urls).toContain("https://x.com/a1");
+    expect(urls).not.toContain("https://x.com/b2");
+  });
+
+  it("scopes crawling to a market path prefix", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/": { body: page("Home", ["/gb/about", "/cl/about"]) },
+      "https://x.com/sitemap.xml": {
+        contentType: "application/xml",
+        body: `<urlset>
+          <url><loc>https://x.com/gb/home</loc></url>
+          <url><loc>https://x.com/cl/home</loc></url>
+        </urlset>`,
+      },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/gb/home": { body: page("GB Home", ["/gb/about"]) },
+      "https://x.com/gb/about": { body: page("GB About") },
+      "https://x.com/cl/home": { body: page("CL Home", ["/cl/about"]) },
+      "https://x.com/cl/about": { body: page("CL About") },
+    };
+
+    const { stub } = makeFetchStub(routes);
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      scopePathPrefix: "/gb",
+      maxPages: 10,
+    });
+
+    expect(result.pages.map((p) => p.url).sort()).toEqual([
+      "https://x.com/gb/about",
+      "https://x.com/gb/home",
+    ]);
+    expect(result.sitemapUrls.sort()).toEqual(["https://x.com/gb/home"]);
+  });
+
+  it("emits sitemap skip warnings for links blocked by robots", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": {
+        contentType: "text/plain",
+        body: "User-agent: *\nDisallow: /gb/private",
+      },
+      "https://x.com/": { body: page("Home") },
+      "https://x.com/sitemap.xml": {
+        contentType: "application/xml",
+        body: `<urlset>
+          <url><loc>https://x.com/gb/private</loc></url>
+          <url><loc>https://x.com/gb/open</loc></url>
+        </urlset>`,
+      },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/gb/open": { body: page("Open") },
+    };
+
+    const { stub } = makeFetchStub(routes);
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      maxPages: 1,
+    });
+
+    expect(result.warnings).toContain("sitemap_skip https://x.com/gb/private: robots_disallow");
+    expect(result.warnings.some((w) => w.includes("max_pages_limit"))).toBe(false);
+    expect(result.pages.map((p) => p.url)).toContain("https://x.com/gb/open");
   });
 
   it("falls back to BFS when no sitemap is available", async () => {
@@ -169,7 +285,6 @@ describe("crawl", () => {
       "https://x.com/b",
       "https://x.com/c",
     ]);
-    // Cross-origin link not fetched.
     expect(calls.some((c) => c.url === "https://other.com/")).toBe(false);
   });
 
@@ -242,6 +357,7 @@ describe("crawl", () => {
         contentType: "text/plain",
         body: "Sitemap: https://x.com/from-robots.xml",
       },
+      "https://x.com/": { body: page("Home") },
       "https://x.com/sitemap.xml": { status: 404, body: "" },
       "https://x.com/sitemap_index.xml": { status: 404, body: "" },
       "https://x.com/from-robots.xml": {
@@ -255,7 +371,44 @@ describe("crawl", () => {
       fetchImpl: stub,
       jitterMs: noJitter,
     });
-    expect(result.pages.map((p) => p.url)).toEqual(["https://x.com/found"]);
+    expect(result.pages.map((p) => p.url).sort()).toEqual([
+      "https://x.com/",
+      "https://x.com/found",
+    ]);
+  });
+
+  it("cleans up abort listeners added during crawl jitter", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/sitemap.xml": { status: 404, body: "" },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/": { body: page("Home", ["/a", "/b", "/c", "/d", "/e", "/f"]) },
+      "https://x.com/a": { body: page("A") },
+      "https://x.com/b": { body: page("B") },
+      "https://x.com/c": { body: page("C") },
+      "https://x.com/d": { body: page("D") },
+      "https://x.com/e": { body: page("E") },
+      "https://x.com/f": { body: page("F") },
+    };
+    const { stub } = makeFetchStub(routes);
+    const ac = new AbortController();
+    const addSpy = vi.spyOn(ac.signal, "addEventListener");
+    const removeSpy = vi.spyOn(ac.signal, "removeEventListener");
+
+    await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: () => 1,
+      signal: ac.signal,
+      maxPages: 7,
+    });
+
+    const addCalls = addSpy.mock.calls.filter(([eventName]) => eventName === "abort").length;
+    const removeCalls = removeSpy.mock.calls.filter(([eventName]) => eventName === "abort").length;
+    expect(addCalls).toBeGreaterThan(0);
+    expect(removeCalls).toBe(addCalls);
+
+    addSpy.mockRestore();
+    removeSpy.mockRestore();
   });
 
   it("skips non-HTML content types", async () => {

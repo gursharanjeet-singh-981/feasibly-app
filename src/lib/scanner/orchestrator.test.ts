@@ -263,4 +263,76 @@ describe("orchestrateScan", () => {
     expect(warnings.some((w) => w.startsWith("spa_suspected:"))).toBe(true);
     expect(warnings).toContain("spa_detected");
   });
+
+  it("starts whole-site scans from origin root when input URL is a subpage", async () => {
+    const routes = {
+      "https://example.com/robots.txt": { body: "" },
+      "https://example.com/sitemap.xml": { status: 404, body: "" },
+      "https://example.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://example.com/": { body: homepageHtml(["/about"]) },
+      "https://example.com/about": { body: `<html><title>About</title><body>About</body></html>` },
+      // Subpage is intentionally not linked to assert root-seed behavior.
+      "https://example.com/library": { body: `<html><title>Library</title><body>Library</body></html>` },
+    };
+    const { stub } = makeFetchStub(routes);
+
+    const events = await collect(
+      orchestrateScan({
+        url: "https://example.com/library",
+        mode: "full",
+        library,
+        crawlOptions: { fetchImpl: stub, jitterMs: noJitter, maxPages: 10 },
+      }),
+    );
+
+    const complete = events.find((e): e is ScanCompleteEvent => e.type === "complete");
+    expect(complete).toBeDefined();
+    const urls = complete!.result.discoveredPages.map((p) => p.url).sort();
+    expect(urls).toEqual([
+      "https://example.com/",
+      "https://example.com/about",
+    ]);
+  });
+
+  it("limits full-site scan to the input market segment", async () => {
+    const routes = {
+      "https://example.com/robots.txt": { body: "" },
+      "https://example.com/sitemap.xml": {
+        contentType: "application/xml",
+        body: `<urlset>
+          <url><loc>https://example.com/gb/home</loc></url>
+          <url><loc>https://example.com/cl/home</loc></url>
+        </urlset>`,
+      },
+      "https://example.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://example.com/": { body: homepageHtml(["/gb/about", "/cl/about"]) },
+      "https://example.com/gb/home": { body: `<html><title>GB Home</title><body><a href="/gb/about">About</a></body></html>` },
+      "https://example.com/gb/about": { body: `<html><title>GB About</title><body>GB</body></html>` },
+      "https://example.com/cl/home": { body: `<html><title>CL Home</title><body><a href="/cl/about">About</a></body></html>` },
+      "https://example.com/cl/about": { body: `<html><title>CL About</title><body>CL</body></html>` },
+    };
+    const { stub } = makeFetchStub(routes);
+
+    const events = await collect(
+      orchestrateScan({
+        url: "https://example.com/gb/library",
+        mode: "full",
+        library,
+        crawlOptions: { fetchImpl: stub, jitterMs: noJitter, maxPages: 10 },
+      }),
+    );
+
+    const complete = events.find((e): e is ScanCompleteEvent => e.type === "complete");
+    expect(complete).toBeDefined();
+    const urls = complete!.result.discoveredPages.map((p) => p.url).sort();
+    expect(urls).toEqual([
+      "https://example.com/gb/about",
+      "https://example.com/gb/home",
+    ]);
+    expect(complete!.result.sitemapUrls).toEqual(["https://example.com/gb/home"]);
+    expect(complete!.result.scrapedUrls.sort()).toEqual([
+      "https://example.com/gb/about",
+      "https://example.com/gb/home",
+    ]);
+  });
 });

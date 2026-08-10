@@ -76,6 +76,8 @@ describe("applyEventToState", () => {
       scanDate: "2026-08-05T11:00:00.000Z",
       scanDuration: 1234,
       pagesScanned: 4,
+      sitemapUrls: ["https://x.com/", "https://x.com/about"],
+      scrapedUrls: ["https://x.com/"],
       discoveredPages: [],
       matchedComponentIds: { 1: { confidence: 0.9, pages: ["https://x.com/"] } },
       matchedTemplateIds: { 2: { confidence: 0.8, pages: ["https://x.com/"] } },
@@ -90,6 +92,8 @@ describe("applyEventToState", () => {
     expect(next.status).toBe("complete");
     expect(next.progress).toBe(100);
     expect(next.scanId).toBe("abc-123");
+    expect(next.sitemapUrls).toEqual(result.sitemapUrls);
+    expect(next.scrapedUrls).toEqual(result.scrapedUrls);
     expect(next.matchedComponentIds).toEqual(result.matchedComponentIds);
     expect(next.matchedTemplateIds).toEqual(result.matchedTemplateIds);
     expect(next.warnings).toEqual(["ok"]);

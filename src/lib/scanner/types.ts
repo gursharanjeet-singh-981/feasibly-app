@@ -74,6 +74,8 @@ export interface ScanResult {
   scanDate: string;
   scanDuration: number;
   pagesScanned: number;
+  sitemapUrls: string[];
+  scrapedUrls: string[];
   discoveredPages: DiscoveredPage[];
   matchedComponentIds: Record<number, MatchMetadata>;
   matchedTemplateIds: Record<number, MatchMetadata>;
@@ -101,6 +103,8 @@ export interface ScanSliceState {
   progress: number;
   scanId: string | null;
   pagesScanned: number;
+  sitemapUrls: string[];
+  scrapedUrls: string[];
   discoveredPages: DiscoveredPage[];
   matchedComponentIds: Record<number, MatchMetadata>;
   matchedTemplateIds: Record<number, MatchMetadata>;
@@ -115,6 +119,8 @@ export const initialScanSliceState: ScanSliceState = {
   progress: 0,
   scanId: null,
   pagesScanned: 0,
+  sitemapUrls: [],
+  scrapedUrls: [],
   discoveredPages: [],
   matchedComponentIds: {},
   matchedTemplateIds: {},

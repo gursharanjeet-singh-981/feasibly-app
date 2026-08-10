@@ -24,8 +24,8 @@ export const SCAN_FEATURE_ENABLED = true;
 export const SCAN_SINGLE_PAGE_OPTION_ENABLED = true;
 
 export const SCAN_DEFAULTS = {
-  maxPages: 50,
-  timeoutMs: 60_000,
+  maxPages: 500,
+  timeoutMs: 180_000,
   rateLimitPerHour: 5,
   crawlerConcurrency: 4,
   perPageTimeoutMs: 10_000,

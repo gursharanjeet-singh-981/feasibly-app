@@ -42,9 +42,11 @@ export async function exportScanReport(
   const componentById = new Map(components.map((c) => [c.id, c]));
   const templateById = new Map(templates.map((t) => [t.id, t]));
   const pageByUrl = new Map(scan.discoveredPages.map((p) => [p.url, p]));
+  const sitemapUrls = [...new Set(scan.sitemapUrls ?? [])];
+  const scrapedUrls = [...new Set(scan.scrapedUrls ?? [])];
   const unmatchedComponents = scan.unmatched.filter((item) => item.kind === "component");
   const unmatchedTemplates = scan.unmatched.filter((item) => item.kind === "template");
-  const failedEntries = buildFailedEntries(scan, pageByUrl);
+  const failedEntries = buildFailedEntries(scan, pageByUrl, project.liveUrl);
 
   // Invert matchedComponentIds → pageUrl → components[]
   const pageComponents = new Map<string, { name: string; group: string; confidence: number }[]>();
@@ -84,6 +86,8 @@ export async function exportScanReport(
     new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
   ]);
   overviewSheet.addRow(["Pages Scanned", scan.pagesScanned]);
+  overviewSheet.addRow(["Links Found In Sitemap", sitemapUrls.length]);
+  overviewSheet.addRow(["Links Scraped", scrapedUrls.length]);
   overviewSheet.addRow(["Components Matched", Object.keys(scan.matchedComponentIds).length]);
   overviewSheet.addRow(["Templates Matched", Object.keys(scan.matchedTemplateIds).length]);
   overviewSheet.addRow(["Components Unmatched", unmatchedComponents.length]);
@@ -330,6 +334,62 @@ export async function exportScanReport(
     row.font = { italic: true, color: { argb: BRAND.lightGrey.argb } };
   }
 
+  // ── Sheet 6: Sitemap Coverage ──
+  const coverageSheet = workbook.addWorksheet("Sitemap Coverage", {
+    properties: { tabColor: { argb: BRAND.brandNavy.argb } },
+  });
+
+  coverageSheet.columns = [
+    { key: "url", width: 62 },
+    { key: "inSitemap", width: 14 },
+    { key: "scraped", width: 12 },
+    { key: "status", width: 12 },
+    { key: "title", width: 30 },
+    { key: "pageType", width: 14 },
+    { key: "notes", width: 40 },
+  ];
+
+  const coverageHeader = coverageSheet.addRow({
+    url: "URL",
+    inSitemap: "In Sitemap",
+    scraped: "Scraped",
+    status: "HTTP Status",
+    title: "Page Title",
+    pageType: "Page Type",
+    notes: "Notes",
+  });
+  headerStyle(coverageHeader);
+
+  const sitemapSet = new Set(sitemapUrls);
+  const scrapedSet = new Set(scrapedUrls);
+  const allCoverageUrls = [...new Set([...sitemapUrls, ...scrapedUrls])].sort();
+  const unscriptedReasonByUrl = buildUnscriptedReasonMap(scan.warnings);
+
+  let coverageRowIdx = 0;
+  for (const url of allCoverageUrls) {
+    const page = pageByUrl.get(url);
+    const inSitemap = sitemapSet.has(url);
+    const scraped = scrapedSet.has(url);
+    const row = coverageSheet.addRow({
+      url,
+      inSitemap: inSitemap ? "Yes" : "No",
+      scraped: scraped ? "Yes" : "No",
+      status: page?.status ?? "—",
+      title: page?.title || "—",
+      pageType: page?.pageType || "—",
+      notes: inSitemap && !scraped
+        ? unscriptedReasonByUrl.get(url) ?? "Present in sitemap but not scraped (limit, timeout, robots, or fetch error)."
+        : "",
+    });
+    dataStyle(row, coverageRowIdx % 2 === 0);
+    coverageRowIdx++;
+  }
+
+  if (coverageRowIdx === 0) {
+    const row = coverageSheet.addRow({ url: "No sitemap links or scraped links were captured." });
+    row.font = { italic: true, color: { argb: BRAND.lightGrey.argb } };
+  }
+
   // ── Download ──
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
@@ -358,7 +418,7 @@ function httpStatusLabel(status: number): string {
   return labels[status] ?? (status >= 400 && status < 500 ? "Client Error" : "Server Error");
 }
 
-interface FailedEntry {
+export interface FailedEntry {
   url: string;
   title: string;
   pageType: string;
@@ -369,11 +429,13 @@ interface FailedEntry {
   source: "http_status" | "warning";
 }
 
-function buildFailedEntries(
+export function buildFailedEntries(
   scan: ScanSliceState,
   pageByUrl: Map<string, DiscoveredPage>,
+  liveUrl: string,
 ): FailedEntry[] {
   const entries: FailedEntry[] = [];
+  const baseUrl = parseUrl(liveUrl);
 
   for (const page of scan.discoveredPages) {
     if (page.status >= 200 && page.status < 300) continue;
@@ -390,16 +452,56 @@ function buildFailedEntries(
     });
   }
 
-  const fetchFailureRe = /^fetch (.+) failed: (.+)$/;
+  const fetchFailureRe = /^fetch (.+?) failed: (.+)$/;
+  const sitemapFailureRe = /^sitemap (.+?) failed: (.+)$/;
+  const robotsFailureRe = /^robots\.txt fetch failed: (.+)$/;
   const skippedRe = /^skipped (.+): (.+)$/;
   const authPartialRe = /^auth_wall_partial:(\d+)$/;
   const timeoutRe = /^scan_timeout_after_(\d+)ms$/;
+  const crawlAbortedRe = /^Crawl aborted$/;
 
   for (const warning of scan.warnings) {
+    const robotsMatch = robotsFailureRe.exec(warning);
+    if (robotsMatch) {
+      const reason = robotsMatch[1]!.trim();
+      const url = baseUrl ? new URL("/robots.txt", baseUrl).toString() : "robots.txt";
+      const classified = classifyWarningReason(reason);
+      entries.push({
+        url,
+        title: "robots.txt",
+        pageType: "—",
+        status: "—",
+        category: classified.category,
+        reason,
+        action: classified.action,
+        source: "warning",
+      });
+      continue;
+    }
+
+    const sitemapMatch = sitemapFailureRe.exec(warning);
+    if (sitemapMatch) {
+      const url = sitemapMatch[1]!.trim();
+      const reason = sitemapMatch[2]!.trim();
+      const page = pageByUrl.get(url);
+      const classified = classifyWarningReason(reason);
+      entries.push({
+        url,
+        title: page?.title || "—",
+        pageType: page?.pageType || "—",
+        status: "—",
+        category: classified.category,
+        reason,
+        action: classified.action,
+        source: "warning",
+      });
+      continue;
+    }
+
     const fetchMatch = fetchFailureRe.exec(warning);
     if (fetchMatch) {
-      const url = fetchMatch[1]!;
-      const reason = fetchMatch[2]!;
+      const url = fetchMatch[1]!.trim();
+      const reason = fetchMatch[2]!.trim();
       const page = pageByUrl.get(url);
       const classified = classifyWarningReason(reason);
       entries.push({
@@ -464,6 +566,19 @@ function buildFailedEntries(
         source: "warning",
       });
       continue;
+    }
+
+    if (crawlAbortedRe.test(warning)) {
+      entries.push({
+        url: "—",
+        title: "—",
+        pageType: "—",
+        status: "—",
+        category: "Scan Cancelled",
+        reason: "Scan was aborted before completion.",
+        action: "Retry the scan if you still need the report.",
+        source: "warning",
+      });
     }
   }
 
@@ -571,4 +686,50 @@ function classifyWarningReason(reason: string): {
     category: "Fetch / Loading Issue",
     action: "Retry scan and inspect page/network availability.",
   };
+}
+
+function parseUrl(input: string): URL | null {
+  try {
+    return new URL(input);
+  } catch {
+    return null;
+  }
+}
+
+function buildUnscriptedReasonMap(warnings: string[]): Map<string, string> {
+  const byUrl = new Map<string, string>();
+  const sitemapSkipRe = /^sitemap_skip (.+): (.+)$/;
+  const fetchFailRe = /^fetch (.+?) failed: (.+)$/;
+  const skippedRe = /^skipped (.+): (.+)$/;
+
+  for (const warning of warnings) {
+    const sitemapSkip = sitemapSkipRe.exec(warning);
+    if (sitemapSkip) {
+      const url = sitemapSkip[1]!.trim();
+      const reasonCode = sitemapSkip[2]!.trim();
+      if (reasonCode === "robots_disallow") {
+        byUrl.set(url, "Skipped by robots.txt disallow rule.");
+      } else if (reasonCode === "max_pages_limit") {
+        byUrl.set(url, "Skipped because max page limit was reached.");
+      } else if (reasonCode === "scan_incomplete") {
+        byUrl.set(url, "Not scraped because the scan ended before this URL was processed.");
+      } else {
+        byUrl.set(url, `Skipped: ${reasonCode}`);
+      }
+      continue;
+    }
+
+    const fetchFail = fetchFailRe.exec(warning);
+    if (fetchFail) {
+      byUrl.set(fetchFail[1]!.trim(), `Fetch failed: ${fetchFail[2]!.trim()}`);
+      continue;
+    }
+
+    const skipped = skippedRe.exec(warning);
+    if (skipped) {
+      byUrl.set(skipped[1]!.trim(), `Skipped: ${skipped[2]!.trim()}`);
+    }
+  }
+
+  return byUrl;
 }

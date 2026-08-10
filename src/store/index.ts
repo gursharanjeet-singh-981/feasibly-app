@@ -187,6 +187,14 @@ export const useAppStore = create<AppState>()(
     {
       name: STORAGE_KEY,
       version: STORAGE_VERSION,
+      // Scan payloads can be very large for whole-site crawls. Keep scan state
+      // in-memory only to avoid localStorage quota failures during setScan().
+      partialize: (state) => ({
+        project: state.project,
+        useAiEstimation: state.useAiEstimation,
+        components: state.components,
+        templates: state.templates,
+      }),
       // v1 -> v2: promote the `assumptions === "__custom__"` sentinel to explicit isCustom.
       // v2 -> v3: seed empty scan slice for the live-site scan feature.
       migrate: (persisted, version) => {

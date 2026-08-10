@@ -67,10 +67,17 @@ export async function* orchestrateScan(
     // ---------- 1. Crawl ----------
     yield progress("crawl", 5, "Fetching robots.txt and sitemap…");
 
+    // In whole-site mode, always crawl from origin root so subpage inputs
+    // (e.g. /library) do not constrain discovery to that single path.
+    const crawlStartUrl =
+      mode === "full" ? new URL("/", url).toString() : url;
+    const marketScopePathPrefix = mode === "full" ? detectMarketPathPrefix(url) : undefined;
+
     let crawlResult: Awaited<ReturnType<typeof crawl>>;
     try {
-      crawlResult = await crawl(url, {
+      crawlResult = await crawl(crawlStartUrl, {
         ...(mode === "single" ? { maxPages: 1, maxDepth: 0 } : {}),
+        ...(marketScopePathPrefix ? { scopePathPrefix: marketScopePathPrefix } : {}),
         ...crawlOptions,
         signal: controller.signal,
         onPage: () => {
@@ -153,6 +160,7 @@ export async function* orchestrateScan(
       depth: p.depth,
       status: p.status,
     }));
+    const scrapedUrls = discovered.map((p) => p.url);
 
     const result: ScanResult = {
       scanId,
@@ -160,6 +168,8 @@ export async function* orchestrateScan(
       scanDate: new Date(startedAt).toISOString(),
       scanDuration: now() - startedAt,
       pagesScanned: crawlResult.pages.length,
+      sitemapUrls: crawlResult.sitemapUrls,
+      scrapedUrls,
       discoveredPages: discovered,
       matchedComponentIds: match.matchedComponentIds,
       matchedTemplateIds: match.matchedTemplateIds,
@@ -210,6 +220,8 @@ function finalizeEmpty(args: {
     scanDate: new Date(args.startedAt).toISOString(),
     scanDuration: args.now() - args.startedAt,
     pagesScanned: 0,
+    sitemapUrls: [],
+    scrapedUrls: [],
     discoveredPages: [],
     matchedComponentIds: {},
     matchedTemplateIds: {},
@@ -233,4 +245,19 @@ function isThinContent(html: string, analysis: PageAnalysis): boolean {
     .replace(/\s+/g, " ")
     .trim();
   return text.length < 200 && analysis.detectedComponents.length === 0;
+}
+
+function detectMarketPathPrefix(inputUrl: string): string | undefined {
+  try {
+    const url = new URL(inputUrl);
+    const firstSegment = url.pathname.split("/").filter(Boolean)[0];
+    if (!firstSegment) return undefined;
+    // Treat common locale-like prefixes as market scoping tokens.
+    if (/^[a-z]{2}(?:-[a-z]{2})?$/i.test(firstSegment)) {
+      return `/${firstSegment.toLowerCase()}`;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
 }
