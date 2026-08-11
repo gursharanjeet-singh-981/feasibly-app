@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { StoreHydration } from "@/components/StoreHydration";
 
 export const metadata: Metadata = {
   title: "Feasibly — Project Estimation Tool",
@@ -13,8 +14,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col font-sans">{children}</body>
+    // suppressHydrationWarning prevents false positives from browser extensions that modify <html>/<body>
+    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+      <body className="min-h-full flex flex-col font-sans" suppressHydrationWarning>
+        <StoreHydration />
+        {children}
+      </body>
     </html>
   );
 }

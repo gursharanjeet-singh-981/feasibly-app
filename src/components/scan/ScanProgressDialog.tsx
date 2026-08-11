@@ -137,6 +137,9 @@ function errorMessage(code: string | null): string {
     invalid_json: "The scan request was malformed. Please refresh and try again.",
     auth_required: "This site requires authentication — we couldn't reach public pages to analyse.",
     ai_not_configured: "AI analysis is not configured. Please check your API key and try again.",
+    scan_aborted: "The scan was interrupted before it finished. Please try again.",
+    scan_timeout: "The scan took too long to complete. Try scanning a single page or retry later.",
+    network_error: "We couldn't reach that site from our scanner. Check the URL and try again.",
   };
   return map[code] ?? "Something went wrong while scanning. You can continue setting up your project manually.";
 }

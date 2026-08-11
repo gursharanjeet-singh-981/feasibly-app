@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
+import { promises as dns } from "node:dns";
 import { describe, expect, it, vi } from "vitest";
 
 vi.mock("node:dns", () => ({
@@ -84,16 +85,15 @@ describe("orchestrateScan", () => {
     expect(progressEvents.length).toBeGreaterThan(0);
     expect(completeEvents).toHaveLength(1);
 
-    // Stages appear in order: crawl -> analyze -> match -> done
+    // Stages appear in order: crawl -> analyze -> match (no "done" progress — completion is signalled by the complete event)
     const stages = progressEvents.map((e) => e.stage);
     const firstCrawl = stages.indexOf("crawl");
     const firstAnalyze = stages.indexOf("analyze");
     const firstMatch = stages.indexOf("match");
-    const firstDone = stages.indexOf("done");
     expect(firstCrawl).toBeGreaterThanOrEqual(0);
     expect(firstAnalyze).toBeGreaterThan(firstCrawl);
     expect(firstMatch).toBeGreaterThan(firstAnalyze);
-    expect(firstDone).toBeGreaterThan(firstMatch);
+    expect(stages).not.toContain("done");
 
     // Progress is monotonically non-decreasing.
     let prev = -1;
@@ -101,7 +101,6 @@ describe("orchestrateScan", () => {
       expect(p.progress).toBeGreaterThanOrEqual(prev);
       prev = p.progress;
     }
-    expect(progressEvents.at(-1)?.progress).toBe(100);
 
     const result = completeEvents[0].result;
     expect(result.scanId).toBe("scan-fixed-id");
@@ -124,6 +123,23 @@ describe("orchestrateScan", () => {
     );
     const errs = events.filter((e): e is ScanErrorEvent => e.type === "error");
     expect(errs).toHaveLength(1);
+    expect(events.find((e) => e.type === "complete")).toBeUndefined();
+  });
+
+  it("emits dns_failure code (not raw error text) when DNS resolution fails", async () => {
+    vi.mocked(dns.lookup).mockRejectedValueOnce(new Error("ENOTFOUND"));
+
+    const events = await collect(
+      orchestrateScan({
+        url: "https://example.com/",
+        library,
+        crawlOptions: { fetchImpl: makeFetchStub({}).stub, jitterMs: noJitter },
+      }),
+    );
+
+    const err = events.find((e): e is ScanErrorEvent => e.type === "error");
+    expect(err).toBeDefined();
+    expect(err?.message).toBe("dns_failure");
     expect(events.find((e) => e.type === "complete")).toBeUndefined();
   });
 

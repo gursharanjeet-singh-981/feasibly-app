@@ -24,12 +24,12 @@ export const SCAN_FEATURE_ENABLED = true;
 export const SCAN_SINGLE_PAGE_OPTION_ENABLED = true;
 
 export const SCAN_DEFAULTS = {
-  maxPages: 500,
+  maxPages: 50000,
   timeoutMs: 180_000,
   rateLimitPerHour: 5,
   crawlerConcurrency: 4,
   perPageTimeoutMs: 10_000,
-  maxDepth: 3,
+  maxDepth: 10,
 } as const;
 
 export const BUFFER_RATIO = 0.2;
