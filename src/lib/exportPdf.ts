@@ -12,6 +12,8 @@ import {
   componentDevEffort,
   templateDesignBase,
   templateDevBase,
+  templateTotalDesign,
+  templateTotalDev,
 } from "@/lib/calculations";
 
 const COBALT = BRAND.cobalt.rgb;
@@ -313,8 +315,8 @@ export function exportPDF(
     doc.text("Selected Templates", margin, y);
     y += 8;
 
-    const tColWidths = [45, 20, 27, 27, 29, 22];
-    const tHeaders = ["Template", "Category", "Design", "Dev", "Extra/pg (D+D)", "Add. Pages"];
+    const tColWidths = [44, 17, 22, 22, 14, 27, 24];
+    const tHeaders = ["Template", "Category", "Design", "Dev", "Add.Pg", "Total Design", "Total Dev"];
     setFillColor(doc, BG_BLUE);
     doc.rect(margin, y - 4, contentWidth, 8, "F");
     doc.setFontSize(7);
@@ -341,11 +343,9 @@ export function exportPDF(
           { text: t.category, width: tColWidths[1] },
           { text: `${templateDesignBase(t, useAi)}h`, width: tColWidths[2] },
           { text: `${templateDevBase(t, useAi)}h`, width: tColWidths[3] },
-          {
-            text: `${t.designEffortPerPage}h + ${t.devEffortPerPage}h`,
-            width: tColWidths[4],
-          },
-          { text: String(t.additionalPages), width: tColWidths[5] },
+          { text: String(t.additionalPages), width: tColWidths[4] },
+          { text: `${templateTotalDesign(t, useAi)}h`, width: tColWidths[5] },
+          { text: `${templateTotalDev(t, useAi)}h`, width: tColWidths[6] },
         ],
         margin,
         y,
