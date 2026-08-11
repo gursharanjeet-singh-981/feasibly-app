@@ -24,25 +24,25 @@ const BG_BLUE_HEX = BRAND.bgBlue.argb;
 const WHITE_HEX = BRAND.white.argb;
 const STROKES_HEX = BRAND.strokes.argb;
 
-function applyHeaderStyle(row: ExcelJS.Row) {
-  row.eachCell((cell) => {
+function applyHeaderStyle(row: ExcelJS.Row, centerCols?: number[]) {
+  row.eachCell((cell, col) => {
     cell.fill = {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: COBALT_HEX },
     };
     cell.font = { bold: true, color: { argb: WHITE_HEX }, size: 11 };
-    cell.alignment = { vertical: "middle", horizontal: "left" };
+    cell.alignment = { vertical: "middle", horizontal: centerCols?.includes(col) ? "center" : "left" };
     cell.border = {
       bottom: { style: "thin", color: { argb: STROKES_HEX } },
     };
   });
 }
 
-function applyDataRowStyle(row: ExcelJS.Row, isEven: boolean) {
-  row.eachCell((cell) => {
+function applyDataRowStyle(row: ExcelJS.Row, isEven: boolean, centerCols?: number[]) {
+  row.eachCell((cell, col) => {
     cell.font = { size: 10 };
-    cell.alignment = { vertical: "top", wrapText: true };
+    cell.alignment = { vertical: "top", wrapText: true, horizontal: centerCols?.includes(col) ? "center" : "left" };
     if (isEven) {
       cell.fill = {
         type: "pattern",
@@ -173,7 +173,8 @@ export async function exportExcel(
       { header: "Assumptions", key: "assumptions", width: 30 },
     ];
 
-    applyHeaderStyle(compSheet.getRow(1));
+    const compNumericCols = [6, 7]; // Design Effort (h), Dev Effort (h)
+    applyHeaderStyle(compSheet.getRow(1), compNumericCols);
 
     // Group by group name
     const grouped = new Map<string, SelectedComponent[]>();
@@ -202,7 +203,7 @@ export async function exportExcel(
           devEffort: componentDevEffort(c, useAi),
           assumptions: c.assumptions,
         });
-        applyDataRowStyle(row, rowIdx % 2 === 0);
+        applyDataRowStyle(row, rowIdx % 2 === 0, compNumericCols);
         rowIdx++;
       }
     }
@@ -220,6 +221,9 @@ export async function exportExcel(
       "",
     ]);
     totalRow.font = { bold: true, size: 11 };
+    compNumericCols.forEach((col) => {
+      totalRow.getCell(col).alignment = { horizontal: "center" };
+    });
   }
 
   // ── Templates Sheet ──
@@ -242,7 +246,9 @@ export async function exportExcel(
       { header: "Total Dev (h)", key: "totalDev", width: 14 },
     ];
 
-    applyHeaderStyle(templSheet.getRow(1));
+    // Cols 4-10: all numeric effort and pages columns
+    const templNumericCols = [4, 5, 6, 7, 8, 9, 10];
+    applyHeaderStyle(templSheet.getRow(1), templNumericCols);
 
     selectedTemplates.forEach((t, i) => {
       const row = templSheet.addRow({
@@ -257,7 +263,7 @@ export async function exportExcel(
         totalDesign: templateTotalDesign(t, useAi),
         totalDev: templateTotalDev(t, useAi),
       });
-      applyDataRowStyle(row, i % 2 === 0);
+      applyDataRowStyle(row, i % 2 === 0, templNumericCols);
     });
 
     const tmplTotals = templatesSubtotal(templates, useAi);
@@ -275,6 +281,9 @@ export async function exportExcel(
       tmplTotals.totalDev,
     ]);
     totalRow.font = { bold: true, size: 11 };
+    templNumericCols.forEach((col) => {
+      totalRow.getCell(col).alignment = { horizontal: "center" };
+    });
   }
 
   // ── Download ──

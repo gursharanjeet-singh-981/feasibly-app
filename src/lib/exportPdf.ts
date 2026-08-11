@@ -52,8 +52,8 @@ interface Cell {
   width: number;
 }
 
-const LINE_HEIGHT = 4;
-const ROW_VPAD = 2;
+const LINE_HEIGHT = 8;
+const ROW_VPAD = 8;
 
 // jsPDF's built-in Helvetica is WinAnsi-only; substitute common Unicode punctuation.
 function sanitize(text: string): string {
@@ -313,7 +313,7 @@ export function exportPDF(
     doc.text("Selected Templates", margin, y);
     y += 8;
 
-    const tColWidths = [45, 22, 28, 28, 28, 22];
+    const tColWidths = [45, 20, 27, 27, 29, 22];
     const tHeaders = ["Template", "Category", "Design", "Dev", "Extra/pg (D+D)", "Add. Pages"];
     setFillColor(doc, BG_BLUE);
     doc.rect(margin, y - 4, contentWidth, 8, "F");

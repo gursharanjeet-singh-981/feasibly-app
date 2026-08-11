@@ -129,7 +129,7 @@ function TemplateRowBase({
             ariaLabel="Development effort per additional page"
           />
         </div>
-        <div className="flex items-center px-4 py-3 w-25 shrink-0">
+        <div className="flex items-start px-4 py-3 w-25 shrink-0">
           <Input
             type="number"
             min={0}
