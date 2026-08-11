@@ -121,10 +121,10 @@ describe("crawl", () => {
     });
     expect(result.usedSitemap).toBe(true);
     expect(result.pages.map((p) => p.url).sort()).toEqual([
+      "https://x.com/",
       "https://x.com/a",
       "https://x.com/b",
       "https://x.com/c",
-      "https://x.com/",
     ]);
   });
 

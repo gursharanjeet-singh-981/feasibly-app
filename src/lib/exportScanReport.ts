@@ -568,18 +568,8 @@ export function buildFailedEntries(
       continue;
     }
 
-    if (crawlAbortedRe.test(warning)) {
-      entries.push({
-        url: "—",
-        title: "—",
-        pageType: "—",
-        status: "—",
-        category: "Scan Cancelled",
-        reason: "Scan was aborted before completion.",
-        action: "Retry the scan if you still need the report.",
-        source: "warning",
-      });
-    }
+    // "Crawl aborted" is a summary notice; individual aborted fetches already
+    // surface as their own rows so no extra entry is needed here.
   }
 
   // De-duplicate repeated entries from mixed sources.
@@ -652,7 +642,13 @@ function classifyWarningReason(reason: string): {
       action: "Use a public URL or allow scanner access to authenticated pages.",
     };
   }
-  if (normalized.includes("abort") || normalized.includes("timeout") || normalized.includes("timed out")) {
+  if (normalized.includes("abort")) {
+    return {
+      category: "Scan Cancelled",
+      action: "Retry the scan if you still need the report.",
+    };
+  }
+  if (normalized.includes("timeout") || normalized.includes("timed out")) {
     return {
       category: "Timeout / Loading Issue",
       action: "Retry scan and verify page response time.",

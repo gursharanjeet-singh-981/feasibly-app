@@ -78,10 +78,8 @@ export async function crawl(
       return normalized ? isWithinPathScope(normalized, scopePathPrefix) : false;
     });
     const usedSitemap = scopedSitemapUrls.length > 0;
-    // Ensure sitemap URLs are not dropped purely due to a low maxPages value.
-    const effectiveMaxPages = usedSitemap
-      ? Math.max(maxPages, scopedSitemapUrls.length + 1)
-      : maxPages;
+    // Add 1 to reserve a slot for the root URL so it doesn't crowd out sitemap pages.
+    const effectiveMaxPages = usedSitemap ? maxPages + 1 : maxPages;
     const queue: Array<{ url: string; depth: number }> = [];
     const sitemapSkipWarned = new Set<string>();
     const pendingSitemapUrls = new Set<string>();
