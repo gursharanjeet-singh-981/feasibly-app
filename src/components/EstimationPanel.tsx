@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useAppStore } from "@/store";
 import { calculateEstimation } from "@/lib/calculations";
 import { EstimationCard } from "@/components/estimation/EstimationCard";
@@ -10,12 +10,33 @@ import {
   InfoSidebar,
   type InfoKind,
 } from "@/components/estimation/InfoSidebar";
+import { loadTemplates } from "@/lib/data";
+import type { SelectedTemplate } from "@/types";
 
 export function EstimationPanel() {
   const components = useAppStore((s) => s.components);
   const templates = useAppStore((s) => s.templates);
+  const setTemplates = useAppStore((s) => s.setTemplates);
   const project = useAppStore((s) => s.project);
   const useAiEstimation = useAppStore((s) => s.useAiEstimation);
+  const matchedTemplateIds = useAppStore((s) => s.scan.matchedTemplateIds);
+
+  // Pre-load templates so the estimation is accurate before the Templates page is visited.
+  useEffect(() => {
+    if (templates.length > 0) return;
+    loadTemplates()
+      .then((data) =>
+        setTemplates(
+          data.map<SelectedTemplate>((t) => ({
+            ...t,
+            isSelected: (matchedTemplateIds[t.id]?.confidence ?? 0) >= 0.5,
+            additionalPages: 0,
+            isCustom: false,
+          })),
+        ),
+      )
+      .catch(() => {/* estimation stays at 0 — non-critical */});
+  }, [templates.length, setTemplates, matchedTemplateIds]);
 
   const [infoSidebar, setInfoSidebar] = useState<InfoKind | null>(null);
 

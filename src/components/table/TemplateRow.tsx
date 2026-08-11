@@ -4,10 +4,12 @@ import { memo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { CategoryLabel } from "@/components/CategoryLabel";
+import { ConfidenceBadge } from "@/components/scan/ConfidenceBadge";
 import {
   EditableTextCell,
   EditableNumberCell,
 } from "@/components/table/EditableCell";
+import type { MatchMetadata } from "@/lib/scanner/types";
 import type { SelectedTemplate } from "@/types";
 
 const CHECKBOX_ROW = "w-4.5 h-4.5 rounded-[5px] border-dark-background mt-0.5";
@@ -16,6 +18,7 @@ const CELL_BORDER = "border-r border-strokes/50";
 interface Props {
   template: SelectedTemplate;
   useAiEstimation: boolean;
+  match?: MatchMetadata;
   onToggle: () => void;
   onSetPages: (pages: number) => void;
   onUpdate: (updates: Partial<SelectedTemplate>) => void;
@@ -24,6 +27,7 @@ interface Props {
 function TemplateRowBase({
   template,
   useAiEstimation,
+  match,
   onToggle,
   onSetPages,
   onUpdate,
@@ -60,6 +64,13 @@ function TemplateRowBase({
             placeholder="Variant name"
             className="leading-snug font-medium"
           />
+          {match && (
+            <ConfidenceBadge
+              confidence={match.confidence}
+              pages={match.pages}
+              className="mt-0.5"
+            />
+          )}
         </div>
         <div className={`flex items-start px-4 py-3 w-22.5 shrink-0 ${CELL_BORDER}`}>
           {isEditable ? (
@@ -151,6 +162,9 @@ function TemplateRowBase({
               <p className="text-sm font-medium text-black truncate">{template.description}</p>
             )}
             <CategoryLabel category={template.category} />
+            {match && (
+              <ConfidenceBadge confidence={match.confidence} pages={match.pages} />
+            )}
           </div>
           <p className="text-xs text-light-grey-text line-clamp-2 mb-2">
             {template.description}

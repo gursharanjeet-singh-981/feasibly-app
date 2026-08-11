@@ -7,6 +7,7 @@ export default defineConfig({
     environment: "node",
     include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     globals: false,
+    typecheck: { tsconfig: "./tsconfig.test.json" },
   },
   resolve: {
     alias: {

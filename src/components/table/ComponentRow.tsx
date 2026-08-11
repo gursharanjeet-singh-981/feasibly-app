@@ -3,10 +3,12 @@
 import { memo } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { CategoryLabel } from "@/components/CategoryLabel";
+import { ConfidenceBadge } from "@/components/scan/ConfidenceBadge";
 import {
   EditableTextCell,
   EditableNumberCell,
 } from "@/components/table/EditableCell";
+import type { MatchMetadata } from "@/lib/scanner/types";
 import type { SelectedComponent } from "@/types";
 
 const CHECKBOX_ROW = "w-4.5 h-4.5 rounded-[5px] border-dark-background mt-0.5";
@@ -16,11 +18,12 @@ const CELL_TEXT = "leading-snug";
 interface Props {
   component: SelectedComponent;
   useAiEstimation: boolean;
+  match?: MatchMetadata;
   onToggle: () => void;
   onUpdate: (updates: Partial<SelectedComponent>) => void;
 }
 
-function ComponentRowBase({ component, useAiEstimation, onToggle, onUpdate }: Props) {
+function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdate }: Props) {
   const designEffort = useAiEstimation
     ? component.aiDesignEffort
     : component.designEffort;
@@ -53,6 +56,13 @@ function ComponentRowBase({ component, useAiEstimation, onToggle, onUpdate }: Pr
             placeholder="Variant name"
             className={CELL_TEXT}
           />
+          {match && (
+            <ConfidenceBadge
+              confidence={match.confidence}
+              pages={match.pages}
+              className="mt-0.5"
+            />
+          )}
         </div>
         <div className={`flex items-start px-4 py-3 w-25 shrink-0 ${CELL_BORDER}`}>
           {isEditable ? (
@@ -124,6 +134,9 @@ function ComponentRowBase({ component, useAiEstimation, onToggle, onUpdate }: Pr
               <p className="text-sm font-medium text-black truncate">{component.name}</p>
             )}
             <CategoryLabel category={component.category} />
+            {match && (
+              <ConfidenceBadge confidence={match.confidence} pages={match.pages} />
+            )}
           </div>
           {isEditable ? (
             <EditableTextCell
