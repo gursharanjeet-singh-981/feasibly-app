@@ -3,6 +3,7 @@ import {
   DEFAULT_USER_AGENT,
   classifyPageType,
   crawl,
+  getPathTemplate,
   normalizeUrl,
   parseSitemap,
 } from "./crawler";
@@ -469,5 +470,103 @@ describe("crawl", () => {
       "https://x.com/",
       "https://x.com/a",
     ]);
+  });
+
+  it("skips sibling pages beyond maxPagesPerPathTemplate at the threshold depth", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/sitemap.xml": { status: 404, body: "" },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/": {
+        body: page("Home", [
+          "/roles/ceo",
+          "/roles/manager",
+          "/roles/analyst",
+          "/sectors/food",
+          "/sectors/tech",
+        ]),
+      },
+      "https://x.com/roles/ceo": { body: page("CEO") },
+      "https://x.com/roles/manager": { body: page("Manager") },
+      "https://x.com/roles/analyst": { body: page("Analyst") },
+      "https://x.com/sectors/food": { body: page("Food") },
+      "https://x.com/sectors/tech": { body: page("Tech") },
+    };
+    const { stub } = makeFetchStub(routes);
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      maxPagesPerPathTemplate: 1,
+      similarPageDepthThreshold: 2,
+    });
+    const rolePages = result.pages.filter((p) => p.url.includes("/roles/"));
+    const sectorPages = result.pages.filter((p) => p.url.includes("/sectors/"));
+    expect(rolePages).toHaveLength(1);
+    expect(sectorPages).toHaveLength(1);
+    expect(result.warnings.some((w) => w.includes("path_template_limit"))).toBe(true);
+  });
+
+  it("does not deduplicate pages below the depth threshold", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/sitemap.xml": { status: 404, body: "" },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/": {
+        body: page("Home", ["/about", "/contact", "/pricing"]),
+      },
+      "https://x.com/about": { body: page("About") },
+      "https://x.com/contact": { body: page("Contact") },
+      "https://x.com/pricing": { body: page("Pricing") },
+    };
+    const { stub } = makeFetchStub(routes);
+    // threshold=2 means /a/b would be deduplicated, but /a (1 segment) is not
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      maxPagesPerPathTemplate: 1,
+      similarPageDepthThreshold: 2,
+    });
+    expect(result.pages.map((p) => p.url).sort()).toEqual([
+      "https://x.com/",
+      "https://x.com/about",
+      "https://x.com/contact",
+      "https://x.com/pricing",
+    ]);
+  });
+
+  it("allows multiple pages per template when maxPagesPerPathTemplate > 1", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/sitemap.xml": { status: 404, body: "" },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/": {
+        body: page("Home", ["/roles/ceo", "/roles/manager", "/roles/analyst"]),
+      },
+      "https://x.com/roles/ceo": { body: page("CEO") },
+      "https://x.com/roles/manager": { body: page("Manager") },
+      "https://x.com/roles/analyst": { body: page("Analyst") },
+    };
+    const { stub } = makeFetchStub(routes);
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      maxPagesPerPathTemplate: 2,
+      similarPageDepthThreshold: 2,
+    });
+    const rolePages = result.pages.filter((p) => p.url.includes("/roles/"));
+    expect(rolePages).toHaveLength(2);
+  });
+});
+
+describe("getPathTemplate", () => {
+  it("returns parent path for deep URLs", () => {
+    expect(getPathTemplate("https://x.com/a/b/c")).toBe("/a/b");
+    expect(getPathTemplate("https://x.com/roles/sales-manager")).toBe("/roles");
+    expect(getPathTemplate("https://x.com/gb/who-is-it-for/roles/ceo")).toBe("/gb/who-is-it-for/roles");
+  });
+
+  it("returns null for root and single-segment URLs", () => {
+    expect(getPathTemplate("https://x.com/")).toBeNull();
+    expect(getPathTemplate("https://x.com/about")).toBeNull();
   });
 });

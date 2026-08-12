@@ -695,6 +695,7 @@ function parseUrl(input: string): URL | null {
 function buildUnscriptedReasonMap(warnings: string[]): Map<string, string> {
   const byUrl = new Map<string, string>();
   const sitemapSkipRe = /^sitemap_skip (.+): (.+)$/;
+  const similarSkipRe = /^similar_skip (.+): (.+)$/;
   const fetchFailRe = /^fetch (.+?) failed: (.+)$/;
   const skippedRe = /^skipped (.+): (.+)$/;
 
@@ -706,11 +707,11 @@ function buildUnscriptedReasonMap(warnings: string[]): Map<string, string> {
       if (reasonCode === "robots_disallow") {
         byUrl.set(url, "Skipped by robots.txt disallow rule.");
       } else if (reasonCode === "max_pages_limit") {
-        byUrl.set(url, "Skipped because max page limit was reached.");
+        byUrl.set(url, "Skipped because the maximum page limit was reached before this URL was processed.");
       } else if (reasonCode === "scan_incomplete") {
-        byUrl.set(url, "Not scraped because the scan ended before this URL was processed.");
+        byUrl.set(url, "Not scraped because the scan ended (timeout or cancellation) before this URL was processed.");
       } else {
-        byUrl.set(url, `Skipped: ${reasonCode}`);
+        byUrl.set(url, `Skipped by crawler — reason: ${reasonCode}.`);
       }
       continue;
     }
@@ -718,6 +719,18 @@ function buildUnscriptedReasonMap(warnings: string[]): Map<string, string> {
     const fetchFail = fetchFailRe.exec(warning);
     if (fetchFail) {
       byUrl.set(fetchFail[1]!.trim(), `Fetch failed: ${fetchFail[2]!.trim()}`);
+      continue;
+    }
+
+    const similarSkip = similarSkipRe.exec(warning);
+    if (similarSkip) {
+      const url = similarSkip[1]!.trim();
+      const reasonCode = similarSkip[2]!.trim();
+      if (reasonCode === "path_template_limit") {
+        byUrl.set(url, "Skipped — a page with the same URL structure was already scanned from this section.");
+      } else {
+        byUrl.set(url, `Skipped (similar page): ${reasonCode}`);
+      }
       continue;
     }
 

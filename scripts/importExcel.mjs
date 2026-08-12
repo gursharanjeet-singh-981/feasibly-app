@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 async function convertExcel() {
   const wb = new ExcelJS.Workbook();
   await wb.xlsx.readFile(
-    path.resolve(__dirname, "../../FF - Data Set 1.xlsx")
+    path.resolve(__dirname, "../Data-Set.xlsx")
   );
 
   // Components sheet

@@ -103,7 +103,7 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-background-blue">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-background-blue" suppressHydrationWarning>
       <div className="flex flex-col justify-between lg:w-131 bg-cobalt p-8 md:p-12 lg:p-15 text-white">
         <div className="flex items-center gap-2">
           <SvgIcon
@@ -158,6 +158,7 @@ export default function OnboardingPage() {
               placeholder="Name your project"
               className="h-12 md:h-15 rounded-full px-5 md:px-6.25 text-sm md:text-[16px] border-strokes"
               aria-invalid={!!errors.projectName}
+              suppressHydrationWarning
             />
             {errors.projectName && (
               <p className="text-destructive text-sm">
@@ -181,6 +182,7 @@ export default function OnboardingPage() {
               placeholder="Paste brand URL"
               className="h-12 md:h-15 rounded-full px-5 md:px-6.25 text-sm md:text-[16px] border-strokes"
               aria-invalid={!!errors.liveUrl}
+              suppressHydrationWarning
             />
             {errors.liveUrl && (
               <p className="text-destructive text-sm">

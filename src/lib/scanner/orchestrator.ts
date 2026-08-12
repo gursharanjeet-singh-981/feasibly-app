@@ -1,8 +1,9 @@
 import { randomUUID } from "node:crypto";
+import pLimit from "p-limit";
 import { SCAN_DEFAULTS } from "@/lib/constants";
 import type { Component, Template } from "@/types";
 import { analyzePage } from "./analyzer";
-import { crawl, type CrawlOptions } from "./crawler";
+import { crawl, type CrawlOptions, type CrawlResult, type FetchedPage } from "./crawler";
 import { matchDetections } from "./matcher";
 import { UrlGuardError, resolveAndAssertPublic } from "./urlGuard";
 import type {
@@ -25,6 +26,8 @@ export interface OrchestrateOptions {
   signal?: AbortSignal;
   now?: () => number;
   idFactory?: () => string;
+  /** Run this many crawlers in parallel, each scoped to a distinct site section. Default 1. */
+  parallelCrawlers?: number;
 }
 
 export async function* orchestrateScan(
@@ -39,6 +42,7 @@ export async function* orchestrateScan(
     signal: externalSignal,
     now = Date.now,
     idFactory = randomUUID,
+    parallelCrawlers = 1,
   } = options;
 
   const scanId = idFactory();
@@ -75,15 +79,23 @@ export async function* orchestrateScan(
 
     let crawlResult: Awaited<ReturnType<typeof crawl>>;
     try {
-      crawlResult = await crawl(crawlStartUrl, {
-        ...(mode === "single" ? { maxPages: 1, maxDepth: 0 } : {}),
-        ...(marketScopePathPrefix ? { scopePathPrefix: marketScopePathPrefix } : {}),
-        ...crawlOptions,
-        signal: controller.signal,
-        onPage: () => {
-          // per-page progress emitted below after crawl completes
-        },
-      });
+      if (mode === "full" && parallelCrawlers > 1) {
+        crawlResult = await parallelCrawl(crawlStartUrl, parallelCrawlers, {
+          ...(marketScopePathPrefix ? { scopePathPrefix: marketScopePathPrefix } : {}),
+          ...crawlOptions,
+          signal: controller.signal,
+        });
+      } else {
+        crawlResult = await crawl(crawlStartUrl, {
+          ...(mode === "single" ? { maxPages: 1, maxDepth: 0 } : {}),
+          ...(marketScopePathPrefix ? { scopePathPrefix: marketScopePathPrefix } : {}),
+          ...crawlOptions,
+          signal: controller.signal,
+          onPage: () => {
+            // per-page progress emitted below after crawl completes
+          },
+        });
+      }
     } catch (err) {
       yield errorEvent(err);
       return;
@@ -275,4 +287,99 @@ function detectMarketPathPrefix(inputUrl: string): string | undefined {
   } catch {
     return undefined;
   }
+}
+
+/**
+ * Runs `workerCount` crawlers concurrently, each scoped to a distinct top-level
+ * path section of the site. Falls back to a single full crawl if the site does
+ * not have enough distinct sections to partition.
+ */
+async function parallelCrawl(
+  startUrl: string,
+  workerCount: number,
+  options: CrawlOptions,
+): Promise<CrawlResult> {
+  // Phase 1: lightweight discovery to find top-level section paths.
+  const discovery = await crawl(startUrl, {
+    ...options,
+    maxDepth: 1,
+    maxPages: 50,
+  });
+
+  const sections = getTopLevelSections(
+    [...discovery.sitemapUrls, ...discovery.pages.map((p) => p.url)],
+    startUrl,
+    options.scopePathPrefix,
+  );
+
+  // Not enough distinct sections — fall back to single crawler.
+  if (sections.length < 2) {
+    return crawl(startUrl, options);
+  }
+
+  const limit = pLimit(workerCount);
+  const pagesPerWorker = Math.ceil((options.maxPages ?? SCAN_DEFAULTS.maxPages) / sections.length);
+
+  const results = await Promise.all(
+    sections.map((prefix) =>
+      limit(() =>
+        crawl(startUrl, {
+          ...options,
+          scopePathPrefix: prefix,
+          maxPages: pagesPerWorker,
+        }),
+      ),
+    ),
+  );
+
+  return mergeCrawlResults([discovery, ...results]);
+}
+
+/** Extracts distinct first-segment path prefixes (after any market prefix) from a URL list. */
+function getTopLevelSections(
+  urls: string[],
+  baseUrl: string,
+  marketPrefix?: string,
+): string[] {
+  const base = new URL(baseUrl);
+  const seen = new Set<string>();
+  for (const raw of urls) {
+    try {
+      if (new URL(raw).origin !== base.origin) continue;
+      const pathname = new URL(raw).pathname;
+      const stripped = marketPrefix ? pathname.slice(marketPrefix.length) : pathname;
+      const segment = stripped.split("/").filter(Boolean)[0];
+      if (!segment) continue;
+      seen.add(marketPrefix ? `${marketPrefix}/${segment}` : `/${segment}`);
+    } catch {
+      // ignore malformed
+    }
+  }
+  return [...seen];
+}
+
+function mergeCrawlResults(results: CrawlResult[]): CrawlResult {
+  const seenUrls = new Set<string>();
+  const pages: FetchedPage[] = [];
+  const sitemapUrls: string[] = [];
+  const warnings: string[] = [];
+  let usedSitemap = false;
+  let discoveredCount = 0;
+
+  for (const r of results) {
+    usedSitemap = usedSitemap || r.usedSitemap;
+    discoveredCount += r.discoveredCount;
+    for (const w of r.warnings) warnings.push(w);
+    for (const u of r.sitemapUrls) {
+      if (!seenUrls.has(u)) sitemapUrls.push(u);
+    }
+    for (const page of r.pages) {
+      if (!seenUrls.has(page.url)) {
+        seenUrls.add(page.url);
+        pages.push(page);
+      }
+    }
+  }
+
+  return { pages, discoveredCount, usedSitemap, sitemapUrls, warnings };
 }

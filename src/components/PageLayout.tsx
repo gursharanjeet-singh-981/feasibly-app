@@ -5,7 +5,7 @@ import { EstimationPanel } from "@/components/EstimationPanel";
 
 export function PageLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-background-blue flex flex-col">
+    <div className="min-h-screen bg-background-blue flex flex-col" suppressHydrationWarning>
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 flex-1">
         <div className="lg:col-span-8 min-w-0">
           <AppHeader />
