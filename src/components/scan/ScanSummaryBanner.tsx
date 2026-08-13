@@ -100,37 +100,11 @@ export function ScanSummaryBanner({ kind }: Props) {
           )}
         </div>
       </div>
-      {(spaDetected || authPartial) && (
+      {spaDetected && (
         <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-xs text-amber-800">
-          {spaDetected && (
-            <p>
-              This looks like a client-rendered app — server HTML was thin, so results are heuristic-only. Review the selections carefully.
-            </p>
-          )}
-          {authPartial && (
-            <p>Some pages required authentication and were skipped.</p>
-          )}
-        </div>
-      )}
-      {issues.length > 0 && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-xs text-red-900">
-          <details>
-            <summary className="cursor-pointer font-medium">
-              {issues.length} page issue{issues.length === 1 ? "" : "s"} found (login/access/load failures)
-            </summary>
-            <ul className="mt-2 max-h-48 list-disc overflow-auto pl-4 text-red-900/90">
-              {issues.slice(0, 30).map((issue, i) => (
-                <li key={`${issue.url}-${issue.reason}-${i}`}>
-                  <span className="font-medium">{issue.category}</span>
-                  <span className="text-red-900/70">: {issue.reason}</span>
-                  <div className="text-[11px] text-red-900/70">{issue.url}</div>
-                </li>
-              ))}
-              {issues.length > 30 && (
-                <li className="text-red-900/60">…and {issues.length - 30} more</li>
-              )}
-            </ul>
-          </details>
+          <p>
+            This looks like a client-rendered app — server HTML was thin, so results are heuristic-only. Review the selections carefully.
+          </p>
         </div>
       )}
     </div>
