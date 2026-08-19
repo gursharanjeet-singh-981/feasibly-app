@@ -24,6 +24,10 @@ export interface CrawlOptions {
   onPage?: (page: FetchedPage) => void;
   // Deterministic jitter for tests. Real usage should leave this undefined.
   jitterMs?: () => number;
+  /** Max pages allowed per shared parent-path "template" at deep URL levels. Default 1. */
+  maxPagesPerPathTemplate?: number;
+  /** Min URL path segments before per-template limiting applies. Default 3 (e.g. /a/b/c). */
+  similarPageDepthThreshold?: number;
 }
 
 export interface CrawlResult {
@@ -50,11 +54,14 @@ export async function crawl(
     signal,
     onPage,
     jitterMs = () => Math.floor(Math.random() * 500),
+    maxPagesPerPathTemplate = 1,
+    similarPageDepthThreshold = 3,
   } = options;
 
   const warnings: string[] = [];
   const seen = new Set<string>();
   const pages: FetchedPage[] = [];
+  const pathTemplateCount = new Map<string, number>();
   const abortRelay = createAbortRelay(signal);
 
   const robots = await loadRobots(base, fetchImpl, userAgent, warnings, signal, abortRelay);
@@ -109,6 +116,21 @@ export async function crawl(
           }
         }
         return;
+      }
+      if (maxPagesPerPathTemplate > 0) {
+        const template = getPathTemplate(normalized);
+        if (template !== null) {
+          const pathParts = new URL(normalized).pathname.split("/").filter(Boolean);
+          if (pathParts.length >= similarPageDepthThreshold) {
+            const count = pathTemplateCount.get(template) ?? 0;
+            if (count >= maxPagesPerPathTemplate) {
+              seen.add(normalized);
+              warnings.push(`similar_skip ${normalized}: path_template_limit`);
+              return;
+            }
+            pathTemplateCount.set(template, count + 1);
+          }
+        }
       }
       seen.add(normalized);
       queue.push({ url: normalized, depth });
@@ -500,4 +522,19 @@ export function classifyPageType(url: URL, title: string): PageType {
     return "landing";
   }
   return "other";
+}
+
+/**
+ * Returns the parent-path "template" key for a URL, or null if the URL has no
+ * meaningful parent (root or single-segment paths). Used to group sibling pages
+ * that share the same directory and are likely the same template.
+ */
+export function getPathTemplate(url: string): string | null {
+  try {
+    const parts = new URL(url).pathname.split("/").filter(Boolean);
+    if (parts.length < 2) return null;
+    return "/" + parts.slice(0, -1).join("/");
+  } catch {
+    return null;
+  }
 }

@@ -72,8 +72,9 @@ export function GroupedAccordion<T extends { id: number; isSelected: boolean }>(
               className={CHECKBOX_BASE}
               checked={useAiEstimation}
               onCheckedChange={onToggleAi}
+              aria-label="Activate AI-Powered Estimation"
             />
-            Activate AI-Powered Estimation
+            <span aria-hidden="true">Activate AI-Powered Estimation</span>
           </label>
           <button onClick={onAddGroup} className={CTA_PILL}>
             {addLabel}

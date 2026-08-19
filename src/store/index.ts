@@ -187,6 +187,8 @@ export const useAppStore = create<AppState>()(
     {
       name: STORAGE_KEY,
       version: STORAGE_VERSION,
+      // Prevents SSR/client state mismatch; rehydration is triggered manually after mount.
+      skipHydration: true,
       // Scan payloads can be very large for whole-site crawls. Keep scan state
       // in-memory only to avoid localStorage quota failures during setScan().
       partialize: (state) => ({

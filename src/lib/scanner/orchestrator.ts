@@ -4,7 +4,7 @@ import type { Component, Template } from "@/types";
 import { analyzePage } from "./analyzer";
 import { crawl, type CrawlOptions } from "./crawler";
 import { matchDetections } from "./matcher";
-import { resolveAndAssertPublic } from "./urlGuard";
+import { UrlGuardError, resolveAndAssertPublic } from "./urlGuard";
 import type {
   DiscoveredPage,
   PageAnalysis,
@@ -177,7 +177,6 @@ export async function* orchestrateScan(
       warnings,
     };
 
-    yield progress("done", 100, "Scan complete.");
     yield { type: "complete", result } satisfies ScanCompleteEvent;
   } finally {
     clearTimeout(timeoutHandle);
@@ -203,7 +202,23 @@ function progress(
 }
 
 function errorEvent(err: unknown): ScanErrorEvent {
+  if (err instanceof UrlGuardError) {
+    return { type: "error", message: err.code };
+  }
+
   const message = err instanceof Error ? err.message : String(err);
+  const normalized = message.toLowerCase();
+
+  if (normalized.includes("abort")) {
+    return { type: "error", message: "scan_aborted" };
+  }
+  if (normalized.includes("timed out") || normalized.includes("timeout")) {
+    return { type: "error", message: "scan_timeout" };
+  }
+  if (normalized.includes("fetch failed") || normalized.includes("network")) {
+    return { type: "error", message: "network_error" };
+  }
+
   return { type: "error", message };
 }
 

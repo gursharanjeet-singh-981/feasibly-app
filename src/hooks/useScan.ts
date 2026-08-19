@@ -220,7 +220,7 @@ function stageToStatus(stage: ScanStage): ScanSliceState["status"] {
     case "match":
       return "matching";
     case "done":
-      return "complete";
+      return "matching"; // "complete" is only set by the ScanCompleteEvent which carries matchedComponentIds
     default:
       return "crawling";
   }
