@@ -85,9 +85,9 @@ export function GroupedAccordion<T extends { id: number; isSelected: boolean }>(
               value={search}
               onChange={(e) => onSearchChange(e.target.value)}
               placeholder={searchPlaceholder}
-              className="h-12 lg:h-15 rounded-full pl-5 pr-12 text-sm lg:text-base border-strokes bg-white w-full sm:w-55"
+              className="h-12 lg:h-15 rounded-full pl-5 pr-11 text-sm lg:text-base border-strokes bg-white w-full sm:w-64 lg:w-72"
             />
-            <Search className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder-text" />
+            <Search className="absolute right-4.5 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder-text pointer-events-none" />
           </div>
         </div>
       </div>

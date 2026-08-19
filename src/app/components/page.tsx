@@ -7,6 +7,7 @@ import { GroupedAccordion } from "@/components/table/GroupedAccordion";
 import { ComponentRow } from "@/components/table/ComponentRow";
 import { ScanSummaryBanner } from "@/components/scan/ScanSummaryBanner";
 import { useGroupedItems } from "@/hooks/useGroupedItems";
+import { useRequireOnboarding } from "@/hooks/useRequireOnboarding";
 import { useAppStore } from "@/store";
 import { loadComponents } from "@/lib/data";
 import {
@@ -21,6 +22,7 @@ import type { SelectedComponent } from "@/types";
 const CHECKBOX_BASE = "w-4.5 h-4.5 rounded-[5px] border-dark-background";
 
 export default function ComponentsPage() {
+  const ready = useRequireOnboarding();
   const components = useAppStore((s) => s.components);
   const setComponents = useAppStore((s) => s.setComponents);
   const toggleComponent = useAppStore((s) => s.toggleComponent);
@@ -37,7 +39,7 @@ export default function ComponentsPage() {
   const loading = !error && components.length === 0;
 
   useEffect(() => {
-    if (components.length > 0) return;
+    if (!ready || components.length > 0) return;
     let cancelled = false;
     loadComponents()
       .then((data) => {
@@ -58,7 +60,7 @@ export default function ComponentsPage() {
     return () => {
       cancelled = true;
     };
-  }, [components.length, setComponents, matchedComponentIds]);
+  }, [ready, components.length, setComponents, matchedComponentIds]);
 
   const getGroup = useCallback((c: SelectedComponent) => c.group, []);
   const matchers = useCallback(
@@ -158,6 +160,8 @@ export default function ComponentsPage() {
     ),
     [useAiEstimation, toggleComponent, updateComponent, matchedComponentIds],
   );
+
+  if (!ready) return null;
 
   return (
     <PageLayout>

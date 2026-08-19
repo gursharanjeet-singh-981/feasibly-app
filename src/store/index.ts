@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { persist } from "zustand/middleware";
+import { createJSONStorage, persist } from "zustand/middleware";
 import { calculateEstimation } from "@/lib/calculations";
 import { STORAGE_KEY, STORAGE_VERSION } from "@/lib/constants";
 import { initialScanSliceState, type ScanSliceState } from "@/lib/scanner/types";
@@ -61,6 +61,15 @@ interface AppState {
   project: Project;
   setProject: (project: Project) => void;
 
+  // True once onboarding has been submitted for the current session; gates access to
+  // /components and /templates so they can't be reached by navigating there directly.
+  hasOnboarded: boolean;
+
+  // True once persisted state has been rehydrated from sessionStorage; route guards
+  // must wait for this before deciding whether to redirect.
+  hasHydrated: boolean;
+  setHasHydrated: (hasHydrated: boolean) => void;
+
   useAiEstimation: boolean;
   toggleAiEstimation: () => void;
 
@@ -91,7 +100,11 @@ export const useAppStore = create<AppState>()(
   persist(
     (set, get) => ({
       project: { ...emptyProject },
-      setProject: (project) => set({ project }),
+      setProject: (project) => set({ project, hasOnboarded: true }),
+
+      hasOnboarded: false,
+      hasHydrated: false,
+      setHasHydrated: (hasHydrated) => set({ hasHydrated }),
 
       useAiEstimation: false,
       toggleAiEstimation: () =>
@@ -100,6 +113,7 @@ export const useAppStore = create<AppState>()(
       resetStore: () =>
         set({
           project: { ...emptyProject },
+          hasOnboarded: false,
           components: [],
           templates: [],
           useAiEstimation: false,
@@ -187,12 +201,19 @@ export const useAppStore = create<AppState>()(
     {
       name: STORAGE_KEY,
       version: STORAGE_VERSION,
+      // sessionStorage (not localStorage): state must not survive across browser
+      // sessions/tabs, so a fresh tab always starts at onboarding with no stale selections.
+      storage: createJSONStorage(() => sessionStorage),
       // Prevents SSR/client state mismatch; rehydration is triggered manually after mount.
       skipHydration: true,
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
       // Scan payloads can be very large for whole-site crawls. Keep scan state
-      // in-memory only to avoid localStorage quota failures during setScan().
+      // in-memory only to avoid storage quota failures during setScan().
       partialize: (state) => ({
         project: state.project,
+        hasOnboarded: state.hasOnboarded,
         useAiEstimation: state.useAiEstimation,
         components: state.components,
         templates: state.templates,

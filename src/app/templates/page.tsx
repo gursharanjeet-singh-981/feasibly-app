@@ -7,6 +7,7 @@ import { GroupedAccordion } from "@/components/table/GroupedAccordion";
 import { TemplateRow } from "@/components/table/TemplateRow";
 import { ScanSummaryBanner } from "@/components/scan/ScanSummaryBanner";
 import { useGroupedItems } from "@/hooks/useGroupedItems";
+import { useRequireOnboarding } from "@/hooks/useRequireOnboarding";
 import { useAppStore } from "@/store";
 import { loadTemplates } from "@/lib/data";
 import {
@@ -21,6 +22,7 @@ import type { SelectedTemplate } from "@/types";
 const CHECKBOX_BASE = "w-4.5 h-4.5 rounded-[5px] border-dark-background";
 
 export default function TemplatesPage() {
+  const ready = useRequireOnboarding();
   const templates = useAppStore((s) => s.templates);
   const setTemplates = useAppStore((s) => s.setTemplates);
   const toggleTemplate = useAppStore((s) => s.toggleTemplate);
@@ -38,7 +40,7 @@ export default function TemplatesPage() {
   const loading = !error && templates.length === 0;
 
   useEffect(() => {
-    if (templates.length > 0) return;
+    if (!ready || templates.length > 0) return;
     let cancelled = false;
     loadTemplates()
       .then((data) => {
@@ -60,7 +62,7 @@ export default function TemplatesPage() {
     return () => {
       cancelled = true;
     };
-  }, [templates.length, setTemplates, matchedTemplateIds]);
+  }, [ready, templates.length, setTemplates, matchedTemplateIds]);
 
   const getGroup = useCallback((t: SelectedTemplate) => t.name, []);
   const matchers = useCallback(
@@ -158,6 +160,8 @@ export default function TemplatesPage() {
     ),
     [useAiEstimation, toggleTemplate, setAdditionalPages, updateTemplate, matchedTemplateIds],
   );
+
+  if (!ready) return null;
 
   return (
     <PageLayout>
