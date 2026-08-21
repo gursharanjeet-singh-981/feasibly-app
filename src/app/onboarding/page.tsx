@@ -237,23 +237,31 @@ export default function OnboardingPage() {
             <div className="flex flex-col gap-3 pl-1">
               <div className="flex items-center gap-2.5">
                 <Checkbox
+                  id="scope-components"
                   checked={scopeComponents}
                   onCheckedChange={(checked) =>
                     setValue("scopeComponents", !!checked)
                   }
                 />
-                <Label className="text-[16px] text-black font-normal">
+                <Label
+                  htmlFor="scope-components"
+                  className="text-[16px] text-black font-normal"
+                >
                   Components
                 </Label>
               </div>
               <div className="flex items-center gap-2.5">
                 <Checkbox
+                  id="scope-templates"
                   checked={scopeTemplates}
                   onCheckedChange={(checked) =>
                     setValue("scopeTemplates", !!checked)
                   }
                 />
-                <Label className="text-[16px] text-black font-normal">
+                <Label
+                  htmlFor="scope-templates"
+                  className="text-[16px] text-black font-normal"
+                >
                   Templates
                 </Label>
               </div>
