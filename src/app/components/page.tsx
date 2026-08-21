@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PageLayout } from "@/components/PageLayout";
 import { GroupedAccordion } from "@/components/table/GroupedAccordion";
@@ -13,6 +13,7 @@ import { loadComponents } from "@/lib/data";
 import {
   addItemAndScroll,
   renameGroupItems,
+  selectMatchedItems,
   toggleAllInGroup as toggleAllInGroupHelper,
   toggleGroup as toggleGroupHelper,
 } from "@/lib/groupHelpers";
@@ -36,6 +37,7 @@ export default function ComponentsPage() {
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const lastAppliedMatchKey = useRef<string | null>(null);
   const loading = !error && components.length === 0;
 
   useEffect(() => {
@@ -47,7 +49,7 @@ export default function ComponentsPage() {
         setComponents(
           data.map<SelectedComponent>((c) => ({
             ...c,
-            isSelected: (matchedComponentIds[c.id]?.confidence ?? 0) >= 0.5,
+            isSelected: matchedComponentIds[c.id] !== undefined,
             isCustom: false,
           })),
         );
@@ -61,6 +63,15 @@ export default function ComponentsPage() {
       cancelled = true;
     };
   }, [ready, components.length, setComponents, matchedComponentIds]);
+
+  useEffect(() => {
+    if (!ready || components.length === 0) return;
+    const matchKey = Object.keys(matchedComponentIds).sort().join(",");
+    if (lastAppliedMatchKey.current === matchKey) return;
+    lastAppliedMatchKey.current = matchKey;
+    const selectedComponents = selectMatchedItems(components, matchedComponentIds);
+    if (selectedComponents) setComponents(selectedComponents);
+  }, [ready, components, setComponents, matchedComponentIds]);
 
   const getGroup = useCallback((c: SelectedComponent) => c.group, []);
   const matchers = useCallback(

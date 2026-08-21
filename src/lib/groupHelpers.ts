@@ -6,6 +6,17 @@ interface Identifiable {
   isSelected: boolean;
 }
 
+export function selectMatchedItems<T extends Identifiable>(
+  items: T[],
+  matchedIds: Record<number, unknown>,
+): T[] | null {
+  const ids = new Set(Object.keys(matchedIds).map(Number));
+  if (!items.some((item) => ids.has(item.id) && !item.isSelected)) return null;
+  return items.map((item) =>
+    ids.has(item.id) ? { ...item, isSelected: true } : item,
+  );
+}
+
 export function toggleGroup(
   group: string,
   setOpenGroups: Dispatch<SetStateAction<Set<string>>>

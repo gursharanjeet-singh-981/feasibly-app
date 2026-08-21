@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppStore } from "@/store";
 import { calculateEstimation } from "@/lib/calculations";
 import { EstimationCard } from "@/components/estimation/EstimationCard";
@@ -11,6 +11,7 @@ import {
   type InfoKind,
 } from "@/components/estimation/InfoSidebar";
 import { loadTemplates } from "@/lib/data";
+import { selectMatchedItems } from "@/lib/groupHelpers";
 import type { SelectedTemplate } from "@/types";
 
 export function EstimationPanel() {
@@ -20,6 +21,7 @@ export function EstimationPanel() {
   const project = useAppStore((s) => s.project);
   const useAiEstimation = useAppStore((s) => s.useAiEstimation);
   const matchedTemplateIds = useAppStore((s) => s.scan.matchedTemplateIds);
+  const lastAppliedMatchKey = useRef<string | null>(null);
 
   // Pre-load templates so the estimation is accurate before the Templates page is visited.
   useEffect(() => {
@@ -29,7 +31,7 @@ export function EstimationPanel() {
         setTemplates(
           data.map<SelectedTemplate>((t) => ({
             ...t,
-            isSelected: (matchedTemplateIds[t.id]?.confidence ?? 0) >= 0.5,
+            isSelected: matchedTemplateIds[t.id] !== undefined,
             additionalPages: 0,
             isCustom: false,
           })),
@@ -37,6 +39,15 @@ export function EstimationPanel() {
       )
       .catch(() => {/* estimation stays at 0 — non-critical */});
   }, [templates.length, setTemplates, matchedTemplateIds]);
+
+  useEffect(() => {
+    if (templates.length === 0) return;
+    const matchKey = Object.keys(matchedTemplateIds).sort().join(",");
+    if (lastAppliedMatchKey.current === matchKey) return;
+    lastAppliedMatchKey.current = matchKey;
+    const selectedTemplates = selectMatchedItems(templates, matchedTemplateIds);
+    if (selectedTemplates) setTemplates(selectedTemplates);
+  }, [templates, setTemplates, matchedTemplateIds]);
 
   const [infoSidebar, setInfoSidebar] = useState<InfoKind | null>(null);
 

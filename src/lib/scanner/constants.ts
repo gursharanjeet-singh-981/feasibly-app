@@ -13,7 +13,7 @@ export interface DetectionRule {
 // confidence. Selectors use Cheerio's css-select syntax (jQuery-like).
 export const COMPONENT_RULES: DetectionRule[] = [
   // --- Structural / layout ---
-  { groupName: "Simple Header", selector: "header, [role=\"banner\"]", minCount: 1, confidence: 0.85, evidence: "header/banner" },
+  { groupName: "Simple Header", selector: "header, [role=\"banner\"], .navbar, [class*=\"navbar\" i], [class*=\"site-header\" i]", minCount: 1, confidence: 0.85, evidence: "header/banner/navbar" },
   {
     groupName: "Complex Header (Megamenu) Megamenu",
     selector:
@@ -34,15 +34,15 @@ export const COMPONENT_RULES: DetectionRule[] = [
   { groupName: "List", selector: "main ul, main ol, article ul, article ol", minCount: 1, confidence: 0.55, evidence: "ul/ol in content" },
 
   // --- Interactive ---
-  { groupName: "CTA", selector: "button, input[type=\"submit\"], .btn, .cta, [class*=\"btn-\" i], a[class*=\"btn\" i], a[class*=\"cta\" i]", minCount: 1, confidence: 0.75, evidence: "button/CTA class" },
+  { groupName: "CTA", selector: "button, input[type=\"submit\"], [role=\"button\"], .btn, .cta, [class*=\"btn-\" i], a[class*=\"btn\" i], a[class*=\"cta\" i], a.button, [class~=\"button\" i]", minCount: 1, confidence: 0.75, evidence: "button/CTA class" },
   { groupName: "Forms", selector: "form", minCount: 1, confidence: 0.85, evidence: "form element" },
   { groupName: "Registration", selector: "form[action*=\"register\" i], form[action*=\"signup\" i], form[action*=\"sign-up\" i], form[id*=\"register\" i], form[id*=\"signup\" i]", minCount: 1, confidence: 0.85, evidence: "register/signup form" },
   { groupName: "Registration", selector: "form input[type=\"password\"] ~ input[type=\"password\"]", minCount: 1, confidence: 0.75, evidence: "confirm password field" },
   { groupName: "Search", selector: "input[type=\"search\"], form[role=\"search\"], input[name=\"q\"], input[name=\"query\"], input[name=\"search\"], [role=\"searchbox\"]", minCount: 1, confidence: 0.9, evidence: "search input/role" },
 
   // --- Navigation-y ---
-  { groupName: "Tabs", selector: "[role=\"tablist\"], .tabs, [class*=\"tab-list\" i], [class*=\"tabs__\" i]", minCount: 1, confidence: 0.85, evidence: "tablist/tab class" },
-  { groupName: "Accordion", selector: "details, .accordion, [class*=\"accordion\" i], button[aria-expanded]", minCount: 1, confidence: 0.85, evidence: "details/accordion class" },
+  { groupName: "Tabs", selector: "[role=\"tablist\"], [role=\"tab\"], .tabs, [class*=\"tab-list\" i], [class*=\"tabs__\" i], [class*=\"tabs-wrapper\" i], [class*=\"tab-menu\" i]", minCount: 1, confidence: 0.85, evidence: "tablist/tab class" },
+  { groupName: "Accordion", selector: "details, .accordion, [class*=\"accordion\" i], [class*=\"faq-item\" i], button[aria-expanded]", minCount: 1, confidence: 0.85, evidence: "details/accordion class" },
   { groupName: "Table of contents", selector: ".toc, [class*=\"table-of-contents\" i], nav[aria-label*=\"contents\" i], nav[aria-label*=\"on this page\" i]", minCount: 1, confidence: 0.85, evidence: "TOC class/aria" },
   { groupName: "Progress Bar", selector: "progress, [role=\"progressbar\"], .progress-bar, [class*=\"progress-bar\" i]", minCount: 1, confidence: 0.85, evidence: "progress element" },
 

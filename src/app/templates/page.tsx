@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PageLayout } from "@/components/PageLayout";
 import { GroupedAccordion } from "@/components/table/GroupedAccordion";
@@ -13,6 +13,7 @@ import { loadTemplates } from "@/lib/data";
 import {
   addItemAndScroll,
   renameGroupItems,
+  selectMatchedItems,
   toggleAllInGroup as toggleAllInGroupHelper,
   toggleGroup as toggleGroupHelper,
 } from "@/lib/groupHelpers";
@@ -37,6 +38,7 @@ export default function TemplatesPage() {
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
+  const lastAppliedMatchKey = useRef<string | null>(null);
   const loading = !error && templates.length === 0;
 
   useEffect(() => {
@@ -48,7 +50,7 @@ export default function TemplatesPage() {
         setTemplates(
           data.map<SelectedTemplate>((t) => ({
             ...t,
-            isSelected: (matchedTemplateIds[t.id]?.confidence ?? 0) >= 0.5,
+            isSelected: matchedTemplateIds[t.id] !== undefined,
             additionalPages: 0,
             isCustom: false,
           })),
@@ -63,6 +65,15 @@ export default function TemplatesPage() {
       cancelled = true;
     };
   }, [ready, templates.length, setTemplates, matchedTemplateIds]);
+
+  useEffect(() => {
+    if (!ready || templates.length === 0) return;
+    const matchKey = Object.keys(matchedTemplateIds).sort().join(",");
+    if (lastAppliedMatchKey.current === matchKey) return;
+    lastAppliedMatchKey.current = matchKey;
+    const selectedTemplates = selectMatchedItems(templates, matchedTemplateIds);
+    if (selectedTemplates) setTemplates(selectedTemplates);
+  }, [ready, templates, setTemplates, matchedTemplateIds]);
 
   const getGroup = useCallback((t: SelectedTemplate) => t.name, []);
   const matchers = useCallback(

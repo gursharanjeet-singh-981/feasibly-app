@@ -49,13 +49,18 @@ export async function exportScanReport(
   const failedEntries = buildFailedEntries(scan, pageByUrl, project.liveUrl);
 
   // Invert matchedComponentIds → pageUrl → components[]
-  const pageComponents = new Map<string, { name: string; group: string; confidence: number }[]>();
+  const pageComponents = new Map<string, { variant: string; group: string; confidence: number; reason: string }[]>();
   for (const [id, meta] of Object.entries(scan.matchedComponentIds)) {
     const comp = componentById.get(Number(id));
     if (!comp) continue;
     for (const url of meta.pages) {
       if (!pageComponents.has(url)) pageComponents.set(url, []);
-      pageComponents.get(url)!.push({ name: comp.name, group: comp.group, confidence: meta.confidence });
+      pageComponents.get(url)!.push({
+        variant: comp.name,
+        group: comp.group,
+        confidence: meta.confidence,
+        reason: meta.reason ?? "Variant rationale was not recorded for this scan.",
+      });
     }
   }
 
@@ -139,8 +144,9 @@ export async function exportScanReport(
     { key: "title", width: 30 },
     { key: "pageType", width: 14 },
     { key: "group", width: 22 },
-    { key: "name", width: 28 },
+    { key: "variant", width: 34 },
     { key: "confidence", width: 14 },
+    { key: "reason", width: 58 },
   ];
 
   const compHeader = compSheet.addRow({
@@ -148,8 +154,9 @@ export async function exportScanReport(
     title: "Page Title",
     pageType: "Page Type",
     group: "Component Group",
-    name: "Component Name",
+    variant: "Variant Name",
     confidence: "Confidence",
+    reason: "Reason for Variant Selection",
   });
   headerStyle(compHeader);
 
@@ -165,8 +172,9 @@ export async function exportScanReport(
         title: page.title || "—",
         pageType: page.pageType,
         group: comp.group,
-        name: comp.name,
+        variant: comp.variant,
         confidence: `${Math.round(comp.confidence * 100)}%`,
+        reason: comp.reason,
       });
       dataStyle(row, compRowIdx % 2 === 0);
       compRowIdx++;

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { renameGroupItems } from "./groupHelpers";
+import { renameGroupItems, selectMatchedItems } from "./groupHelpers";
 
 interface Row {
   id: number;
@@ -56,5 +56,22 @@ describe("renameGroupItems", () => {
     const result = renameGroupItems("A", "  New  ", items, "group", update, setOpenGroups);
     expect(result).toEqual({ ok: true });
     expect(update).toHaveBeenCalledWith(1, { group: "New" });
+  });
+});
+
+describe("selectMatchedItems", () => {
+  it("selects matched rows without changing unmatched rows", () => {
+    const items = [
+      { id: 1, isSelected: false, group: "A" },
+      { id: 2, isSelected: false, group: "B" },
+    ];
+    expect(selectMatchedItems(items, { 1: {} })).toEqual([
+      { id: 1, isSelected: true, group: "A" },
+      { id: 2, isSelected: false, group: "B" },
+    ]);
+  });
+
+  it("returns null when all matched rows are already selected", () => {
+    expect(selectMatchedItems([{ id: 1, isSelected: true }], { 1: {} })).toBeNull();
   });
 });

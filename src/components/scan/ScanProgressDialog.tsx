@@ -42,6 +42,8 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
   const isDone = scan.status === "complete";
   const isError = scan.status === "error";
   const isRunning = !isDone && !isError;
+  const matchedVariantCount = countMatches(scan.matchedComponentIds);
+  const matchedGroupCount = countGroups(scan.matchedComponentIds);
 
   return (
     <div
@@ -86,7 +88,7 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
           {isDone && (
             <div className="flex flex-col gap-1 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
               <span className="font-medium">
-                Scan complete — {countMatches(scan.matchedComponentIds)} component group{countMatches(scan.matchedComponentIds) === 1 ? "" : "s"} and {countMatches(scan.matchedTemplateIds)} template{countMatches(scan.matchedTemplateIds) === 1 ? "" : "s"} pre-selected.
+                Scan complete — {matchedGroupCount} component group{matchedGroupCount === 1 ? "" : "s"}, {matchedVariantCount} variant{matchedVariantCount === 1 ? "" : "s"}, and {countMatches(scan.matchedTemplateIds)} template{countMatches(scan.matchedTemplateIds) === 1 ? "" : "s"} pre-selected.
               </span>
               {scan.warnings.length > 0 && (
                 <span className="text-xs text-emerald-700/80">
@@ -108,6 +110,11 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
               </Button>
             )}
             {isDone && (
+              <Button type="button" variant="ghost" onClick={onDismiss}>
+                Cancel
+              </Button>
+            )}
+            {isDone && (
               <Button type="button" onClick={onProceed}>
                 Continue
               </Button>
@@ -121,6 +128,15 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
 
 function countMatches(record: Record<number, unknown>): number {
   return Object.keys(record).length;
+}
+
+function countGroups(record: Record<number, { group?: string }>): number {
+  const groups = new Set(
+    Object.values(record)
+      .map((match) => match.group?.trim().toLowerCase())
+      .filter((group): group is string => Boolean(group)),
+  );
+  return groups.size > 0 ? groups.size : countMatches(record);
 }
 
 function errorMessage(code: string | null): string {
