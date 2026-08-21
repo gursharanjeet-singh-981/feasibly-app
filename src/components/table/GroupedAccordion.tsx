@@ -87,14 +87,14 @@ export function GroupedAccordion<T extends { id: number; isSelected: boolean }>(
                 {addLabel}
                 <CirclePlus className="w-5 h-5" />
               </button>
-              <div className="relative w-full sm:w-64 lg:w-72">
+              <div className="relative w-full sm:w-57">
                 <Input
                   value={search}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder={searchPlaceholder}
                   className="h-12 lg:h-15 rounded-full pl-5 pr-11 text-sm lg:text-base border-strokes bg-white w-full"
                 />
-                <Search className="absolute right-4.5 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder-text pointer-events-none" />
+                <Search className="absolute right-4.5 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder-text" />
               </div>
             </div>
           </div>
