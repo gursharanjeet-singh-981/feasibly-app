@@ -63,31 +63,40 @@ export function GroupedAccordion<T extends { id: number; isSelected: boolean }>(
   return (
     <div className="bg-white rounded-2xl lg:rounded-[40px] p-4 md:p-6 lg:p-8">
       <div className="flex flex-col gap-4 mb-8 lg:mb-10">
-        <div className="flex flex-wrap items-center gap-4">
-          <h2 className="text-xl md:text-2xl lg:text-[30px] font-semibold text-black mr-auto">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center">
+          <h2 className="text-xl md:text-2xl lg:text-[30px] font-semibold text-black lg:mr-auto whitespace-nowrap">
             {title}
           </h2>
-          <label className="flex items-center gap-2 text-sm lg:text-base text-black cursor-pointer whitespace-nowrap">
-            <Checkbox
-              className={CHECKBOX_BASE}
-              checked={useAiEstimation}
-              onCheckedChange={onToggleAi}
-              aria-label="Activate AI-Powered Estimation"
-            />
-            <span aria-hidden="true">Activate AI-Powered Estimation</span>
-          </label>
-          <button onClick={onAddGroup} className={CTA_PILL}>
-            {addLabel}
-            <CirclePlus className="w-5 h-5" />
-          </button>
-          <div className="relative w-full sm:w-auto">
-            <Input
-              value={search}
-              onChange={(e) => onSearchChange(e.target.value)}
-              placeholder={searchPlaceholder}
-              className="h-12 lg:h-15 rounded-full pl-5 pr-11 text-sm lg:text-base border-strokes bg-white w-full sm:w-64 lg:w-72"
-            />
-            <Search className="absolute right-4.5 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder-text pointer-events-none" />
+          <div className="flex flex-wrap items-center gap-4 lg:justify-end w-full">
+            <label className="flex items-center gap-2 text-sm lg:text-base text-black cursor-pointer whitespace-nowrap">
+              <Checkbox
+                className={CHECKBOX_BASE}
+                checked={useAiEstimation}
+                onCheckedChange={onToggleAi}
+                aria-label="Activate AI-Powered Estimation"
+              />
+              <span aria-hidden="true">
+                Activate AI-Powered Estimation
+              </span>
+            </label>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+              <button
+                onClick={onAddGroup}
+                className={`${CTA_PILL} w-full sm:w-auto justify-center`}
+              >
+                {addLabel}
+                <CirclePlus className="w-5 h-5" />
+              </button>
+              <div className="relative w-full sm:w-64 lg:w-72">
+                <Input
+                  value={search}
+                  onChange={(e) => onSearchChange(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  className="h-12 lg:h-15 rounded-full pl-5 pr-11 text-sm lg:text-base border-strokes bg-white w-full"
+                />
+                <Search className="absolute right-4.5 top-1/2 -translate-y-1/2 w-5 h-5 text-placeholder-text pointer-events-none" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
