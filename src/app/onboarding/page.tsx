@@ -89,7 +89,7 @@ export default function OnboardingPage() {
   const handleScanCancel = () => {
     cancelScan();
     setScanOpen(false);
-    if (pendingRoute) router.push(pendingRoute);
+    setPendingRoute(null);
   };
 
   const handleScanDismiss = () => {
