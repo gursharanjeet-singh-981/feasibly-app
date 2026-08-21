@@ -145,6 +145,30 @@ describe("analyzer robustness", () => {
     expect(regHits[0].confidence).toBeGreaterThanOrEqual(0.85);
   });
 
+  it("captures DOM signals as a variant hint", () => {
+    const result = analyzePage({
+      url: "https://x.com/",
+      html: wrap('<button class="cta motion" aria-label="Animated shop button">Shop</button>'),
+      pageType: "other",
+    });
+    const cta = result.detectedComponents.find((c) => c.groupName === "CTA");
+    expect(cta?.variantHint).toContain("cta motion");
+    expect(cta?.variantHint).toContain("Animated shop button");
+  });
+
+  it("detects CTA-styled anchor links without treating article cards as teasers", () => {
+    const result = analyzePage({
+      url: "https://x.com/",
+      html: wrap(
+        '<article class="article-card card-link"><a class="button secondary-button" href="/stories">All stories</a></article>',
+      ),
+      pageType: "home",
+    });
+    expect(result.detectedComponents.some((c) => c.groupName === "Teaser")).toBe(false);
+    expect(result.detectedComponents.some((c) => c.groupName === "CTA")).toBe(true);
+    expect(result.detectedComponents.some((c) => c.groupName === "Link")).toBe(true);
+  });
+
   it("sorts detected components by descending confidence", () => {
     const html = wrap(
       "<header>h</header><p>a</p><p>b</p><p>c</p><form><input></form>",

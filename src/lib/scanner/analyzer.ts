@@ -31,14 +31,20 @@ export function analyzePage(input: AnalyzeInput): PageAnalysis {
     }
     if (count < rule.minCount) continue;
 
+    const variantHint = collectDetectionHint($, rule.selector);
     const existing = byGroup.get(rule.groupName);
     if (!existing || rule.confidence > existing.confidence) {
       byGroup.set(rule.groupName, {
         groupName: rule.groupName,
+        variantHint,
         confidence: rule.confidence,
         source: "heuristic",
         evidence: rule.evidence,
       });
+    } else if (variantHint && existing.variantHint) {
+      existing.variantHint = `${existing.variantHint} ${variantHint}`;
+    } else if (variantHint) {
+      existing.variantHint = variantHint;
     }
   }
 
@@ -49,6 +55,26 @@ export function analyzePage(input: AnalyzeInput): PageAnalysis {
   const detectedTemplate = detectTemplate($, pageType, detectedComponents);
 
   return { url, pageType, detectedComponents, detectedTemplate };
+}
+
+function collectDetectionHint(
+  $: ReturnType<typeof load>,
+  selector: string,
+): string | undefined {
+  const signals: string[] = [];
+  try {
+    $(selector).slice(0, 12).each((_, element) => {
+      const attributes = ["class", "id", "aria-label", "role", "title", "data-testid"]
+        .map((name) => $(element).attr(name))
+        .filter((value): value is string => Boolean(value?.trim()));
+      const text = $(element).text().replace(/\s+/g, " ").trim().slice(0, 120);
+      signals.push(...attributes, text);
+    });
+  } catch {
+    return undefined;
+  }
+  const hint = [...new Set(signals)].join(" ").trim();
+  return hint || undefined;
 }
 
 function detectTemplate(

@@ -51,6 +51,8 @@ export interface PageAnalysis {
 export interface MatchMetadata {
   confidence: number;
   pages: string[];
+  group?: string;
+  reason?: string;
 }
 
 export interface UnmatchedItem {
