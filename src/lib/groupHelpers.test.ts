@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { renameGroupItems, selectMatchedItems } from "./groupHelpers";
+import { getMatchedItemGroups, renameGroupItems, selectMatchedItems } from "./groupHelpers";
 
 interface Row {
   id: number;
@@ -73,5 +73,25 @@ describe("selectMatchedItems", () => {
 
   it("returns null when all matched rows are already selected", () => {
     expect(selectMatchedItems([{ id: 1, isSelected: true }], { 1: {} })).toBeNull();
+  });
+});
+
+describe("getMatchedItemGroups", () => {
+  it("returns the groups that contain matched rows", () => {
+    const items = [
+      { id: 1, group: "Hero" },
+      { id: 2, group: "Cards" },
+      { id: 3, group: "Hero" },
+    ];
+
+    expect(getMatchedItemGroups(items, { 1: {}, 2: {} }, (item) => item.group)).toEqual(
+      new Set(["Hero", "Cards"]),
+    );
+  });
+
+  it("ignores matched ids that are not in the current items", () => {
+    expect(
+      getMatchedItemGroups([{ id: 1, group: "Hero" }], { 2: {} }, (item) => item.group),
+    ).toEqual(new Set());
   });
 });

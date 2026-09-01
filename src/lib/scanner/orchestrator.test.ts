@@ -165,6 +165,29 @@ describe("orchestrateScan", () => {
     expect(complete?.result.warnings).toContain("no_pages_fetched");
   });
 
+  it("starts an in-scope locale crawl when no sitemap is available", async () => {
+    const routes = {
+      "https://example.com/robots.txt": { body: "" },
+      "https://example.com/sitemap.xml": { status: 404, body: "" },
+      "https://example.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://example.com/gb": { body: homepageHtml() },
+    };
+    const { stub, calls } = makeFetchStub(routes);
+
+    const events = await collect(
+      orchestrateScan({
+        url: "https://example.com/gb/library",
+        library,
+        crawlOptions: { fetchImpl: stub, jitterMs: noJitter },
+      }),
+    );
+
+    const complete = events.find((event): event is ScanCompleteEvent => event.type === "complete");
+    expect(calls).toContain("https://example.com/gb");
+    expect(complete?.result.pagesScanned).toBe(1);
+    expect(complete?.result.warnings).not.toContain("no_pages_fetched");
+  });
+
   it("aborts crawling when an external AbortSignal fires", async () => {
     const routes: Record<string, { status?: number; body: string; contentType?: string }> = {
       "https://example.com/robots.txt": { body: "" },
@@ -280,6 +303,34 @@ describe("orchestrateScan", () => {
     expect(warnings).toContain("spa_detected");
   });
 
+  it("records cookie consent markup without hiding analyzable page content", async () => {
+    const consentPage = `<!doctype html><html><head><title>Home</title></head><body>
+      <nav><a href="/">Home</a><a href="/products">Shop</a></nav>
+      <div role="dialog" id="cookie-consent"><p>We use cookies</p><button>Accept all</button></div>
+      <div class="carousel"><div class="carousel-item">Featured work</div></div>
+    </body></html>`;
+    const routes = {
+      "https://example.com/robots.txt": { body: "" },
+      "https://example.com/sitemap.xml": { status: 404, body: "" },
+      "https://example.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://example.com/": { body: consentPage },
+    };
+    const { stub } = makeFetchStub(routes);
+
+    const events = await collect(
+      orchestrateScan({
+        url: "https://example.com/",
+        library,
+        crawlOptions: { fetchImpl: stub, jitterMs: noJitter, maxPages: 1 },
+      }),
+    );
+
+    const complete = events.find((event): event is ScanCompleteEvent => event.type === "complete");
+    expect(complete).toBeDefined();
+    expect(complete!.result.warnings).toContain("cookie_consent_detected:https://example.com/");
+    expect(Object.keys(complete!.result.matchedComponentIds).length).toBeGreaterThan(0);
+  });
+
   it("starts whole-site scans from origin root when input URL is a subpage", async () => {
     const routes = {
       "https://example.com/robots.txt": { body: "" },
@@ -341,14 +392,48 @@ describe("orchestrateScan", () => {
     const complete = events.find((e): e is ScanCompleteEvent => e.type === "complete");
     expect(complete).toBeDefined();
     const urls = complete!.result.discoveredPages.map((p) => p.url).sort();
-    expect(urls).toEqual([
-      "https://example.com/gb/about",
-      "https://example.com/gb/home",
-    ]);
+    expect(urls).toEqual(["https://example.com/gb/home"]);
     expect(complete!.result.sitemapUrls).toEqual(["https://example.com/gb/home"]);
-    expect(complete!.result.scrapedUrls.sort()).toEqual([
-      "https://example.com/gb/about",
-      "https://example.com/gb/home",
+    expect(complete!.result.scrapedUrls).toEqual(["https://example.com/gb/home"]);
+  });
+
+  it("limits full-site scans to a nested locale subtree", async () => {
+    const routes = {
+      "https://example.com/robots.txt": { body: "" },
+      "https://example.com/sitemap.xml": {
+        contentType: "application/xml",
+        body: `<urlset>
+          <url><loc>https://example.com/coming-soon/en/about</loc></url>
+          <url><loc>https://example.com/coming-soon/de/about</loc></url>
+          <url><loc>https://example.com/gb/home</loc></url>
+        </urlset>`,
+      },
+      "https://example.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://example.com/coming-soon/en": {
+        body: homepageHtml(["/coming-soon/en/about", "/coming-soon/de/about"]),
+      },
+      "https://example.com/coming-soon/en/about": {
+        body: `<html><title>About</title><body>About</body></html>`,
+      },
+    };
+    const { stub } = makeFetchStub(routes);
+
+    const events = await collect(
+      orchestrateScan({
+        url: "https://example.com/coming-soon/en",
+        mode: "full",
+        library,
+        crawlOptions: { fetchImpl: stub, jitterMs: noJitter, maxPages: 10 },
+      }),
+    );
+
+    const complete = events.find((event): event is ScanCompleteEvent => event.type === "complete");
+    expect(complete?.result.scrapedUrls.sort()).toEqual([
+      "https://example.com/coming-soon/en",
+      "https://example.com/coming-soon/en/about",
+    ]);
+    expect(complete?.result.sitemapUrls).toEqual([
+      "https://example.com/coming-soon/en/about",
     ]);
   });
 });

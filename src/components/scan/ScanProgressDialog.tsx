@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store";
+import { countMatchedGroups } from "@/lib/scanner/scanCounts";
 import type { ScanStatus } from "@/lib/scanner/types";
 
 interface Props {
@@ -42,8 +43,10 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
   const isDone = scan.status === "complete";
   const isError = scan.status === "error";
   const isRunning = !isDone && !isError;
+  const isDiscovering = scan.status === "crawling" && pct <= 5;
+  const displayedProgress = getDisplayedProgress(scan.status, pct);
   const matchedVariantCount = countMatches(scan.matchedComponentIds);
-  const matchedGroupCount = countGroups(scan.matchedComponentIds);
+  const matchedGroupCount = countMatchedGroups(scan.matchedComponentIds);
 
   return (
     <div
@@ -56,7 +59,7 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
         <div className="flex flex-col gap-4 p-6">
           <div className="flex flex-col gap-1">
             <h2 id="scan-dialog-title" className="text-xl font-semibold text-black">
-              {isError ? "We couldn't scan that site" : "Analysing your live site"}
+              {isError ? "We couldn't scan that site" : label}
             </h2>
             <p className="text-sm text-black/60">
               {isError
@@ -68,13 +71,13 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
           {!isError && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs text-black/70">
-                <span>{label}</span>
-                <span>{pct}%</span>
+                <span>{isDiscovering ? "Checking robots.txt and sitemaps…" : label}</span>
+                <span>{displayedProgress}%</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-black/10">
                 <div
                   className="h-full bg-cobalt transition-[width] duration-300 ease-out"
-                  style={{ width: `${pct}%` }}
+                  style={{ width: `${displayedProgress}%` }}
                 />
               </div>
               {typeof scan.pagesScanned === "number" && scan.pagesScanned > 0 && (
@@ -130,13 +133,9 @@ function countMatches(record: Record<number, unknown>): number {
   return Object.keys(record).length;
 }
 
-function countGroups(record: Record<number, { group?: string }>): number {
-  const groups = new Set(
-    Object.values(record)
-      .map((match) => match.group?.trim().toLowerCase())
-      .filter((group): group is string => Boolean(group)),
-  );
-  return groups.size > 0 ? groups.size : countMatches(record);
+export function getDisplayedProgress(status: ScanStatus, progress: number): number {
+  if (status === "complete") return 100;
+  return progress;
 }
 
 function errorMessage(code: string | null): string {

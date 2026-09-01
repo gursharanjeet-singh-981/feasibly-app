@@ -23,7 +23,7 @@ export const COMPONENT_RULES: DetectionRule[] = [
     evidence: "megamenu markers",
   },
   { groupName: "Breadcrumbs", selector: "nav[aria-label*=\"breadcrumb\" i], .breadcrumb, .breadcrumbs, [class*=\"breadcrumb\" i], [itemtype*=\"BreadcrumbList\"]", minCount: 1, confidence: 0.9, evidence: "breadcrumb container" },
-  { groupName: "Container", selector: "section, [class*=\"container\" i], main > div", minCount: 2, confidence: 0.5, evidence: "section/container blocks" },
+  { groupName: "Container", selector: "main section, section, [class*=\"container\" i], [class*=\"wrapper\" i], [class*=\"content-shell\" i]", minCount: 2, confidence: 0.55, evidence: "section/container blocks" },
   { groupName: "Separator", selector: "hr, [role=\"separator\"]", minCount: 1, confidence: 0.8, evidence: "hr/role=separator" },
 
   // --- Text / media primitives ---
@@ -34,7 +34,7 @@ export const COMPONENT_RULES: DetectionRule[] = [
   { groupName: "List", selector: "main ul, main ol, article ul, article ol", minCount: 1, confidence: 0.55, evidence: "ul/ol in content" },
 
   // --- Interactive ---
-  { groupName: "CTA", selector: "button, input[type=\"submit\"], [role=\"button\"], .btn, .cta, [class*=\"btn-\" i], a[class*=\"btn\" i], a[class*=\"cta\" i], a.button, [class~=\"button\" i]", minCount: 1, confidence: 0.75, evidence: "button/CTA class" },
+  { groupName: "CTA", selector: "button, input[type=\"submit\"], [role=\"button\"], .btn, .cta, [class*=\"btn-\" i], a[class*=\"btn\" i], a[class*=\"cta\" i], a.button, [class~=\"button\" i], [aria-label*=\"shop\" i], [aria-label*=\"buy\" i]", minCount: 1, confidence: 0.75, evidence: "button/CTA class" },
   { groupName: "Forms", selector: "form", minCount: 1, confidence: 0.85, evidence: "form element" },
   { groupName: "Registration", selector: "form[action*=\"register\" i], form[action*=\"signup\" i], form[action*=\"sign-up\" i], form[id*=\"register\" i], form[id*=\"signup\" i]", minCount: 1, confidence: 0.85, evidence: "register/signup form" },
   { groupName: "Registration", selector: "form input[type=\"password\"] ~ input[type=\"password\"]", minCount: 1, confidence: 0.75, evidence: "confirm password field" },
@@ -42,7 +42,7 @@ export const COMPONENT_RULES: DetectionRule[] = [
 
   // --- Navigation-y ---
   { groupName: "Tabs", selector: "[role=\"tablist\"], [role=\"tab\"], .tabs, [class*=\"tab-list\" i], [class*=\"tabs__\" i], [class*=\"tabs-wrapper\" i], [class*=\"tab-menu\" i]", minCount: 1, confidence: 0.85, evidence: "tablist/tab class" },
-  { groupName: "Accordion", selector: "details, .accordion, [class*=\"accordion\" i], [class*=\"faq-item\" i], button[aria-expanded]", minCount: 1, confidence: 0.85, evidence: "details/accordion class" },
+  { groupName: "Accordion", selector: "details, .accordion, [class*=\"accordion\" i], [class*=\"faq-item\" i], button[aria-expanded][aria-controls*=\"accordion\" i]", minCount: 1, confidence: 0.85, evidence: "details/accordion class" },
   { groupName: "Table of contents", selector: ".toc, [class*=\"table-of-contents\" i], nav[aria-label*=\"contents\" i], nav[aria-label*=\"on this page\" i]", minCount: 1, confidence: 0.85, evidence: "TOC class/aria" },
   { groupName: "Progress Bar", selector: "progress, [role=\"progressbar\"], .progress-bar, [class*=\"progress-bar\" i]", minCount: 1, confidence: 0.85, evidence: "progress element" },
 
@@ -57,7 +57,7 @@ export const COMPONENT_RULES: DetectionRule[] = [
   { groupName: "Download", selector: "a[href$=\".pdf\" i], a[href$=\".zip\" i], a[href$=\".doc\" i], a[href$=\".docx\" i], a[href$=\".xls\" i], a[href$=\".xlsx\" i], a[download]", minCount: 1, confidence: 0.85, evidence: "download link" },
 
   // --- Commerce ---
-  { groupName: "Product (PDP)", selector: "[itemtype*=\"schema.org/Product\" i], [class*=\"product-detail\" i], [class*=\"pdp\" i], [class*=\"add-to-cart\" i], [class*=\"add-to-bag\" i], button[name*=\"add-to-cart\" i]", minCount: 1, confidence: 0.85, evidence: "product/PDP markers" },
+  { groupName: "Product (PDP)", selector: "[itemtype*=\"schema.org/Product\" i], [class*=\"product-detail\" i], [class*=\"pdp\" i], [class*=\"add-to-cart\" i], [class*=\"add-to-bag\" i], button[name*=\"add-to-cart\" i], [aria-label*=\"add to cart\" i]", minCount: 1, confidence: 0.85, evidence: "product/PDP markers" },
   { groupName: "Product List (PLP)", selector: "[class*=\"product-list\" i], [class*=\"product-grid\" i], [class*=\"products-grid\" i], [class*=\"plp\" i]", minCount: 1, confidence: 0.8, evidence: "product list/grid class" },
   { groupName: "Product Teaser", selector: "[class*=\"product-teaser\" i], [class*=\"product-card\" i], [class*=\"product-tile\" i]", minCount: 1, confidence: 0.75, evidence: "product card/tile class" },
   { groupName: "Product Carousel", selector: "[class*=\"product-carousel\" i], [class*=\"products-slider\" i]", minCount: 1, confidence: 0.85, evidence: "product-carousel class" },
@@ -72,7 +72,7 @@ export const COMPONENT_RULES: DetectionRule[] = [
   { groupName: "Experience Fragment", selector: "[data-cq-experience-fragment], [class*=\"experience-fragment\" i], [class*=\"xf-\" i]", minCount: 1, confidence: 0.7, evidence: "experience-fragment marker" },
 
   // --- Misc ---
-  { groupName: "Search Lister", selector: "[class*=\"search-lister\" i], [class*=\"search-results\" i], [class*=\"result-list\" i][class*=\"search\" i]", minCount: 1, confidence: 0.8, evidence: "search-results/lister class" },
+  { groupName: "Search Lister", selector: "[class*=\"search-lister\" i], [class*=\"search-results\" i], [class*=\"result-list\" i][class*=\"search\" i], [role=\"search\"], input[type=\"search\"], input[name*=\"query\" i]", minCount: 1, confidence: 0.8, evidence: "search-results/lister class" },
 ];
 
 // Maps the crawler's URL/title-based pageType to a template in

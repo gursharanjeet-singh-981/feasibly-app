@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store";
 import { exportScanReport } from "@/lib/exportScanReport";
 import { TOAST_DURATION_MS } from "@/lib/constants";
-import type { ScanSliceState } from "@/lib/scanner/types";
+import { countMatchedGroups } from "@/lib/scanner/scanCounts";
 
 type Kind = "components" | "templates";
 
@@ -25,19 +25,17 @@ export function ScanSummaryBanner({ kind }: Props) {
 
   const matchedCount =
     kind === "components"
-      ? Object.keys(scan.matchedComponentIds).length
+      ? countMatchedGroups(scan.matchedComponentIds)
       : Object.keys(scan.matchedTemplateIds).length;
 
   const unmatched = scan.unmatched.filter((item) =>
     kind === "components" ? item.kind === "component" : item.kind === "template",
   );
-  const issues = getScanIssues(scan);
 
   const label = kind === "components" ? "component group" : "template";
   const plural = matchedCount === 1 ? label : `${label}s`;
 
   const spaDetected = scan.warnings.includes("spa_detected");
-  const authPartial = scan.warnings.some((w) => w.startsWith("auth_wall_partial:"));
 
   const handleExport = async () => {
     setExporting(true);
@@ -109,131 +107,4 @@ export function ScanSummaryBanner({ kind }: Props) {
       )}
     </div>
   );
-}
-
-interface ScanIssue {
-  url: string;
-  category: string;
-  reason: string;
-}
-
-function getScanIssues(scan: ScanSliceState): ScanIssue[] {
-  const issues: ScanIssue[] = [];
-
-  for (const page of scan.discoveredPages) {
-    if (page.status >= 200 && page.status < 300) continue;
-    issues.push({
-      url: page.url,
-      category: classifyStatusCategory(page.status),
-      reason: `${page.status} ${statusText(page.status)}`,
-    });
-  }
-
-  const fetchFailureRe = /^fetch (.+) failed: (.+)$/;
-  const skippedRe = /^skipped (.+): (.+)$/;
-  const authPartialRe = /^auth_wall_partial:(\d+)$/;
-  const timeoutRe = /^scan_timeout_after_(\d+)ms$/;
-
-  for (const warning of scan.warnings) {
-    const fetchMatch = fetchFailureRe.exec(warning);
-    if (fetchMatch) {
-      issues.push({
-        url: fetchMatch[1]!,
-        category: classifyWarningCategory(fetchMatch[2]!),
-        reason: fetchMatch[2]!,
-      });
-      continue;
-    }
-
-    const skippedMatch = skippedRe.exec(warning);
-    if (skippedMatch) {
-      issues.push({
-        url: skippedMatch[1]!,
-        category: classifyWarningCategory(skippedMatch[2]!),
-        reason: `skipped: ${skippedMatch[2]!}`,
-      });
-      continue;
-    }
-
-    const authPartialMatch = authPartialRe.exec(warning);
-    if (authPartialMatch) {
-      issues.push({
-        url: "multiple pages",
-        category: "Authentication Required",
-        reason: `${authPartialMatch[1]!} page(s) were blocked by login/authentication`,
-      });
-      continue;
-    }
-
-    const timeoutMatch = timeoutRe.exec(warning);
-    if (timeoutMatch) {
-      issues.push({
-        url: "scan-level",
-        category: "Scan Timeout",
-        reason: `scan timed out after ${timeoutMatch[1]!}ms`,
-      });
-      continue;
-    }
-  }
-
-  const seen = new Set<string>();
-  return issues.filter((issue) => {
-    const key = `${issue.url}|${issue.category}|${issue.reason}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-function classifyStatusCategory(status: number): string {
-  if (status === 401 || status === 403) return "Authentication Required";
-  if (status === 404 || status === 410) return "Page Not Reachable";
-  if (status === 429) return "Rate Limited";
-  if (status >= 500) return "Server Error";
-  if (status >= 400) return "Client Error";
-  return "Unexpected Status";
-}
-
-function classifyWarningCategory(reason: string): string {
-  const normalized = reason.toLowerCase();
-  if (
-    normalized.includes("unauthorized") ||
-    normalized.includes("forbidden") ||
-    normalized.includes("auth") ||
-    normalized.includes("401") ||
-    normalized.includes("403")
-  ) {
-    return "Authentication Required";
-  }
-  if (normalized.includes("abort") || normalized.includes("timeout") || normalized.includes("timed out")) {
-    return "Timeout / Loading Issue";
-  }
-  if (normalized.includes("content-type")) return "Unsupported Content";
-  if (normalized.includes("dns") || normalized.includes("enotfound") || normalized.includes("resolve")) {
-    return "DNS / Host Resolution";
-  }
-  if (normalized.includes("private_host") || normalized.includes("blocked_tld")) {
-    return "Security Restriction";
-  }
-  if (normalized.includes("certificate") || normalized.includes("ssl") || normalized.includes("tls")) {
-    return "TLS / Certificate Issue";
-  }
-  return "Fetch / Loading Issue";
-}
-
-function statusText(status: number): string {
-  const labels: Record<number, string> = {
-    400: "Bad Request",
-    401: "Unauthorized",
-    403: "Forbidden",
-    404: "Not Found",
-    408: "Request Timeout",
-    410: "Gone",
-    429: "Too Many Requests",
-    500: "Internal Server Error",
-    502: "Bad Gateway",
-    503: "Service Unavailable",
-    504: "Gateway Timeout",
-  };
-  return labels[status] ?? (status >= 400 && status < 500 ? "Client Error" : "Server Error");
 }

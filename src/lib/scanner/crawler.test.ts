@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { SCAN_DEFAULTS } from "@/lib/constants";
 import {
   DEFAULT_USER_AGENT,
   classifyPageType,
@@ -6,6 +7,7 @@ import {
   getPathTemplate,
   normalizeUrl,
   parseSitemap,
+  selectRepresentativeUrls,
 } from "./crawler";
 
 type Route = {
@@ -66,8 +68,10 @@ describe("classifyPageType", () => {
     ["https://x.com/search", "search"],
     ["https://x.com/?q=hello", "search"],
     ["https://x.com/contact", "contact"],
+    ["https://x.com/blog", "listing"],
+    ["https://x.com/news", "listing"],
     ["https://x.com/blog/hello-world", "article"],
-    ["https://x.com/news", "article"],
+    ["https://x.com/news/latest", "article"],
     ["https://x.com/collections/summer", "listing"],
     ["https://x.com/products/12345", "product"],
     ["https://x.com/landing/promo", "landing"],
@@ -99,7 +103,47 @@ describe("parseSitemap", () => {
   });
 });
 
+describe("selectRepresentativeUrls", () => {
+  it("keeps the requested locale and one representative for PDP, PLP, and article route families", () => {
+    const selection = selectRepresentativeUrls([
+      "https://x.com/gb/products/red-shoe",
+      "https://x.com/gb/products/blue-shoe",
+      "https://x.com/fr/products/red-shoe",
+      "https://x.com/gb/category/shoes",
+      "https://x.com/gb/category/accessories",
+      "https://x.com/gb/blog/summer-style",
+      "https://x.com/gb/blog/winter-style",
+      "https://x.com/gb/about",
+    ], "https://x.com/gb/");
+
+    expect(selection.urls).toEqual([
+      "https://x.com/gb/about",
+      "https://x.com/gb/blog/summer-style",
+      "https://x.com/gb/category/accessories",
+      "https://x.com/gb/products/blue-shoe",
+    ]);
+    expect(selection.skipped).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        url: "https://x.com/fr/products/red-shoe",
+        detail: "locale_duplicate; representative=https://x.com/gb/products/blue-shoe",
+      }),
+      expect.objectContaining({
+        url: "https://x.com/gb/products/red-shoe",
+        detail: "same_route_family; representative=https://x.com/gb/products/blue-shoe",
+      }),
+    ]));
+  });
+});
+
 describe("crawl", () => {
+  it("keeps the default fetch budget within the scan timeout", () => {
+    const worstCaseFetchMs =
+      Math.ceil(SCAN_DEFAULTS.maxPages / SCAN_DEFAULTS.crawlerConcurrency) *
+      SCAN_DEFAULTS.perPageTimeoutMs;
+
+    expect(worstCaseFetchMs).toBeLessThan(SCAN_DEFAULTS.timeoutMs);
+  });
+
   const noJitter = () => 0;
 
   it("uses sitemap URLs when present and still follows links", async () => {
@@ -127,6 +171,88 @@ describe("crawl", () => {
       "https://x.com/b",
       "https://x.com/c",
     ]);
+  });
+
+  it("does not exceed maxPages when sitemap URLs are present", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/": { body: page("Home") },
+      "https://x.com/sitemap.xml": {
+        contentType: "application/xml",
+        body: `<urlset><url><loc>https://x.com/a</loc></url></urlset>`,
+      },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/a": { body: page("A") },
+    };
+    const { stub } = makeFetchStub(routes);
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      maxPages: 1,
+    });
+
+    expect(result.pages).toHaveLength(1);
+    expect(result.pages[0]?.url).toBe("https://x.com/");
+  });
+
+  it("reserves a representative slot for the scan root and caps all selected scan targets", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/": { body: page("Home") },
+      "https://x.com/sitemap.xml": {
+        contentType: "application/xml",
+        body: `<urlset>
+          <url><loc>https://x.com/about</loc></url>
+          <url><loc>https://x.com/contact</loc></url>
+          <url><loc>https://x.com/pricing</loc></url>
+        </urlset>`,
+      },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/about": { body: page("About") },
+      "https://x.com/contact": { body: page("Contact") },
+      "https://x.com/pricing": { body: page("Pricing") },
+    };
+    const { stub } = makeFetchStub(routes);
+
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      maxPages: 3,
+      useSitemapRepresentatives: true,
+      followLinks: false,
+    });
+
+    expect(result.representativeUrls).toEqual([
+      "https://x.com/",
+      "https://x.com/about",
+      "https://x.com/contact",
+    ]);
+    expect(result.pages).toHaveLength(3);
+  });
+
+  it("aggregates sitemap URLs skipped by the page limit", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/": { body: page("Home") },
+      "https://x.com/sitemap.xml": {
+        contentType: "application/xml",
+        body: `<urlset>
+          <url><loc>https://x.com/a</loc></url>
+          <url><loc>https://x.com/b</loc></url>
+          <url><loc>https://x.com/c</loc></url>
+        </urlset>`,
+      },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+    };
+    const { stub } = makeFetchStub(routes);
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      maxPages: 1,
+    });
+
+    expect(result.warnings).toContain("sitemap_skip_summary max_pages_limit: 3");
+    expect(result.warnings.filter((warning) => warning.includes("max_pages_limit"))).toHaveLength(1);
   });
 
   it("follows sitemap index recursively", async () => {
@@ -256,7 +382,7 @@ describe("crawl", () => {
     const result = await crawl("https://x.com/", {
       fetchImpl: stub,
       jitterMs: noJitter,
-      maxPages: 1,
+      maxPages: 2,
     });
 
     expect(result.warnings).toContain("sitemap_skip https://x.com/gb/private: robots_disallow");
@@ -289,6 +415,79 @@ describe("crawl", () => {
     expect(calls.some((c) => c.url === "https://other.com/")).toBe(false);
   });
 
+  it("records a page request timeout instead of a generic abort", async () => {
+    const stub: typeof fetch = async (input, init) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url === "https://x.com/robots.txt") return new Response("", { status: 404 });
+      if (url.endsWith("sitemap.xml") || url.endsWith("sitemap_index.xml")) {
+        return new Response("", { status: 404 });
+      }
+      return new Promise((_, reject) => {
+        init?.signal?.addEventListener("abort", () => {
+          reject(new DOMException("This operation was aborted", "AbortError"));
+        });
+      });
+    };
+
+    const result = await crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: noJitter,
+      perPageTimeoutMs: 5,
+    });
+
+    expect(result.warnings).toContain("fetch https://x.com/ failed: request_timeout_after_5ms");
+    expect(result.warnings.some((warning) => warning.includes("This operation was aborted"))).toBe(false);
+    expect(result.unscannedPages).toContainEqual({
+      url: "https://x.com/",
+      source: "link",
+      reason: "fetch_failed",
+      detail: "request_timeout_after_5ms",
+    });
+  });
+
+  it("keeps the page timeout active while reading the response body", async () => {
+    const stub: typeof fetch = async (input, init) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url === "https://x.com/robots.txt" || url.endsWith("sitemap.xml") || url.endsWith("sitemap_index.xml")) {
+        return new Response("", { status: 404 });
+      }
+
+      let streamController: ReadableStreamDefaultController<Uint8Array>;
+      const body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          streamController = controller;
+        },
+      });
+      init?.signal?.addEventListener("abort", () => {
+        streamController.error(new DOMException("This operation was aborted", "AbortError"));
+      });
+      return new Response(body, {
+        headers: { "content-type": "text/html; charset=utf-8" },
+      });
+    };
+
+    const outcome = await Promise.race([
+      crawl("https://x.com/", {
+        fetchImpl: stub,
+        jitterMs: noJitter,
+        perPageTimeoutMs: 5,
+      }),
+      new Promise<"stalled">((resolve) => setTimeout(() => resolve("stalled"), 50)),
+    ]);
+
+    expect(outcome).not.toBe("stalled");
+    expect(outcome).toMatchObject({
+      unscannedPages: [
+        {
+          url: "https://x.com/",
+          source: "link",
+          reason: "fetch_failed",
+          detail: "request_timeout_after_5ms",
+        },
+      ],
+    });
+  });
+
   it("respects maxPages", async () => {
     const routes: Record<string, Route> = {
       "https://x.com/robots.txt": { body: "" },
@@ -307,6 +506,10 @@ describe("crawl", () => {
       maxPages: 3,
     });
     expect(result.pages.length).toBe(3);
+    expect(result.unscannedPages).toEqual([
+      { url: "https://x.com/c", source: "link", reason: "max_pages_limit" },
+      { url: "https://x.com/d", source: "link", reason: "max_pages_limit" },
+    ]);
   });
 
   it("respects maxDepth", async () => {
@@ -327,6 +530,11 @@ describe("crawl", () => {
     });
     const urls = result.pages.map((p) => p.url).sort();
     expect(urls).toEqual(["https://x.com/", "https://x.com/a"]);
+    expect(result.unscannedPages).toContainEqual({
+      url: "https://x.com/b",
+      source: "link",
+      reason: "max_depth",
+    });
   });
 
   it("honours robots.txt disallow", async () => {
@@ -350,6 +558,11 @@ describe("crawl", () => {
     expect(urls).toContain("https://x.com/public");
     expect(urls).not.toContain("https://x.com/private");
     expect(calls.some((c) => c.url === "https://x.com/private")).toBe(false);
+    expect(result.unscannedPages).toContainEqual({
+      url: "https://x.com/private",
+      source: "link",
+      reason: "robots_disallow",
+    });
   });
 
   it("uses sitemap URLs listed in robots.txt", async () => {
@@ -412,6 +625,36 @@ describe("crawl", () => {
     removeSpy.mockRestore();
   });
 
+  it("returns pages already fetched when aborted during crawl jitter", async () => {
+    const routes: Record<string, Route> = {
+      "https://x.com/robots.txt": { body: "" },
+      "https://x.com/sitemap.xml": { status: 404, body: "" },
+      "https://x.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://x.com/": { body: page("Home", ["/a", "/b"]) },
+      "https://x.com/a": { body: page("A") },
+      "https://x.com/b": { body: page("B") },
+    };
+    const { stub } = makeFetchStub(routes);
+    const controller = new AbortController();
+    let jitterCall = 0;
+    const resultPromise = crawl("https://x.com/", {
+      fetchImpl: stub,
+      jitterMs: () => (jitterCall++ === 0 ? 0 : 1_000),
+      signal: controller.signal,
+      maxPages: 3,
+    });
+
+    setTimeout(() => controller.abort(), 5);
+
+    await expect(resultPromise).resolves.toMatchObject({
+      pages: [expect.objectContaining({ url: "https://x.com/" })],
+      warnings: expect.arrayContaining(["Crawl aborted"]),
+      unscannedPages: expect.arrayContaining([
+        expect.objectContaining({ source: "link", reason: "scan_incomplete" }),
+      ]),
+    });
+  });
+
   it("skips non-HTML content types", async () => {
     const routes: Record<string, Route> = {
       "https://x.com/robots.txt": { body: "" },
@@ -430,6 +673,12 @@ describe("crawl", () => {
     });
     expect(result.pages.map((p) => p.url)).toEqual(["https://x.com/"]);
     expect(result.warnings.some((w) => w.includes("application/pdf"))).toBe(true);
+    expect(result.unscannedPages).toContainEqual({
+      url: "https://x.com/file.pdf",
+      source: "link",
+      reason: "unsupported_content",
+      detail: "application/pdf",
+    });
   });
 
   it("sends the configured user-agent", async () => {

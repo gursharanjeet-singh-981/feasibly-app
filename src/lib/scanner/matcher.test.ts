@@ -103,6 +103,29 @@ describe("matchDetections — exact matching", () => {
     expect(result.matchedComponentIds[teaser!.id]).toBeDefined();
   });
 
+  it("selects only the default image variant for generic image markup", () => {
+    const result = matchDetections(
+      [
+        analysis({
+          url: "https://x.com/blog",
+          detectedComponents: [
+            {
+              groupName: "Image",
+              variantHint: "hero-image article-card-image Fashion insights hero",
+              confidence: 0.8,
+              source: "heuristic",
+            },
+          ],
+        }),
+      ],
+      library,
+    );
+    const matchedNames = Object.keys(result.matchedComponentIds).map((id) =>
+      library.components.find((component) => component.id === Number(id))?.name,
+    );
+    expect(matchedNames).toEqual(["Standard image (AEM Core Component defaults)"]);
+  });
+
   it("selects multiple variants when the page evidence supports both", () => {
     const result = matchDetections(
       [
@@ -144,6 +167,24 @@ describe("matchDetections — exact matching", () => {
     for (const id of homepageIds) {
       expect(result.matchedTemplateIds[id]).toBeDefined();
       expect(result.matchedTemplateIds[id].confidence).toBeCloseTo(0.85, 5);
+    }
+  });
+
+  it("falls back to page type when no explicit template signal is detected", () => {
+    const result = matchDetections(
+      [
+        analysis({
+          url: "https://x.com/product/123",
+          pageType: "product",
+          detectedTemplate: null,
+        }),
+      ],
+      library,
+    );
+    expect(pdpIds.length).toBeGreaterThan(0);
+    for (const id of pdpIds) {
+      expect(result.matchedTemplateIds[id]).toBeDefined();
+      expect(result.matchedTemplateIds[id].confidence).toBeGreaterThan(0.5);
     }
   });
 

@@ -17,6 +17,18 @@ export function selectMatchedItems<T extends Identifiable>(
   );
 }
 
+export function getMatchedItemGroups<T extends { id: number }>(
+  items: T[],
+  matchedIds: Record<number, unknown>,
+  getGroup: (item: T) => string,
+): Set<string> {
+  const ids = new Set(Object.keys(matchedIds).map(Number));
+  return items.reduce((groups, item) => {
+    if (ids.has(item.id)) groups.add(getGroup(item));
+    return groups;
+  }, new Set<string>());
+}
+
 export function toggleGroup(
   group: string,
   setOpenGroups: Dispatch<SetStateAction<Set<string>>>

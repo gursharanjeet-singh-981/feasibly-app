@@ -169,6 +169,17 @@ describe("analyzer robustness", () => {
     expect(result.detectedComponents.some((c) => c.groupName === "Link")).toBe(true);
   });
 
+  it("does not treat navigation disclosure buttons as accordions", () => {
+    const result = analyzePage({
+      url: "https://x.com/blog",
+      html: wrap(
+        '<nav aria-label="Main navigation"><button aria-expanded="false">Trends</button></nav>',
+      ),
+      pageType: "listing",
+    });
+    expect(result.detectedComponents.some((c) => c.groupName === "Accordion")).toBe(false);
+  });
+
   it("sorts detected components by descending confidence", () => {
     const html = wrap(
       "<header>h</header><p>a</p><p>b</p><p>c</p><form><input></form>",

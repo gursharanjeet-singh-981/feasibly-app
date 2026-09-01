@@ -49,10 +49,11 @@ export async function* orchestrateScan(
   // and external cancels both propagate to crawler.
   const controller = new AbortController();
   const timeoutHandle = setTimeout(() => {
-    warnings.push(`scan_timeout_after_${timeoutMs}ms`);
-    controller.abort();
+    const reason = `scan_timeout_after_${timeoutMs}ms`;
+    warnings.push(reason);
+    controller.abort(new Error(reason));
   }, timeoutMs);
-  const onExternalAbort = () => controller.abort();
+  const onExternalAbort = () => controller.abort(new Error("scan_cancelled"));
   externalSignal?.addEventListener("abort", onExternalAbort, { once: true });
 
   try {
@@ -67,16 +68,17 @@ export async function* orchestrateScan(
     // ---------- 1. Crawl ----------
     yield progress("crawl", 5, "Fetching robots.txt and sitemap…");
 
-    // In whole-site mode, always crawl from origin root so subpage inputs
-    // (e.g. /library) do not constrain discovery to that single path.
-    const crawlStartUrl =
-      mode === "full" ? new URL("/", url).toString() : url;
     const marketScopePathPrefix = mode === "full" ? detectMarketPathPrefix(url) : undefined;
+    const crawlStartUrl =
+      mode === "full"
+        ? new URL(marketScopePathPrefix ?? "/", url).toString()
+        : url;
 
     let crawlResult: Awaited<ReturnType<typeof crawl>>;
     try {
       crawlResult = await crawl(crawlStartUrl, {
         ...(mode === "single" ? { maxPages: 1, maxDepth: 0 } : {}),
+        ...(mode === "full" ? { useSitemapRepresentatives: true, followLinks: false } : {}),
         ...(marketScopePathPrefix ? { scopePathPrefix: marketScopePathPrefix } : {}),
         ...crawlOptions,
         signal: controller.signal,
@@ -133,6 +135,9 @@ export async function* orchestrateScan(
     // ---------- 2b. SPA detection (thin/client-rendered pages) ----------
     const spaUrls = new Set<string>();
     for (let i = 0; i < crawlResult.pages.length; i++) {
+      if (hasCookieConsent(crawlResult.pages[i]!.html)) {
+        warnings.push(`cookie_consent_detected:${crawlResult.pages[i]!.url}`);
+      }
       if (isThinContent(crawlResult.pages[i]!.html, heuristicAnalyses[i]!)) {
         spaUrls.add(crawlResult.pages[i]!.url);
         warnings.push(`spa_suspected:${crawlResult.pages[i]!.url}`);
@@ -169,7 +174,9 @@ export async function* orchestrateScan(
       scanDuration: now() - startedAt,
       pagesScanned: crawlResult.pages.length,
       sitemapUrls: crawlResult.sitemapUrls,
+      representativeUrls: crawlResult.representativeUrls,
       scrapedUrls,
+      unscannedPages: crawlResult.unscannedPages,
       discoveredPages: discovered,
       matchedComponentIds: match.matchedComponentIds,
       matchedTemplateIds: match.matchedTemplateIds,
@@ -236,7 +243,9 @@ function finalizeEmpty(args: {
     scanDuration: args.now() - args.startedAt,
     pagesScanned: 0,
     sitemapUrls: [],
+    representativeUrls: [],
     scrapedUrls: [],
+    unscannedPages: [],
     discoveredPages: [],
     matchedComponentIds: {},
     matchedTemplateIds: {},
@@ -262,15 +271,20 @@ function isThinContent(html: string, analysis: PageAnalysis): boolean {
   return text.length < 200 && analysis.detectedComponents.length === 0;
 }
 
+function hasCookieConsent(html: string): boolean {
+  return /<(?:dialog|div|section|aside)[^>]+(?:id|class)=["'][^"']*(?:cookie[-_ ]?(?:banner|consent|notice)|consent[-_ ]?(?:banner|dialog|manager)|onetrust|cookiebot)[^"']*["']/i.test(
+    html,
+  );
+}
+
 function detectMarketPathPrefix(inputUrl: string): string | undefined {
   try {
     const url = new URL(inputUrl);
-    const firstSegment = url.pathname.split("/").filter(Boolean)[0];
-    if (!firstSegment) return undefined;
-    // Treat common locale-like prefixes as market scoping tokens.
-    if (/^[a-z]{2}(?:-[a-z]{2})?$/i.test(firstSegment)) {
-      return `/${firstSegment.toLowerCase()}`;
-    }
+    const segments = url.pathname.split("/").filter(Boolean);
+    const localeIndex = segments.findIndex((segment) =>
+      /^[a-z]{2}(?:-[a-z]{2})?$/i.test(segment),
+    );
+    if (localeIndex >= 0) return `/${segments.slice(0, localeIndex + 1).join("/").toLowerCase()}`;
     return undefined;
   } catch {
     return undefined;

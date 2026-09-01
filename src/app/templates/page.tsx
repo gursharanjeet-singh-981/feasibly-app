@@ -12,6 +12,7 @@ import { useAppStore } from "@/store";
 import { loadTemplates } from "@/lib/data";
 import {
   addItemAndScroll,
+  getMatchedItemGroups,
   renameGroupItems,
   selectMatchedItems,
   toggleAllInGroup as toggleAllInGroupHelper,
@@ -33,12 +34,14 @@ export default function TemplatesPage() {
   const updateTemplate = useAppStore((s) => s.updateTemplate);
   const useAiEstimation = useAppStore((s) => s.useAiEstimation);
   const toggleAiEstimation = useAppStore((s) => s.toggleAiEstimation);
+  const scanStatus = useAppStore((s) => s.scan.status);
   const matchedTemplateIds = useAppStore((s) => s.scan.matchedTemplateIds);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const lastAppliedMatchKey = useRef<string | null>(null);
+  const lastOpenedMatchKey = useRef<string | null>(null);
   const loading = !error && templates.length === 0;
 
   useEffect(() => {
@@ -76,6 +79,15 @@ export default function TemplatesPage() {
   }, [ready, templates, setTemplates, matchedTemplateIds]);
 
   const getGroup = useCallback((t: SelectedTemplate) => t.name, []);
+
+  useEffect(() => {
+    if (scanStatus !== "complete" || templates.length === 0) return;
+    const matchKey = Object.keys(matchedTemplateIds).sort().join(",");
+    if (!matchKey || lastOpenedMatchKey.current === matchKey) return;
+    lastOpenedMatchKey.current = matchKey;
+    setOpenGroups(getMatchedItemGroups(templates, matchedTemplateIds, getGroup));
+  }, [scanStatus, templates, matchedTemplateIds, getGroup]);
+
   const matchers = useCallback(
     (t: SelectedTemplate) => [t.name, t.description, t.category],
     [],
