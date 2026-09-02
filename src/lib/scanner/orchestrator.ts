@@ -91,6 +91,11 @@ export async function* orchestrateScan(
       return;
     }
 
+    if (controller.signal.aborted) {
+      yield errorEvent(controller.signal.reason);
+      return;
+    }
+
     if (crawlResult.pages.length === 0) {
       warnings.push("no_pages_fetched");
       const emptyResult = finalizeEmpty({
@@ -99,6 +104,9 @@ export async function* orchestrateScan(
         startedAt,
         now,
         warnings: [...warnings, ...crawlResult.warnings],
+        sitemapUrls: crawlResult.sitemapUrls,
+        representativeUrls: crawlResult.representativeUrls,
+        unscannedPages: crawlResult.unscannedPages,
       });
       yield { type: "complete", result: emptyResult } satisfies ScanCompleteEvent;
       return;
@@ -117,6 +125,9 @@ export async function* orchestrateScan(
     if (blocked.length > 0) {
       warnings.push(`auth_wall_partial:${blocked.length}`);
     }
+    const analyzablePages = crawlResult.pages.filter(
+      (page) => page.status !== 401 && page.status !== 403,
+    );
 
     yield progress(
       "crawl",
@@ -128,22 +139,22 @@ export async function* orchestrateScan(
     // ---------- 2. Heuristic analyze ----------
     yield progress("analyze", 40, "Running heuristic detection…", crawlResult.pages.length);
 
-    const heuristicAnalyses: PageAnalysis[] = crawlResult.pages.map((p) =>
+    const heuristicAnalyses: PageAnalysis[] = analyzablePages.map((p) =>
       analyzePage({ url: p.url, html: p.html, pageType: p.pageType }),
     );
 
     // ---------- 2b. SPA detection (thin/client-rendered pages) ----------
     const spaUrls = new Set<string>();
-    for (let i = 0; i < crawlResult.pages.length; i++) {
-      if (hasCookieConsent(crawlResult.pages[i]!.html)) {
-        warnings.push(`cookie_consent_detected:${crawlResult.pages[i]!.url}`);
+    for (let i = 0; i < analyzablePages.length; i++) {
+      if (hasCookieConsent(analyzablePages[i]!.html)) {
+        warnings.push(`cookie_consent_detected:${analyzablePages[i]!.url}`);
       }
-      if (isThinContent(crawlResult.pages[i]!.html, heuristicAnalyses[i]!)) {
-        spaUrls.add(crawlResult.pages[i]!.url);
-        warnings.push(`spa_suspected:${crawlResult.pages[i]!.url}`);
+      if (isThinContent(analyzablePages[i]!.html, heuristicAnalyses[i]!)) {
+        spaUrls.add(analyzablePages[i]!.url);
+        warnings.push(`spa_suspected:${analyzablePages[i]!.url}`);
       }
     }
-    if (spaUrls.size === crawlResult.pages.length) {
+    if (spaUrls.size === analyzablePages.length) {
       warnings.push("spa_detected");
     }
 
@@ -216,11 +227,11 @@ function errorEvent(err: unknown): ScanErrorEvent {
   const message = err instanceof Error ? err.message : String(err);
   const normalized = message.toLowerCase();
 
-  if (normalized.includes("abort")) {
-    return { type: "error", message: "scan_aborted" };
-  }
   if (normalized.includes("timed out") || normalized.includes("timeout")) {
     return { type: "error", message: "scan_timeout" };
+  }
+  if (normalized.includes("abort") || normalized.includes("cancelled")) {
+    return { type: "error", message: "scan_aborted" };
   }
   if (normalized.includes("fetch failed") || normalized.includes("network")) {
     return { type: "error", message: "network_error" };
@@ -235,6 +246,9 @@ function finalizeEmpty(args: {
   startedAt: number;
   now: () => number;
   warnings: string[];
+  sitemapUrls: string[];
+  representativeUrls: string[];
+  unscannedPages: ScanResult["unscannedPages"];
 }): ScanResult {
   return {
     scanId: args.scanId,
@@ -242,10 +256,10 @@ function finalizeEmpty(args: {
     scanDate: new Date(args.startedAt).toISOString(),
     scanDuration: args.now() - args.startedAt,
     pagesScanned: 0,
-    sitemapUrls: [],
-    representativeUrls: [],
+    sitemapUrls: args.sitemapUrls,
+    representativeUrls: args.representativeUrls,
     scrapedUrls: [],
-    unscannedPages: [],
+    unscannedPages: args.unscannedPages,
     discoveredPages: [],
     matchedComponentIds: {},
     matchedTemplateIds: {},

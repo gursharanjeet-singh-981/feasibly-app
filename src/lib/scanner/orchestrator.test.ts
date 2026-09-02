@@ -165,6 +165,39 @@ describe("orchestrateScan", () => {
     expect(complete?.result.warnings).toContain("no_pages_fetched");
   });
 
+  it("preserves crawler coverage metadata in an empty result", async () => {
+    const routes = {
+      "https://example.com/robots.txt": { body: "User-agent: *\nDisallow: /" },
+      "https://example.com/sitemap.xml": {
+        contentType: "application/xml",
+        body: `<urlset><url><loc>https://example.com/missing</loc></url></urlset>`,
+      },
+      "https://example.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://example.com/": { status: 404, body: "" },
+      "https://example.com/missing": { status: 404, body: "" },
+    };
+    const { stub } = makeFetchStub(routes);
+
+    const events = await collect(
+      orchestrateScan({
+        url: "https://example.com/",
+        library,
+        crawlOptions: { fetchImpl: stub, jitterMs: noJitter, maxPages: 10 },
+      }),
+    );
+
+    const complete = events.find((event): event is ScanCompleteEvent => event.type === "complete");
+    expect(complete?.result.sitemapUrls).toEqual(["https://example.com/missing"]);
+    expect(complete?.result.representativeUrls).toEqual([
+      "https://example.com/",
+      "https://example.com/missing",
+    ]);
+    expect(complete?.result.unscannedPages.map((page) => page.url).sort()).toEqual([
+      "https://example.com/",
+      "https://example.com/missing",
+    ]);
+  });
+
   it("starts an in-scope locale crawl when no sitemap is available", async () => {
     const routes = {
       "https://example.com/robots.txt": { body: "" },
@@ -227,10 +260,33 @@ describe("orchestrateScan", () => {
     // Abort just after the generator starts.
     setTimeout(() => ac.abort(), 5);
     const events = await collect(gen);
-    // Either an error event or a complete with no_pages_fetched warning is acceptable.
-    const hasError = events.some((e) => e.type === "error");
-    const complete = events.find((e): e is ScanCompleteEvent => e.type === "complete");
-    expect(hasError || complete?.result.warnings.includes("no_pages_fetched")).toBe(true);
+    const error = events.find((e): e is ScanErrorEvent => e.type === "error");
+    expect(error?.message).toBe("scan_aborted");
+    expect(events.find((e) => e.type === "complete")).toBeUndefined();
+  });
+
+  it("returns a timeout error instead of completing a partial crawl", async () => {
+    const stub: typeof fetch = async (_input, init) =>
+      new Promise((resolve, reject) => {
+        const timer = setTimeout(() => resolve(new Response("", { status: 200 })), 200);
+        init?.signal?.addEventListener("abort", () => {
+          clearTimeout(timer);
+          reject(new DOMException("Aborted", "AbortError"));
+        });
+      });
+
+    const events = await collect(
+      orchestrateScan({
+        url: "https://example.com/",
+        library,
+        timeoutMs: 5,
+        crawlOptions: { fetchImpl: stub, jitterMs: noJitter },
+      }),
+    );
+
+    const error = events.find((event): event is ScanErrorEvent => event.type === "error");
+    expect(error?.message).toBe("scan_timeout");
+    expect(events.find((event) => event.type === "complete")).toBeUndefined();
   });
 
   it("emits an auth_required error when every fetched page returns 401/403", async () => {
@@ -278,6 +334,35 @@ describe("orchestrateScan", () => {
     const complete = events.find((e): e is ScanCompleteEvent => e.type === "complete");
     expect(complete).toBeDefined();
     expect(complete!.result.warnings.some((w) => w.startsWith("auth_wall_partial:"))).toBe(true);
+  });
+
+  it("excludes auth-blocked HTML from heuristic matching", async () => {
+    const routes = {
+      "https://example.com/robots.txt": { body: "" },
+      "https://example.com/sitemap.xml": { status: 404, body: "" },
+      "https://example.com/sitemap_index.xml": { status: 404, body: "" },
+      "https://example.com/": {
+        body: `<html><title>Home</title><body><a href="/account">Account</a></body></html>`,
+      },
+      "https://example.com/account": { status: 403, body: homepageHtml() },
+    };
+    const { stub } = makeFetchStub(routes);
+    const events = await collect(
+      orchestrateScan({
+        url: "https://example.com/",
+        library,
+        crawlOptions: { fetchImpl: stub, jitterMs: noJitter, maxPages: 10 },
+      }),
+    );
+
+    const complete = events.find((event): event is ScanCompleteEvent => event.type === "complete");
+    expect(complete?.result.pagesScanned).toBe(2);
+    expect(complete?.result.discoveredPages.map((page) => page.status)).toEqual([200, 403]);
+    expect(
+      Object.values(complete?.result.matchedComponentIds ?? {}).every(
+        (metadata) => !metadata.pages.includes("https://example.com/account"),
+      ),
+    ).toBe(true);
   });
 
   it("flags SPA-shell pages and warns spa_detected when all pages are thin", async () => {
