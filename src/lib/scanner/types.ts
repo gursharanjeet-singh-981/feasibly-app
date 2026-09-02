@@ -27,6 +27,23 @@ export interface DiscoveredPage {
   status: number;
 }
 
+export type UnscannedPageReason =
+  | "robots_disallow"
+  | "max_pages_limit"
+  | "representative_page"
+  | "max_depth"
+  | "path_template_limit"
+  | "scan_incomplete"
+  | "fetch_failed"
+  | "unsupported_content";
+
+export interface UnscannedPage {
+  url: string;
+  source: "sitemap" | "link";
+  reason: UnscannedPageReason;
+  detail?: string;
+}
+
 export interface DetectedComponent {
   groupName: string;
   variantHint?: string;
@@ -77,7 +94,9 @@ export interface ScanResult {
   scanDuration: number;
   pagesScanned: number;
   sitemapUrls: string[];
+  representativeUrls: string[];
   scrapedUrls: string[];
+  unscannedPages: UnscannedPage[];
   discoveredPages: DiscoveredPage[];
   matchedComponentIds: Record<number, MatchMetadata>;
   matchedTemplateIds: Record<number, MatchMetadata>;
@@ -106,7 +125,9 @@ export interface ScanSliceState {
   scanId: string | null;
   pagesScanned: number;
   sitemapUrls: string[];
+  representativeUrls: string[];
   scrapedUrls: string[];
+  unscannedPages: UnscannedPage[];
   discoveredPages: DiscoveredPage[];
   matchedComponentIds: Record<number, MatchMetadata>;
   matchedTemplateIds: Record<number, MatchMetadata>;
@@ -122,7 +143,9 @@ export const initialScanSliceState: ScanSliceState = {
   scanId: null,
   pagesScanned: 0,
   sitemapUrls: [],
+  representativeUrls: [],
   scrapedUrls: [],
+  unscannedPages: [],
   discoveredPages: [],
   matchedComponentIds: {},
   matchedTemplateIds: {},

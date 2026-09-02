@@ -52,10 +52,14 @@ function checkPageBreak(doc: jsPDF, y: number, needed: number): number {
 interface Cell {
   text: string;
   width: number;
+  verticalAlign?: "middle";
+  highlightedText?: string;
+  secondaryText?: string;
 }
 
 const LINE_HEIGHT = 8;
-const ROW_VPAD = 8;
+const ROW_VPAD = 4;
+const PRIMARY_TABLE_COLUMN_WIDTH = 55;
 
 // jsPDF's built-in Helvetica is WinAnsi-only; substitute common Unicode punctuation.
 function sanitize(text: string): string {
@@ -75,17 +79,36 @@ function drawTableRow(
   contentWidth: number,
 ): number {
   const wrapped = cells.map((c) => {
+    if (c.highlightedText) {
+      const highlightedLines = doc.splitTextToSize(sanitize(c.highlightedText), c.width - 4);
+      const secondaryLines = c.secondaryText
+        ? doc.splitTextToSize(sanitize(c.secondaryText), c.width - 4)
+        : [];
+      return {
+        lines: [
+          ...(Array.isArray(highlightedLines) ? highlightedLines : [highlightedLines]),
+          ...(Array.isArray(secondaryLines) ? secondaryLines : [secondaryLines]),
+        ],
+        highlightedLineCount: Array.isArray(highlightedLines) ? highlightedLines.length : 1,
+      };
+    }
     const lines = doc.splitTextToSize(sanitize(c.text), c.width - 4);
-    return Array.isArray(lines) ? lines : [lines];
+    return { lines: Array.isArray(lines) ? lines : [lines], highlightedLineCount: 0 };
   });
-  const maxLines = Math.max(1, ...wrapped.map((w) => w.length));
+  const maxLines = Math.max(1, ...wrapped.map((w) => w.lines.length));
   const rowHeight = maxLines * LINE_HEIGHT + ROW_VPAD;
+  y = checkPageBreak(doc, y, rowHeight);
 
   let cx = x;
   for (let i = 0; i < cells.length; i++) {
-    const lines = wrapped[i];
+    const { lines, highlightedLineCount } = wrapped[i];
+    const textOffset = cells[i].verticalAlign === "middle"
+      ? ((maxLines - lines.length) * LINE_HEIGHT) / 2
+      : 0;
     for (let li = 0; li < lines.length; li++) {
-      doc.text(lines[li], cx + 2, y + li * LINE_HEIGHT);
+      setColor(doc, li < highlightedLineCount ? COBALT : BLACK);
+      doc.setFont("helvetica", li < highlightedLineCount ? "bold" : "normal");
+      doc.text(lines[li], cx + 2, y + textOffset + li * LINE_HEIGHT);
     }
     cx += cells[i].width;
   }
@@ -174,7 +197,7 @@ export function exportPDF(
   doc.setFontSize(6);
   setColor(doc, WHITE);
   doc.setFont("helvetica", "bold");
-  doc.text("DEV", margin + 5.5, y + 11);
+  doc.text("DEV", margin + 9, y + 10, { align: "center", baseline: "middle" });
 
   doc.setFontSize(10);
   setColor(doc, BLACK);
@@ -200,7 +223,7 @@ export function exportPDF(
   doc.setFontSize(6);
   setColor(doc, WHITE);
   doc.setFont("helvetica", "bold");
-  doc.text("UX", cardX2 + 6, y + 11);
+  doc.text("UX", cardX2 + 9, y + 10, { align: "center", baseline: "middle" });
 
   doc.setFontSize(10);
   setColor(doc, BLACK);
@@ -250,7 +273,7 @@ export function exportPDF(
     y += 8;
 
     // Table header
-    const colWidths = [55, 25, 45, 45];
+    const colWidths = [PRIMARY_TABLE_COLUMN_WIDTH, 25, 45, 45];
     const headers = ["Component", "Category", "Design Effort", "Dev Effort"];
     setFillColor(doc, BG_BLUE);
     doc.rect(margin, y - 4, contentWidth, 8, "F");
@@ -290,10 +313,10 @@ export function exportPDF(
         y = drawTableRow(
           doc,
           [
-            { text: c.name, width: colWidths[0] },
-            { text: c.category, width: colWidths[1] },
-            { text: `${componentDesignEffort(c, useAi)}h`, width: colWidths[2] },
-            { text: `${componentDevEffort(c, useAi)}h`, width: colWidths[3] },
+            { text: c.name, width: colWidths[0], verticalAlign: "middle" },
+            { text: c.category, width: colWidths[1], verticalAlign: "middle" },
+            { text: `${componentDesignEffort(c, useAi)}h`, width: colWidths[2], verticalAlign: "middle" },
+            { text: `${componentDevEffort(c, useAi)}h`, width: colWidths[3], verticalAlign: "middle" },
           ],
           margin,
           y,
@@ -315,7 +338,7 @@ export function exportPDF(
     doc.text("Selected Templates", margin, y);
     y += 8;
 
-    const tColWidths = [44, 17, 22, 22, 14, 27, 24];
+    const tColWidths = [PRIMARY_TABLE_COLUMN_WIDTH, 14, 18, 18, 12, 27, 26];
     const tHeaders = ["Template", "Category", "Design", "Dev", "Add.Pg", "Total Design", "Total Dev"];
     setFillColor(doc, BG_BLUE);
     doc.rect(margin, y - 4, contentWidth, 8, "F");
@@ -333,19 +356,22 @@ export function exportPDF(
     doc.setFontSize(8);
     for (const t of selectedTemplates) {
       y = checkPageBreak(doc, y, 12);
-      const templateLabel = t.description && t.description !== t.name
-        ? `${t.name} - ${t.description}`
-        : t.name;
       y = drawTableRow(
         doc,
         [
-          { text: templateLabel, width: tColWidths[0] },
-          { text: t.category, width: tColWidths[1] },
-          { text: `${templateDesignBase(t, useAi)}h`, width: tColWidths[2] },
-          { text: `${templateDevBase(t, useAi)}h`, width: tColWidths[3] },
-          { text: String(t.additionalPages), width: tColWidths[4] },
-          { text: `${templateTotalDesign(t, useAi)}h`, width: tColWidths[5] },
-          { text: `${templateTotalDev(t, useAi)}h`, width: tColWidths[6] },
+          {
+            text: t.name,
+            width: tColWidths[0],
+            verticalAlign: "middle",
+            highlightedText: t.name,
+            secondaryText: t.description !== t.name ? t.description : undefined,
+          },
+          { text: t.category, width: tColWidths[1], verticalAlign: "middle" },
+          { text: `${templateDesignBase(t, useAi)}h`, width: tColWidths[2], verticalAlign: "middle" },
+          { text: `${templateDevBase(t, useAi)}h`, width: tColWidths[3], verticalAlign: "middle" },
+          { text: String(t.additionalPages), width: tColWidths[4], verticalAlign: "middle" },
+          { text: `${templateTotalDesign(t, useAi)}h`, width: tColWidths[5], verticalAlign: "middle" },
+          { text: `${templateTotalDev(t, useAi)}h`, width: tColWidths[6], verticalAlign: "middle" },
         ],
         margin,
         y,

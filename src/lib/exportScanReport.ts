@@ -1,7 +1,7 @@
 import ExcelJS from "exceljs";
 import { BRAND } from "@/lib/theme";
 import type { Project, SelectedComponent, SelectedTemplate } from "@/types";
-import type { DiscoveredPage, ScanSliceState } from "@/lib/scanner/types";
+import type { DiscoveredPage, ScanSliceState, UnscannedPage } from "@/lib/scanner/types";
 
 const COBALT = BRAND.cobalt.argb;
 const SKY_BLUE = BRAND.skyBlue.argb;
@@ -21,12 +21,30 @@ function headerStyle(row: ExcelJS.Row) {
 function dataStyle(row: ExcelJS.Row, isEven: boolean) {
   row.eachCell((cell) => {
     cell.font = { size: 10 };
-    cell.alignment = { vertical: "top", wrapText: true };
+    cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
     if (isEven) {
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BG_BLUE } };
     }
     cell.border = { bottom: { style: "thin", color: { argb: STROKES } } };
   });
+}
+
+function applyWorkbookAlignment(workbook: ExcelJS.Workbook) {
+  workbook.eachSheet((worksheet) => {
+    worksheet.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.alignment = {
+          ...cell.alignment,
+          vertical: "middle",
+          horizontal: "left",
+        };
+      });
+    });
+  });
+}
+
+export function getDefaultScanSheetNames(): string[] {
+  return ["Scan Overview", "Detected Components", "Templates", "Unmatched Items", "Issues"];
 }
 
 export async function exportScanReport(
@@ -42,8 +60,8 @@ export async function exportScanReport(
   const componentById = new Map(components.map((c) => [c.id, c]));
   const templateById = new Map(templates.map((t) => [t.id, t]));
   const pageByUrl = new Map(scan.discoveredPages.map((p) => [p.url, p]));
-  const sitemapUrls = [...new Set(scan.sitemapUrls ?? [])];
-  const scrapedUrls = [...new Set(scan.scrapedUrls ?? [])];
+  const coverageSummary = summarizeKnownUrlCoverage(scan);
+  const scanCoverage = summarizeScanCoverage(scan);
   const unmatchedComponents = scan.unmatched.filter((item) => item.kind === "component");
   const unmatchedTemplates = scan.unmatched.filter((item) => item.kind === "template");
   const failedEntries = buildFailedEntries(scan, pageByUrl, project.liveUrl);
@@ -90,13 +108,14 @@ export async function exportScanReport(
     "Scan Date",
     new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
   ]);
-  overviewSheet.addRow(["Pages Scanned", scan.pagesScanned]);
-  overviewSheet.addRow(["Links Found In Sitemap", sitemapUrls.length]);
-  overviewSheet.addRow(["Links Scraped", scrapedUrls.length]);
   overviewSheet.addRow(["Components Matched", Object.keys(scan.matchedComponentIds).length]);
   overviewSheet.addRow(["Templates Matched", Object.keys(scan.matchedTemplateIds).length]);
   overviewSheet.addRow(["Components Unmatched", unmatchedComponents.length]);
   overviewSheet.addRow(["Templates Unmatched", unmatchedTemplates.length]);
+  overviewSheet.addRow(["Known URLs", coverageSummary.known]);
+  overviewSheet.addRow(["Known URLs Scanned", `${coverageSummary.scanned} (${coverageSummary.percentage}%)`]);
+  overviewSheet.addRow(["URLs Selected for Scan", scanCoverage.selectedForScan]);
+  overviewSheet.addRow(["Selected URLs Remaining", scanCoverage.selectedRemaining]);
   overviewSheet.addRow(["Pages With Scan Issues", failedEntries.length]);
   overviewSheet.addRow([]);
 
@@ -134,100 +153,76 @@ export async function exportScanReport(
     dataStyle(row, i % 2 === 0);
   });
 
-  // ── Sheet 2: Components by Page ──
-  const compSheet = workbook.addWorksheet("Components by Page", {
+  // ── Sheet 2: Detected Components ──
+  const compSheet = workbook.addWorksheet("Detected Components", {
     properties: { tabColor: { argb: SKY_BLUE } },
   });
 
   compSheet.columns = [
-    { key: "url", width: 50 },
-    { key: "title", width: 30 },
-    { key: "pageType", width: 14 },
     { key: "group", width: 22 },
     { key: "variant", width: 34 },
     { key: "confidence", width: 14 },
-    { key: "reason", width: 58 },
+    { key: "pageCount", width: 16 },
+    { key: "pageUrls", width: 64 },
   ];
 
   const compHeader = compSheet.addRow({
-    url: "Page URL",
-    title: "Page Title",
-    pageType: "Page Type",
     group: "Component Group",
     variant: "Variant Name",
     confidence: "Confidence",
-    reason: "Reason for Variant Selection",
+    pageCount: "Detected on Pages",
+    pageUrls: "Detected On URLs",
   });
   headerStyle(compHeader);
 
-  let compRowIdx = 0;
-  for (const page of scan.discoveredPages) {
-    const comps = pageComponents.get(page.url);
-    if (!comps || comps.length === 0) continue;
-    // Sort by confidence descending within a page
-    const sorted = [...comps].sort((a, b) => b.confidence - a.confidence);
-    for (const comp of sorted) {
-      const row = compSheet.addRow({
-        url: page.url,
-        title: page.title || "—",
-        pageType: page.pageType,
-        group: comp.group,
-        variant: comp.variant,
-        confidence: `${Math.round(comp.confidence * 100)}%`,
-        reason: comp.reason,
-      });
-      dataStyle(row, compRowIdx % 2 === 0);
-      compRowIdx++;
-    }
-  }
-
-  if (compRowIdx === 0) {
-    const row = compSheet.addRow({ url: "No components detected on any scanned page." });
+  const uniqueComponentEntries = buildUniqueComponentEntries(scan, components);
+  uniqueComponentEntries.forEach((entry, index) => {
+    dataStyle(compSheet.addRow(entry), index % 2 === 0);
+  });
+  if (uniqueComponentEntries.length === 0) {
+    const row = compSheet.addRow({ group: "No components detected." });
     row.font = { italic: true, color: { argb: BRAND.lightGrey.argb } };
   }
 
-  // ── Sheet 3: Templates by Page ──
-  const tmplSheet = workbook.addWorksheet("Templates by Page", {
+  // ── Sheet 3: Templates ──
+  const tmplSheet = workbook.addWorksheet("Templates", {
     properties: { tabColor: { argb: SKY_BLUE } },
   });
 
+  const templateEntries = Object.entries(scan.matchedTemplateIds)
+    .flatMap(([id, metadata]) => {
+      const template = templateById.get(Number(id));
+      if (!template) return [];
+      const pages = [...new Set(metadata.pages)].sort();
+      return [{
+        name: template.name,
+        confidence: `${Math.round(metadata.confidence * 100)}%`,
+        pageCount: pages.length,
+        pageUrls: pages.join("\n"),
+      }];
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+
   tmplSheet.columns = [
-    { key: "url", width: 50 },
-    { key: "title", width: 30 },
-    { key: "pageType", width: 14 },
     { key: "name", width: 36 },
     { key: "confidence", width: 14 },
+    { key: "pageCount", width: 16 },
+    { key: "pageUrls", width: 64 },
   ];
 
   const tmplHeader = tmplSheet.addRow({
-    url: "Page URL",
-    title: "Page Title",
-    pageType: "Page Type",
     name: "Template",
     confidence: "Confidence",
+    pageCount: "Detected on Pages",
+    pageUrls: "Detected On URLs",
   });
   headerStyle(tmplHeader);
 
-  let tmplRowIdx = 0;
-  for (const page of scan.discoveredPages) {
-    const tmpls = pageTemplates.get(page.url);
-    if (!tmpls || tmpls.length === 0) continue;
-    const sorted = [...tmpls].sort((a, b) => b.confidence - a.confidence);
-    for (const tmpl of sorted) {
-      const row = tmplSheet.addRow({
-        url: page.url,
-        title: page.title || "—",
-        pageType: page.pageType,
-        name: tmpl.name,
-        confidence: `${Math.round(tmpl.confidence * 100)}%`,
-      });
-      dataStyle(row, tmplRowIdx % 2 === 0);
-      tmplRowIdx++;
-    }
-  }
-
-  if (tmplRowIdx === 0) {
-    const row = tmplSheet.addRow({ url: "No templates detected on any scanned page." });
+  templateEntries.forEach((entry, index) => {
+    dataStyle(tmplSheet.addRow(entry), index % 2 === 0);
+  });
+  if (templateEntries.length === 0) {
+    const row = tmplSheet.addRow({ name: "No templates detected." });
     row.font = { italic: true, color: { argb: BRAND.lightGrey.argb } };
   }
 
@@ -293,8 +288,8 @@ export async function exportScanReport(
     row.font = { italic: true, color: { argb: BRAND.lightGrey.argb } };
   }
 
-  // ── Sheet 5: Failed Pages ──
-  const failedSheet = workbook.addWorksheet("Failed Pages", {
+  // ── Sheet 5: Issues ──
+  const failedSheet = workbook.addWorksheet("Issues", {
     properties: { tabColor: { argb: BRAND.brandRed.argb } },
   });
 
@@ -304,9 +299,7 @@ export async function exportScanReport(
     { key: "pageType", width: 14 },
     { key: "status", width: 14 },
     { key: "category", width: 22 },
-    { key: "reason", width: 40 },
-    { key: "action", width: 42 },
-    { key: "source", width: 16 },
+    { key: "reason", width: 56 },
   ];
 
   const failedHeader = failedSheet.addRow({
@@ -316,8 +309,6 @@ export async function exportScanReport(
     status: "HTTP Status",
     category: "Issue Category",
     reason: "Reason",
-    action: "Recommended Action",
-    source: "Source",
   });
   headerStyle(failedHeader);
 
@@ -330,8 +321,6 @@ export async function exportScanReport(
       status: issue.status,
       category: issue.category,
       reason: issue.reason,
-      action: issue.action,
-      source: issue.source,
     });
     dataStyle(row, failedRowIdx % 2 === 0);
     failedRowIdx++;
@@ -342,63 +331,8 @@ export async function exportScanReport(
     row.font = { italic: true, color: { argb: BRAND.lightGrey.argb } };
   }
 
-  // ── Sheet 6: Sitemap Coverage ──
-  const coverageSheet = workbook.addWorksheet("Sitemap Coverage", {
-    properties: { tabColor: { argb: BRAND.brandNavy.argb } },
-  });
-
-  coverageSheet.columns = [
-    { key: "url", width: 62 },
-    { key: "inSitemap", width: 14 },
-    { key: "scraped", width: 12 },
-    { key: "status", width: 12 },
-    { key: "title", width: 30 },
-    { key: "pageType", width: 14 },
-    { key: "notes", width: 40 },
-  ];
-
-  const coverageHeader = coverageSheet.addRow({
-    url: "URL",
-    inSitemap: "In Sitemap",
-    scraped: "Scraped",
-    status: "HTTP Status",
-    title: "Page Title",
-    pageType: "Page Type",
-    notes: "Notes",
-  });
-  headerStyle(coverageHeader);
-
-  const sitemapSet = new Set(sitemapUrls);
-  const scrapedSet = new Set(scrapedUrls);
-  const allCoverageUrls = [...new Set([...sitemapUrls, ...scrapedUrls])].sort();
-  const unscriptedReasonByUrl = buildUnscriptedReasonMap(scan.warnings);
-
-  let coverageRowIdx = 0;
-  for (const url of allCoverageUrls) {
-    const page = pageByUrl.get(url);
-    const inSitemap = sitemapSet.has(url);
-    const scraped = scrapedSet.has(url);
-    const row = coverageSheet.addRow({
-      url,
-      inSitemap: inSitemap ? "Yes" : "No",
-      scraped: scraped ? "Yes" : "No",
-      status: page?.status ?? "—",
-      title: page?.title || "—",
-      pageType: page?.pageType || "—",
-      notes: inSitemap && !scraped
-        ? unscriptedReasonByUrl.get(url) ?? "Present in sitemap but not scraped (limit, timeout, robots, or fetch error)."
-        : "",
-    });
-    dataStyle(row, coverageRowIdx % 2 === 0);
-    coverageRowIdx++;
-  }
-
-  if (coverageRowIdx === 0) {
-    const row = coverageSheet.addRow({ url: "No sitemap links or scraped links were captured." });
-    row.font = { italic: true, color: { argb: BRAND.lightGrey.argb } };
-  }
-
   // ── Download ──
+  applyWorkbookAlignment(workbook);
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -414,6 +348,156 @@ export async function exportScanReport(
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+}
+
+export interface UnscannedReportEntry {
+  url: string;
+  source: "sitemap" | "link";
+  reason: string;
+  detail?: string;
+  action: string;
+}
+
+export interface UniqueComponentReportEntry {
+  group: string;
+  variant: string;
+  confidence: string;
+  pageCount: number;
+  pageUrls: string;
+}
+
+export function buildUniqueComponentEntries(
+  scan: ScanSliceState,
+  components: SelectedComponent[],
+): UniqueComponentReportEntry[] {
+  const componentById = new Map(components.map((component) => [component.id, component]));
+
+  return Object.entries(scan.matchedComponentIds)
+    .flatMap(([id, metadata]) => {
+      const component = componentById.get(Number(id));
+      if (!component) return [];
+      const pages = [...new Set(metadata.pages)].sort();
+      return [{
+        group: component.group,
+        variant: component.name,
+        confidence: `${Math.round(metadata.confidence * 100)}%`,
+        pageCount: pages.length,
+        pageUrls: pages.join("\n"),
+      }];
+    })
+    .sort((a, b) => a.group.localeCompare(b.group) || a.variant.localeCompare(b.variant));
+}
+
+export function summarizeKnownUrlCoverage(scan: ScanSliceState): {
+  known: number;
+  scanned: number;
+  percentage: number;
+} {
+  const knownUrls = new Set([
+    ...scan.sitemapUrls,
+    ...scan.scrapedUrls,
+    ...scan.unscannedPages.map((page) => page.url),
+  ]);
+  const scannedUrls = new Set(scan.scrapedUrls);
+  const scanned = [...knownUrls].filter((url) => scannedUrls.has(url)).length;
+  return {
+    known: knownUrls.size,
+    scanned,
+    percentage: knownUrls.size === 0 ? 0 : Math.round((scanned / knownUrls.size) * 100),
+  };
+}
+
+export function summarizeScanCoverage(scan: ScanSliceState): {
+  sitemapUrls: number;
+  selectedForScan: number;
+  scanned: number;
+  selectedRemaining: number;
+  unscanned: number;
+} {
+  const sitemapUrls = new Set(scan.sitemapUrls);
+  const representativeUrls = selectedUrlSet(scan);
+  const scrapedUrls = new Set(scan.scrapedUrls);
+  const knownUrls = new Set([...sitemapUrls, ...scrapedUrls, ...scan.unscannedPages.map((page) => page.url)]);
+  const scanned = [...scrapedUrls].filter((url) => representativeUrls.size === 0 || representativeUrls.has(url)).length;
+
+  return {
+    sitemapUrls: sitemapUrls.size,
+    selectedForScan: representativeUrls.size,
+    scanned,
+    selectedRemaining: [...representativeUrls].filter((url) => !scrapedUrls.has(url)).length,
+    unscanned: [...knownUrls].filter((url) => !scrapedUrls.has(url)).length,
+  };
+}
+
+const PRE_FETCH_SKIP_REASONS = new Set<UnscannedPage["reason"]>([
+  "max_pages_limit",
+  "representative_page",
+  "max_depth",
+  "robots_disallow",
+  "path_template_limit",
+]);
+
+function selectedUrlSet(scan: ScanSliceState): Set<string> {
+  const preFetchSkippedUrls = new Set(
+    scan.unscannedPages
+      .filter((page) => PRE_FETCH_SKIP_REASONS.has(page.reason))
+      .map((page) => page.url),
+  );
+
+  return new Set(scan.representativeUrls.filter((url) => !preFetchSkippedUrls.has(url)));
+}
+
+export function buildUnscannedEntries(pages: UnscannedPage[]): UnscannedReportEntry[] {
+  const byUrl = new Map<string, UnscannedPage>();
+  for (const page of pages) {
+    const existing = byUrl.get(page.url);
+    if (!existing || page.source === "sitemap") byUrl.set(page.url, page);
+  }
+
+  return [...byUrl.values()]
+    .sort((a, b) => a.url.localeCompare(b.url))
+    .map((page) => ({ ...page, ...describeUnscannedReason(page.reason) }));
+}
+
+function describeUnscannedReason(reason: UnscannedPage["reason"]): {
+  reason: string;
+  action: string;
+} {
+  const descriptions: Record<UnscannedPage["reason"], { reason: string; action: string }> = {
+    max_pages_limit: {
+      reason: "Maximum scan page limit reached",
+      action: "Run a narrower scan or increase the configured page limit.",
+    },
+    representative_page: {
+      reason: "Represented by a similar or primary-locale page",
+      action: "Review the representative URL in the technical detail if this route may use a distinct layout.",
+    },
+    max_depth: {
+      reason: "Beyond the configured crawl depth",
+      action: "Run a scan from a closer parent page or increase the crawl depth.",
+    },
+    robots_disallow: {
+      reason: "Blocked by robots.txt",
+      action: "Review the site's robots.txt rules if this page should be scannable.",
+    },
+    path_template_limit: {
+      reason: "Similar page structure already sampled",
+      action: "Review the sampled page or increase the similar-page limit.",
+    },
+    scan_incomplete: {
+      reason: "Scan ended before this page was processed",
+      action: "Retry the scan or use a narrower starting URL.",
+    },
+    fetch_failed: {
+      reason: "Page request failed",
+      action: "Review the technical detail, verify availability, and retry.",
+    },
+    unsupported_content: {
+      reason: "Page did not return HTML",
+      action: "Confirm this URL is a web page that returns HTML content.",
+    },
+  };
+  return descriptions[reason];
 }
 
 function httpStatusLabel(status: number): string {
@@ -433,8 +517,8 @@ export interface FailedEntry {
   status: string | number;
   category: string;
   reason: string;
-  action: string;
-  source: "http_status" | "warning";
+  action?: string;
+  source: "http_status" | "warning" | "unscanned";
 }
 
 export function buildFailedEntries(
@@ -444,6 +528,21 @@ export function buildFailedEntries(
 ): FailedEntry[] {
   const entries: FailedEntry[] = [];
   const baseUrl = parseUrl(liveUrl);
+  const unscannedUrls = new Set(scan.unscannedPages.map((page) => page.url));
+
+  for (const page of buildUnscannedEntries(scan.unscannedPages)) {
+    const discovered = pageByUrl.get(page.url);
+    entries.push({
+      url: page.url,
+      title: discovered?.title || "—",
+      pageType: discovered?.pageType || "—",
+      status: discovered?.status ?? "—",
+      category: "Unscanned Page",
+      reason: page.reason,
+      action: page.detail ? `${page.action} Technical detail: ${page.detail}` : page.action,
+      source: "unscanned",
+    });
+  }
 
   for (const page of scan.discoveredPages) {
     if (page.status >= 200 && page.status < 300) continue;
@@ -464,9 +563,15 @@ export function buildFailedEntries(
   const sitemapFailureRe = /^sitemap (.+?) failed: (.+)$/;
   const robotsFailureRe = /^robots\.txt fetch failed: (.+)$/;
   const skippedRe = /^skipped (.+): (.+)$/;
+  const similarSkipRe = /^similar_skip (.+): (.+)$/;
+  const sitemapSummaryRe = /^sitemap_skip_summary (.+): (\d+)$/;
   const authPartialRe = /^auth_wall_partial:(\d+)$/;
   const timeoutRe = /^scan_timeout_after_(\d+)ms$/;
+  const noPagesRe = /^no_pages_fetched$/;
   const crawlAbortedRe = /^Crawl aborted$/;
+  const cookieConsentRe = /^cookie_consent_detected:(.+)$/;
+  const spaDetectedRe = /^spa_detected$/;
+  const spaSuspectedRe = /^spa_suspected:(.+)$/;
 
   for (const warning of scan.warnings) {
     const robotsMatch = robotsFailureRe.exec(warning);
@@ -509,9 +614,11 @@ export function buildFailedEntries(
     const fetchMatch = fetchFailureRe.exec(warning);
     if (fetchMatch) {
       const url = fetchMatch[1]!.trim();
-      const reason = fetchMatch[2]!.trim();
+      if (unscannedUrls.has(url)) continue;
+      const rawReason = fetchMatch[2]!.trim();
+      const reason = humanizeWarningReason(rawReason);
       const page = pageByUrl.get(url);
-      const classified = classifyWarningReason(reason);
+      const classified = classifyWarningReason(rawReason);
       entries.push({
         url,
         title: page?.title || "—",
@@ -528,6 +635,7 @@ export function buildFailedEntries(
     const skippedMatch = skippedRe.exec(warning);
     if (skippedMatch) {
       const url = skippedMatch[1]!;
+      if (unscannedUrls.has(url)) continue;
       const reason = skippedMatch[2]!;
       const page = pageByUrl.get(url);
       const classified = classifyWarningReason(reason);
@@ -539,6 +647,57 @@ export function buildFailedEntries(
         category: classified.category,
         reason: `skipped: ${reason}`,
         action: classified.action,
+        source: "warning",
+      });
+      continue;
+    }
+
+    const similarSkipMatch = similarSkipRe.exec(warning);
+    if (similarSkipMatch) {
+      const url = similarSkipMatch[1]!.trim();
+      if (unscannedUrls.has(url)) continue;
+      const reason = similarSkipMatch[2]!.trim();
+      const page = pageByUrl.get(url);
+      const normalizedReason = reason.toLowerCase();
+      const similarSkipReason =
+        normalizedReason === "path_template_limit"
+          ? "This page matches an existing route pattern and was intentionally skipped to keep the crawl focused."
+          : normalizedReason === "representative_page"
+            ? "This page was already represented by a higher-priority route and was intentionally skipped."
+            : normalizedReason === "robots_disallow"
+              ? "This page was skipped because the site blocks access to this route in robots.txt."
+              : `Similar page skipped because ${reason}.`;
+
+      entries.push({
+        url,
+        title: page?.title || "—",
+        pageType: page?.pageType || "—",
+        status: "—",
+        category:
+          normalizedReason === "path_template_limit" || normalizedReason === "representative_page"
+            ? "Similar Page Skipped"
+            : normalizedReason === "robots_disallow"
+              ? "Route Blocked by Robots"
+              : "Similar Page Skipped",
+        reason: similarSkipReason,
+        source: "warning",
+      });
+      continue;
+    }
+
+    const sitemapSummaryMatch = sitemapSummaryRe.exec(warning);
+    if (sitemapSummaryMatch) {
+      const reasonCode = sitemapSummaryMatch[1]!.trim();
+      const count = sitemapSummaryMatch[2]!;
+      const reason = summarizeSitemapSkipReason(reasonCode);
+      entries.push({
+        url: "—",
+        title: "—",
+        pageType: "—",
+        status: "—",
+        category: "Sitemap Coverage Gap",
+        reason: `${count} sitemap URLs were skipped because ${reason}.`,
+        action: "Review the sitemap and consider widening the crawl or removing duplicate/skipped routes.",
         source: "warning",
       });
       continue;
@@ -576,8 +735,77 @@ export function buildFailedEntries(
       continue;
     }
 
-    // "Crawl aborted" is a summary notice; individual aborted fetches already
-    // surface as their own rows so no extra entry is needed here.
+    if (noPagesRe.test(warning)) {
+      entries.push({
+        url: "—",
+        title: "—",
+        pageType: "—",
+        status: "—",
+        category: "No Pages Fetched",
+        reason: "No pages were successfully fetched during the scan.",
+        action: "Verify the live URL, robots rules, and public accessibility before retrying.",
+        source: "warning",
+      });
+      continue;
+    }
+
+    if (crawlAbortedRe.test(warning)) {
+      entries.push({
+        url: "—",
+        title: "—",
+        pageType: "—",
+        status: "—",
+        category: "Scan Cancelled",
+        reason: "Crawl aborted",
+        action: "Retry the scan if you still need a complete report.",
+        source: "warning",
+      });
+      continue;
+    }
+
+    const cookieConsentMatch = cookieConsentRe.exec(warning);
+    if (cookieConsentMatch) {
+      entries.push({
+        url: cookieConsentMatch[1]!.trim(),
+        title: "—",
+        pageType: "—",
+        status: "—",
+        category: "Cookie Consent Detected",
+        reason: "Cookie consent banner detected; additional interaction may be required to fully scan the site.",
+        action: "Review the site flow and, if needed, run a scan with the consent experience enabled.",
+        source: "warning",
+      });
+      continue;
+    }
+
+    if (spaDetectedRe.test(warning)) {
+      entries.push({
+        url: "—",
+        title: "—",
+        pageType: "—",
+        status: "—",
+        category: "Potential SPA / Thin Content",
+        reason: "The site appears to be largely client-rendered or thin-content based.",
+        action: "Check whether the site relies on client-side rendering and review the content structure.",
+        source: "warning",
+      });
+      continue;
+    }
+
+    const spaSuspectedMatch = spaSuspectedRe.exec(warning);
+    if (spaSuspectedMatch) {
+      entries.push({
+        url: spaSuspectedMatch[1]!.trim(),
+        title: "—",
+        pageType: "—",
+        status: "—",
+        category: "Potential SPA / Thin Content",
+        reason: "Page content appears thin or client-rendered.",
+        action: "Review the page structure and consider whether client-side rendering is affecting scan quality.",
+        source: "warning",
+      });
+      continue;
+    }
   }
 
   // De-duplicate repeated entries from mixed sources.
@@ -692,61 +920,34 @@ function classifyWarningReason(reason: string): {
   };
 }
 
+function humanizeWarningReason(reason: string): string {
+  const requestTimeout = /^request_timeout_after_(\d+)ms$/.exec(reason);
+  if (requestTimeout) return `Request timed out after ${requestTimeout[1]}ms.`;
+  const scanTimeout = /^scan_timeout_after_(\d+)ms$/.exec(reason);
+  if (scanTimeout) return `Scan timed out after ${scanTimeout[1]}ms.`;
+  if (reason === "scan_cancelled") return "The scan was cancelled before this request completed.";
+  return reason;
+}
+
+function summarizeSitemapSkipReason(reasonCode: string): string {
+  switch (reasonCode) {
+    case "max_pages_limit":
+      return "the maximum page limit was reached";
+    case "robots_disallow":
+      return "robots.txt blocked the route";
+    case "scan_incomplete":
+      return "the scan ended before the route was processed";
+    case "representative_page":
+      return "the page was already represented by a similar route";
+    default:
+      return `reason code ${reasonCode}`;
+  }
+}
+
 function parseUrl(input: string): URL | null {
   try {
     return new URL(input);
   } catch {
     return null;
   }
-}
-
-function buildUnscriptedReasonMap(warnings: string[]): Map<string, string> {
-  const byUrl = new Map<string, string>();
-  const sitemapSkipRe = /^sitemap_skip (.+): (.+)$/;
-  const similarSkipRe = /^similar_skip (.+): (.+)$/;
-  const fetchFailRe = /^fetch (.+?) failed: (.+)$/;
-  const skippedRe = /^skipped (.+): (.+)$/;
-
-  for (const warning of warnings) {
-    const sitemapSkip = sitemapSkipRe.exec(warning);
-    if (sitemapSkip) {
-      const url = sitemapSkip[1]!.trim();
-      const reasonCode = sitemapSkip[2]!.trim();
-      if (reasonCode === "robots_disallow") {
-        byUrl.set(url, "Skipped by robots.txt disallow rule.");
-      } else if (reasonCode === "max_pages_limit") {
-        byUrl.set(url, "Skipped because the maximum page limit was reached before this URL was processed.");
-      } else if (reasonCode === "scan_incomplete") {
-        byUrl.set(url, "Not scraped because the scan ended (timeout or cancellation) before this URL was processed.");
-      } else {
-        byUrl.set(url, `Skipped by crawler — reason: ${reasonCode}.`);
-      }
-      continue;
-    }
-
-    const fetchFail = fetchFailRe.exec(warning);
-    if (fetchFail) {
-      byUrl.set(fetchFail[1]!.trim(), `Fetch failed: ${fetchFail[2]!.trim()}`);
-      continue;
-    }
-
-    const similarSkip = similarSkipRe.exec(warning);
-    if (similarSkip) {
-      const url = similarSkip[1]!.trim();
-      const reasonCode = similarSkip[2]!.trim();
-      if (reasonCode === "path_template_limit") {
-        byUrl.set(url, "Skipped — a page with the same URL structure was already scanned from this section.");
-      } else {
-        byUrl.set(url, `Skipped (similar page): ${reasonCode}`);
-      }
-      continue;
-    }
-
-    const skipped = skippedRe.exec(warning);
-    if (skipped) {
-      byUrl.set(skipped[1]!.trim(), `Skipped: ${skipped[2]!.trim()}`);
-    }
-  }
-
-  return byUrl;
 }

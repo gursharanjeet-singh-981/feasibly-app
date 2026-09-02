@@ -12,6 +12,7 @@ import { useAppStore } from "@/store";
 import { loadComponents } from "@/lib/data";
 import {
   addItemAndScroll,
+  getMatchedItemGroups,
   renameGroupItems,
   selectMatchedItems,
   toggleAllInGroup as toggleAllInGroupHelper,
@@ -32,12 +33,14 @@ export default function ComponentsPage() {
   const updateComponent = useAppStore((s) => s.updateComponent);
   const useAiEstimation = useAppStore((s) => s.useAiEstimation);
   const toggleAiEstimation = useAppStore((s) => s.toggleAiEstimation);
+  const scanStatus = useAppStore((s) => s.scan.status);
   const matchedComponentIds = useAppStore((s) => s.scan.matchedComponentIds);
 
   const [search, setSearch] = useState("");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
   const [error, setError] = useState<string | null>(null);
   const lastAppliedMatchKey = useRef<string | null>(null);
+  const lastOpenedMatchKey = useRef<string | null>(null);
   const loading = !error && components.length === 0;
 
   useEffect(() => {
@@ -74,6 +77,15 @@ export default function ComponentsPage() {
   }, [ready, components, setComponents, matchedComponentIds]);
 
   const getGroup = useCallback((c: SelectedComponent) => c.group, []);
+
+  useEffect(() => {
+    if (scanStatus !== "complete" || components.length === 0) return;
+    const matchKey = Object.keys(matchedComponentIds).sort().join(",");
+    if (!matchKey || lastOpenedMatchKey.current === matchKey) return;
+    lastOpenedMatchKey.current = matchKey;
+    setOpenGroups(getMatchedItemGroups(components, matchedComponentIds, getGroup));
+  }, [scanStatus, components, matchedComponentIds, getGroup]);
+
   const matchers = useCallback(
     (c: SelectedComponent) => [
       c.name,

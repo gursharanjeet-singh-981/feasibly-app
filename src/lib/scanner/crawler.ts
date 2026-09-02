@@ -2,7 +2,7 @@ import { load } from "cheerio";
 import pLimit from "p-limit";
 import robotsParser from "robots-parser";
 import { SCAN_DEFAULTS } from "@/lib/constants";
-import type { DiscoveredPage, PageType } from "./types";
+import type { DiscoveredPage, PageType, UnscannedPage, UnscannedPageReason } from "./types";
 import { UrlGuardError, assertPublicUrl } from "./urlGuard";
 
 export const DEFAULT_USER_AGENT =
@@ -28,6 +28,10 @@ export interface CrawlOptions {
   maxPagesPerPathTemplate?: number;
   /** Min URL path segments before per-template limiting applies. Default 3 (e.g. /a/b/c). */
   similarPageDepthThreshold?: number;
+  /** Select sitemap route-family representatives instead of crawling every sitemap URL. */
+  useSitemapRepresentatives?: boolean;
+  /** Do not enqueue links found on representative pages. */
+  followLinks?: boolean;
 }
 
 export interface CrawlResult {
@@ -35,6 +39,8 @@ export interface CrawlResult {
   discoveredCount: number;
   usedSitemap: boolean;
   sitemapUrls: string[];
+  representativeUrls: string[];
+  unscannedPages: UnscannedPage[];
   warnings: string[];
 }
 
@@ -56,11 +62,14 @@ export async function crawl(
     jitterMs = () => Math.floor(Math.random() * 500),
     maxPagesPerPathTemplate = 1,
     similarPageDepthThreshold = 3,
+    useSitemapRepresentatives = false,
+    followLinks = true,
   } = options;
 
   const warnings: string[] = [];
   const seen = new Set<string>();
   const pages: FetchedPage[] = [];
+  const unscannedByUrl = new Map<string, UnscannedPage>();
   const pathTemplateCount = new Map<string, number>();
   const abortRelay = createAbortRelay(signal);
 
@@ -84,19 +93,48 @@ export async function crawl(
       const normalized = normalizeUrl(url, base);
       return normalized ? isWithinPathScope(normalized, scopePathPrefix) : false;
     });
-    const usedSitemap = scopedSitemapUrls.length > 0;
-    // Add 1 to reserve a slot for the root URL so it doesn't crowd out sitemap pages.
-    const effectiveMaxPages = usedSitemap ? maxPages + 1 : maxPages;
-    const queue: Array<{ url: string; depth: number }> = [];
+    const normalizedBaseUrl = normalizeUrl(base.toString(), base)!;
+    const baseIsInSitemap = scopedSitemapUrls.includes(normalizedBaseUrl);
+    const sitemapSelection = useSitemapRepresentatives
+      ? selectRepresentativeUrls(
+        scopedSitemapUrls,
+        base.toString(),
+        Math.max(0, maxPages - (baseIsInSitemap ? 0 : 1)),
+      )
+      : { urls: scopedSitemapUrls, skipped: [] };
+    const selectedSitemapUrls = sitemapSelection.urls;
+    const usedSitemap = selectedSitemapUrls.length > 0;
+    const representativeUrls = useSitemapRepresentatives && usedSitemap
+      ? [...new Set([normalizedBaseUrl, ...selectedSitemapUrls])]
+      : selectedSitemapUrls;
+    const effectiveMaxPages = maxPages;
+    const queue: Array<{ url: string; depth: number; source: "sitemap" | "link" }> = [];
     const sitemapSkipWarned = new Set<string>();
     const pendingSitemapUrls = new Set<string>();
+    const sitemapSkipCounts = new Map<string, number>();
 
-    const enqueue = (url: string, depth: number, source: "crawl" | "sitemap" = "crawl") => {
+    const countSitemapSkip = (reason: string, count = 1) => {
+      sitemapSkipCounts.set(reason, (sitemapSkipCounts.get(reason) ?? 0) + count);
+    };
+
+    const recordUnscanned = (
+      url: string,
+      source: "sitemap" | "link",
+      reason: UnscannedPageReason,
+      detail?: string,
+    ) => {
+      const existing = unscannedByUrl.get(url);
+      if (existing?.source === "sitemap") return;
+      unscannedByUrl.set(url, { url, source, reason, ...(detail ? { detail } : {}) });
+    };
+
+    const enqueue = (url: string, depth: number, source: "sitemap" | "link" = "link") => {
       const normalized = normalizeUrl(url, base);
       if (!normalized) return;
       if (!isWithinPathScope(normalized, scopePathPrefix)) return;
       if (seen.has(normalized)) return;
       if (isDisallowed(normalized)) {
+        recordUnscanned(normalized, source, "robots_disallow");
         if (source === "sitemap") {
           const warning = `sitemap_skip ${normalized}: robots_disallow`;
           if (!sitemapSkipWarned.has(warning)) {
@@ -106,14 +144,14 @@ export async function crawl(
         }
         return;
       }
-      if (depth > maxDepth) return;
+      if (depth > maxDepth) {
+        recordUnscanned(normalized, source, "max_depth");
+        return;
+      }
       if (queue.length + pages.length >= effectiveMaxPages) {
+        recordUnscanned(normalized, source, "max_pages_limit");
         if (source === "sitemap") {
-          const warning = `sitemap_skip ${normalized}: max_pages_limit`;
-          if (!sitemapSkipWarned.has(warning)) {
-            warnings.push(warning);
-            sitemapSkipWarned.add(warning);
-          }
+          countSitemapSkip("max_pages_limit");
         }
         return;
       }
@@ -125,6 +163,7 @@ export async function crawl(
             const count = pathTemplateCount.get(template) ?? 0;
             if (count >= maxPagesPerPathTemplate) {
               seen.add(normalized);
+              recordUnscanned(normalized, source, "path_template_limit");
               warnings.push(`similar_skip ${normalized}: path_template_limit`);
               return;
             }
@@ -133,15 +172,18 @@ export async function crawl(
         }
       }
       seen.add(normalized);
-      queue.push({ url: normalized, depth });
+      queue.push({ url: normalized, depth, source });
       if (source === "sitemap") {
         pendingSitemapUrls.add(normalized);
       }
     };
 
-    enqueue(base.toString(), 0, "crawl");
+    for (const skipped of sitemapSelection.skipped) {
+      recordUnscanned(skipped.url, "sitemap", "representative_page", skipped.detail);
+    }
+    enqueue(base.toString(), 0, "link");
     if (usedSitemap) {
-      for (const url of scopedSitemapUrls) enqueue(url, 0, "sitemap");
+      for (const url of selectedSitemapUrls) enqueue(url, 0, "sitemap");
     }
 
     // Drain the queue in waves so BFS depth is honoured while still running
@@ -151,7 +193,10 @@ export async function crawl(
         warnings.push("Crawl aborted");
         break;
       }
-      const wave = queue.splice(0, Math.min(queue.length, effectiveMaxPages - pages.length));
+      const wave = queue.splice(
+        0,
+        Math.min(concurrency, queue.length, effectiveMaxPages - pages.length),
+      );
       for (const item of wave) {
         pendingSitemapUrls.delete(item.url);
       }
@@ -171,25 +216,43 @@ export async function crawl(
         ),
       );
 
-      for (const { page, links } of results) {
-        if (!page) continue;
+      for (let index = 0; index < results.length; index++) {
+        const { page, links, failure } = results[index]!;
+        const item = wave[index]!;
+        if (!page) {
+          if (failure) {
+            recordUnscanned(item.url, item.source, failure.reason, failure.detail);
+          }
+          continue;
+        }
         pages.push(page);
         onPage?.(page);
         if (pages.length >= effectiveMaxPages) break;
-        for (const href of links) enqueue(href, page.depth + 1, "crawl");
+        if (followLinks || !usedSitemap) {
+          for (const href of links) enqueue(href, page.depth + 1, "link");
+        }
+      }
+
+      if (signal?.aborted) {
+        warnings.push("Crawl aborted");
+        break;
+      }
+    }
+
+    if (signal?.aborted) {
+      const detail = abortReason(signal);
+      for (const item of queue) {
+        recordUnscanned(item.url, item.source, "scan_incomplete", detail);
       }
     }
 
     // If scan ended before all queued sitemap URLs were processed (abort/timeout),
     // emit a per-URL reason so report coverage doesn't fall back to generic text.
     if (pendingSitemapUrls.size > 0) {
-      for (const url of pendingSitemapUrls) {
-        const warning = `sitemap_skip ${url}: scan_incomplete`;
-        if (!sitemapSkipWarned.has(warning)) {
-          warnings.push(warning);
-          sitemapSkipWarned.add(warning);
-        }
-      }
+      countSitemapSkip("scan_incomplete", pendingSitemapUrls.size);
+    }
+    for (const [reason, count] of sitemapSkipCounts) {
+      warnings.push(`sitemap_skip_summary ${reason}: ${count}`);
     }
 
     return {
@@ -197,11 +260,105 @@ export async function crawl(
       discoveredCount: seen.size,
       usedSitemap,
       sitemapUrls: scopedSitemapUrls,
+      representativeUrls,
+      unscannedPages: [...unscannedByUrl.values()],
       warnings,
     };
   } finally {
     abortRelay?.dispose();
   }
+}
+
+export interface RepresentativeUrlSelection {
+  urls: string[];
+  skipped: Array<{ url: string; detail: string }>;
+}
+
+export function selectRepresentativeUrls(
+  sitemapUrls: string[],
+  inputUrl: string,
+  maxPages: number = SCAN_DEFAULTS.maxPages,
+): RepresentativeUrlSelection {
+  const inputLocale = localeFromUrl(inputUrl);
+  const normalized = [...new Set(sitemapUrls)]
+    .map((url) => {
+      try {
+        const parsed = new URL(url);
+        parsed.hash = "";
+        if (parsed.pathname.length > 1 && parsed.pathname.endsWith("/")) {
+          parsed.pathname = parsed.pathname.slice(0, -1);
+        }
+        return parsed.toString();
+      } catch {
+        return null;
+      }
+    })
+    .filter((url): url is string => Boolean(url))
+    .sort();
+  const primaryLocale = inputLocale ?? normalized.map(localeFromUrl).find(Boolean);
+  const representatives = new Map<string, string>();
+  const skipped: Array<{ url: string; detail: string }> = [];
+
+  const primaryLocaleUrls = normalized.filter((url) => {
+    const locale = localeFromUrl(url);
+    return !primaryLocale || !locale || locale === primaryLocale;
+  });
+  const alternateLocaleUrls = normalized.filter((url) => {
+    const locale = localeFromUrl(url);
+    return Boolean(primaryLocale && locale && locale !== primaryLocale);
+  });
+
+  for (const url of primaryLocaleUrls) {
+    const family = routeFamily(url);
+    const representative = representatives.get(family);
+    if (representative) {
+      skipped.push({ url, detail: `same_route_family; representative=${representative}` });
+      continue;
+    }
+    if (representatives.size >= maxPages) {
+      skipped.push({ url, detail: "representative_limit" });
+      continue;
+    }
+    representatives.set(family, url);
+  }
+
+  for (const url of alternateLocaleUrls) {
+    const equivalent = replaceLocale(url, primaryLocale!);
+    const representative = representatives.get(routeFamily(equivalent)) ?? equivalent;
+    skipped.push({ url, detail: `locale_duplicate; representative=${representative}` });
+  }
+
+  return { urls: [...representatives.values()], skipped };
+}
+
+function localeFromUrl(input: string): string | undefined {
+  try {
+    const firstSegment = new URL(input).pathname.split("/").filter(Boolean)[0];
+    return firstSegment && /^[a-z]{2}(?:-[a-z]{2})?$/i.test(firstSegment)
+      ? firstSegment.toLowerCase()
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function replaceLocale(input: string, locale: string): string {
+  const url = new URL(input);
+  const segments = url.pathname.split("/").filter(Boolean);
+  segments[0] = locale;
+  url.pathname = `/${segments.join("/")}`;
+  return url.toString();
+}
+
+function routeFamily(input: string): string {
+  const url = new URL(input);
+  const segments = url.pathname.toLowerCase().split("/").filter(Boolean);
+  if (segments[0] && /^[a-z]{2}(?:-[a-z]{2})?$/.test(segments[0])) segments.shift();
+  const [section] = segments;
+  if (section && /^(products?|pdp)$/.test(section) && segments.length >= 2) return "pdp";
+  if (section && /^(categories|category|collections?|plp)$/.test(section) && segments.length >= 2) return "plp";
+  if (section && /^(blog|articles?|news|posts?|stories|insights)$/.test(section) && segments.length >= 2) return "article";
+  return `page:${url.pathname.toLowerCase()}`;
 }
 
 // ---------- internals ----------
@@ -253,6 +410,7 @@ async function collectSitemapUrls(
   const queue = [...candidates];
 
   while (queue.length > 0 && visited.size < 20) {
+    if (signal?.aborted) break;
     const next = queue.shift();
     if (!next || visited.has(next)) continue;
     visited.add(next);
@@ -316,35 +474,61 @@ interface FetchPageDeps {
 async function fetchPage(
   item: { url: string; depth: number },
   deps: FetchPageDeps,
-): Promise<{ page: FetchedPage | null; links: string[] }> {
+): Promise<{
+  page: FetchedPage | null;
+  links: string[];
+  failure?: { reason: UnscannedPageReason; detail?: string };
+}> {
   const jitter = deps.jitterMs();
   if (jitter > 0) await sleep(jitter, deps.signal);
-  if (deps.signal?.aborted) return { page: null, links: [] };
+  if (deps.signal?.aborted) {
+    return {
+      page: null,
+      links: [],
+      failure: { reason: "scan_incomplete", detail: abortReason(deps.signal) },
+    };
+  }
 
   try {
     assertPublicUrl(item.url);
   } catch (err) {
     if (err instanceof UrlGuardError) {
       deps.warnings.push(`skipped ${item.url}: ${err.code}`);
-      return { page: null, links: [] };
+      return {
+        page: null,
+        links: [],
+        failure: { reason: "fetch_failed", detail: err.code },
+      };
     }
     throw err;
   }
 
   try {
-    const res = await timedFetch(item.url, {
-      fetchImpl: deps.fetchImpl,
-      userAgent: deps.userAgent,
-      timeoutMs: deps.perPageTimeoutMs,
-      signal: deps.signal,
-      abortRelay: deps.abortRelay,
-    });
+    const { response: res, html } = await timedFetch(
+      item.url,
+      {
+        fetchImpl: deps.fetchImpl,
+        userAgent: deps.userAgent,
+        timeoutMs: deps.perPageTimeoutMs,
+        signal: deps.signal,
+        abortRelay: deps.abortRelay,
+      },
+      async (response) => ({
+        response,
+        html: response.headers.get("content-type")?.includes("text/html")
+          ? await response.text()
+          : null,
+      }),
+    );
     const contentType = res.headers.get("content-type") ?? "";
-    if (!contentType.includes("text/html")) {
+    if (html === null) {
       deps.warnings.push(`skipped ${item.url}: content-type ${contentType || "unknown"}`);
-      return { page: null, links: [] };
+      return {
+        page: null,
+        links: [],
+        failure: { reason: "unsupported_content", detail: contentType || "unknown" },
+      };
     }
-    const html = await res.text();
     const $ = load(html);
     const title = ($("title").first().text() || "").trim();
     const urlObj = new URL(item.url);
@@ -366,9 +550,23 @@ async function fetchPage(
     };
     return { page, links };
   } catch (err) {
-    deps.warnings.push(`fetch ${item.url} failed: ${(err as Error).message}`);
-    return { page: null, links: [] };
+    const detail = err instanceof Error ? err.message : String(err);
+    deps.warnings.push(`fetch ${item.url} failed: ${detail}`);
+    return {
+      page: null,
+      links: [],
+      failure: {
+        reason: deps.signal?.aborted ? "scan_incomplete" : "fetch_failed",
+        detail,
+      },
+    };
   }
+}
+
+function abortReason(signal: AbortSignal): string | undefined {
+  const reason = signal.reason;
+  if (reason instanceof Error) return reason.message;
+  return typeof reason === "string" ? reason : undefined;
 }
 
 interface TimedFetchOpts {
@@ -379,19 +577,38 @@ interface TimedFetchOpts {
   abortRelay: AbortRelay | undefined;
 }
 
-async function timedFetch(url: string, opts: TimedFetchOpts): Promise<Response> {
+async function timedFetch<T = Response>(
+  url: string,
+  opts: TimedFetchOpts,
+  consume: (response: Response) => Promise<T> = async (response) => response as T,
+): Promise<T> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), opts.timeoutMs);
+  let requestTimedOut = false;
+  const timeout = setTimeout(() => {
+    requestTimedOut = true;
+    controller.abort();
+  }, opts.timeoutMs);
   const unlinkAbortRelay = opts.abortRelay?.track(controller);
   if (!opts.abortRelay && opts.signal?.aborted) {
     controller.abort();
   }
   try {
-    return await opts.fetchImpl(url, {
+    const response = await opts.fetchImpl(url, {
       headers: { "user-agent": opts.userAgent, accept: "text/html,application/xhtml+xml,application/xml" },
       redirect: "follow",
       signal: controller.signal,
     });
+    return await consume(response);
+  } catch (err) {
+    if (requestTimedOut) {
+      throw new Error(`request_timeout_after_${opts.timeoutMs}ms`);
+    }
+    if (opts.signal?.aborted) {
+      const reason = opts.signal.reason;
+      if (reason instanceof Error && reason.message) throw reason;
+      throw new Error("scan_cancelled");
+    }
+    throw err;
   } finally {
     clearTimeout(timeout);
     unlinkAbortRelay?.();
@@ -435,7 +652,7 @@ function createAbortRelay(signal?: AbortSignal): AbortRelay | undefined {
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     if (signal?.aborted) return resolve();
     let settled = false;
     const cleanup = () => {
@@ -452,7 +669,7 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
       settled = true;
       clearTimeout(t);
       cleanup();
-      reject(new Error("aborted"));
+      resolve();
     };
     const t = setTimeout(onTimeout, ms);
     signal?.addEventListener("abort", onAbort, { once: true });
@@ -509,8 +726,9 @@ export function classifyPageType(url: URL, title: string): PageType {
   if (/\/contact(\/|$)/.test(path) || /\bcontact\b/.test(t)) {
     return "contact";
   }
-  if (/\/(blog|article|articles|news|post|posts|stories|insights)(\/|$)/.test(path)) {
-    return "article";
+  const editorialPath = path.match(/^\/(blog|article|articles|news|post|posts|stories|insights)(?:\/(.+))?\/?$/);
+  if (editorialPath) {
+    return editorialPath[2] ? "article" : "listing";
   }
   if (/\/(category|categories|collection|collections|catalog|shop|store)(\/|$)/.test(path) || /\bplp\b/.test(path)) {
     return "listing";

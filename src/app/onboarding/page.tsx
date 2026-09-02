@@ -37,7 +37,6 @@ export default function OnboardingPage() {
   const router = useRouter();
   const setProject = useAppStore((s) => s.setProject);
   const resetStore = useAppStore((s) => s.resetStore);
-  const useAiEstimation = useAppStore((s) => s.useAiEstimation);
   const { startScan, cancelScan } = useScan();
   const [scanOpen, setScanOpen] = useState(false);
   const [pendingRoute, setPendingRoute] = useState<string | null>(null);
@@ -86,15 +85,11 @@ export default function OnboardingPage() {
     router.push(nextRoute);
   };
 
-  const handleScanCancel = () => {
+  const handleScanDiscard = () => {
     cancelScan();
+    resetStore();
     setScanOpen(false);
     setPendingRoute(null);
-  };
-
-  const handleScanDismiss = () => {
-    setScanOpen(false);
-    if (pendingRoute) router.push(pendingRoute);
   };
 
   const handleScanProceed = () => {
@@ -300,8 +295,8 @@ export default function OnboardingPage() {
 
       <ScanProgressDialog
         open={scanOpen}
-        onCancel={handleScanCancel}
-        onDismiss={handleScanDismiss}
+        onCancel={handleScanDiscard}
+        onDismiss={handleScanDiscard}
         onProceed={handleScanProceed}
       />
     </div>

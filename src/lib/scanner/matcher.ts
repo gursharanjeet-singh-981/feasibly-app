@@ -36,6 +36,7 @@ export function matchDetections(
 
   const componentDetections = aggregateComponents(analyses, minConfidence);
   const templateDetections = aggregateTemplates(analyses, minConfidence);
+  const pageTypeTemplateDetections = aggregatePageTypeTemplates(analyses, minConfidence);
 
   const componentsByGroup = groupBy(library.components, (c) => c.group.toLowerCase());
   const templatesByName = groupBy(library.templates, (t) => t.name.toLowerCase());
@@ -128,6 +129,20 @@ export function matchDetections(
     });
   }
 
+  for (const det of pageTypeTemplateDetections) {
+    const exact = templatesByName.get(det.name.toLowerCase());
+    if (exact && exact.length > 0) {
+      applyMatch(matchedTemplateIds, exact, det.confidence, det.pages, "Page type strongly suggests this template.");
+      continue;
+    }
+    const fuzzy = templateIndex.search(det.name)[0];
+    if (fuzzy && (fuzzy.score ?? 1) <= fuzzyThreshold) {
+      const members = templatesByName.get(fuzzy.item.name.toLowerCase()) ?? [fuzzy.item];
+      const conf = det.confidence * (1 - (fuzzy.score ?? 0));
+      applyMatch(matchedTemplateIds, members, conf, det.pages, "Page type is consistent with this template.");
+    }
+  }
+
   return { matchedComponentIds, matchedTemplateIds, unmatched };
 }
 
@@ -145,6 +160,17 @@ interface AggregatedTemplate {
   confidence: number;
   pages: string[];
 }
+
+const PAGE_TYPE_TO_TEMPLATE: Record<string, string> = {
+  home: "Homepage",
+  product: "PDP",
+  listing: "Listing Page (ie: PLP, Blog landing)",
+  article: "Article Page",
+  contact: "Contact Page",
+  search: "Search Results Page",
+  legal: "Utility Template",
+  landing: "Landing Page (General Content)",
+};
 
 function aggregateComponents(
   analyses: PageAnalysis[],
@@ -202,6 +228,33 @@ function aggregateTemplates(
   return [...acc.values()];
 }
 
+function aggregatePageTypeTemplates(
+  analyses: PageAnalysis[],
+  minConfidence: number,
+): AggregatedTemplate[] {
+  const acc = new Map<string, AggregatedTemplate>();
+  for (const analysis of analyses) {
+    const templateName = PAGE_TYPE_TO_TEMPLATE[analysis.pageType];
+    if (!templateName) continue;
+    const templateConfidence = Math.max(0.55, 0.75 - (analysis.detectedTemplate ? 0.15 : 0));
+    if (templateConfidence < minConfidence) continue;
+
+    const key = templateName.toLowerCase();
+    const prev = acc.get(key);
+    if (!prev) {
+      acc.set(key, {
+        name: templateName,
+        confidence: templateConfidence,
+        pages: [analysis.url],
+      });
+    } else {
+      prev.confidence = Math.max(prev.confidence, templateConfidence);
+      if (!prev.pages.includes(analysis.url)) prev.pages.push(analysis.url);
+    }
+  }
+  return [...acc.values()];
+}
+
 interface VariantSelection<T extends Component> {
   item: T;
   confidence: number;
@@ -211,6 +264,8 @@ interface VariantSelection<T extends Component> {
 function selectVariants<T extends Component>(items: T[], hints: string[]): VariantSelection<T>[] {
   const defaultItem = items.find((item) => /\b(?:standard|default)\b/i.test(item.name)) ?? items[0]!;
   const hintTokens = tokenize(hints.join(" "));
+  const groupTokens = tokenize(defaultItem.group);
+  for (const token of groupTokens) hintTokens.delete(token);
   if (hintTokens.size === 0) {
     return [{
       item: defaultItem,
@@ -231,7 +286,7 @@ function selectVariants<T extends Component>(items: T[], hints: string[]): Varia
     }];
   }
 
-  const selected = ranked.filter(({ score }) => score >= 0.35);
+  const selected = ranked.filter(({ score }) => score >= 0.18);
   if (selected.length === 0) {
     return [{
       item: defaultItem,
@@ -239,7 +294,12 @@ function selectVariants<T extends Component>(items: T[], hints: string[]): Varia
       reason: "DOM evidence was present but did not clear the variant threshold; selected the standard/default variant.",
     }];
   }
-  return selected.map(({ item, score }) => ({
+
+  const topScore = selected[0].score;
+  const threshold = Math.max(0.18, topScore * 0.55);
+  const relevant = selected.filter(({ score }) => score >= threshold);
+
+  return relevant.map(({ item, score }) => ({
     item,
     confidence: 0.7 + score * 0.3,
     reason: `Selected because DOM evidence matched this variant description (score ${Math.round(score * 100)}%). Multiple variants may be required on this page.`,
@@ -247,21 +307,41 @@ function selectVariants<T extends Component>(items: T[], hints: string[]): Varia
 }
 
 function scoreVariant(item: Component, hintTokens: Set<string>): number {
+  const allText = [
+    item.name,
+    item.group,
+    item.designDescription,
+    item.developmentDescription,
+    item.assumptions,
+  ].join(" ");
+  const allTokens = tokenize(allText);
   const descriptionTokens = tokenize(
     [item.designDescription, item.developmentDescription, item.assumptions].join(" "),
   );
   const nameTokens = tokenize(item.name);
+  const groupTokens = tokenize(item.group);
+
   let descriptionMatches = 0;
   let nameMatches = 0;
+  let groupMatches = 0;
+  let exactPhraseMatches = 0;
+
   for (const token of hintTokens) {
     if (descriptionTokens.has(token)) descriptionMatches++;
     if (nameTokens.has(token)) nameMatches++;
+    if (groupTokens.has(token)) groupMatches++;
+    if (allTokens.has(token)) exactPhraseMatches++;
   }
-  return Math.min(
-    1,
-    (descriptionMatches / hintTokens.size) * 0.85 +
-      (nameMatches / hintTokens.size) * 0.15,
-  );
+
+  const baseScore =
+    (descriptionMatches / Math.max(1, hintTokens.size)) * 0.7 +
+    (nameMatches / Math.max(1, hintTokens.size)) * 0.2 +
+    (groupMatches / Math.max(1, hintTokens.size)) * 0.1;
+
+  const phraseBonus = exactPhraseMatches > 0 ? 0.12 : 0;
+  const defaultBias = /\b(?:standard|default)\b/i.test(item.name) ? 0.05 : 0;
+
+  return Math.min(1, baseScore + phraseBonus + defaultBias);
 }
 
 function tokenize(value: string): Set<string> {
