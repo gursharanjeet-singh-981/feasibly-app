@@ -21,11 +21,25 @@ function headerStyle(row: ExcelJS.Row) {
 function dataStyle(row: ExcelJS.Row, isEven: boolean) {
   row.eachCell((cell) => {
     cell.font = { size: 10 };
-    cell.alignment = { vertical: "top", wrapText: true };
+    cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
     if (isEven) {
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: BG_BLUE } };
     }
     cell.border = { bottom: { style: "thin", color: { argb: STROKES } } };
+  });
+}
+
+function applyWorkbookAlignment(workbook: ExcelJS.Workbook) {
+  workbook.eachSheet((worksheet) => {
+    worksheet.eachRow((row) => {
+      row.eachCell((cell) => {
+        cell.alignment = {
+          ...cell.alignment,
+          vertical: "middle",
+          horizontal: "left",
+        };
+      });
+    });
   });
 }
 
@@ -318,6 +332,7 @@ export async function exportScanReport(
   }
 
   // ── Download ──
+  applyWorkbookAlignment(workbook);
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

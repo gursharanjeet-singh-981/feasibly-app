@@ -24,25 +24,29 @@ const BG_BLUE_HEX = BRAND.bgBlue.argb;
 const WHITE_HEX = BRAND.white.argb;
 const STROKES_HEX = BRAND.strokes.argb;
 
-function applyHeaderStyle(row: ExcelJS.Row, centerCols?: number[]) {
-  row.eachCell((cell, col) => {
+function applyHeaderStyle(row: ExcelJS.Row) {
+  row.eachCell((cell) => {
     cell.fill = {
       type: "pattern",
       pattern: "solid",
       fgColor: { argb: COBALT_HEX },
     };
     cell.font = { bold: true, color: { argb: WHITE_HEX }, size: 11 };
-    cell.alignment = { vertical: "middle", horizontal: centerCols?.includes(col) ? "center" : "left" };
+    cell.alignment = { vertical: "middle", horizontal: "left" };
     cell.border = {
       bottom: { style: "thin", color: { argb: STROKES_HEX } },
     };
   });
 }
 
-function applyDataRowStyle(row: ExcelJS.Row, isEven: boolean, centerCols?: number[]) {
-  row.eachCell((cell, col) => {
+function applyDataRowStyle(row: ExcelJS.Row, isEven: boolean) {
+  row.eachCell((cell) => {
     cell.font = { size: 10 };
-    cell.alignment = { vertical: "top", wrapText: true, horizontal: centerCols?.includes(col) ? "center" : "left" };
+    cell.alignment = {
+      vertical: "middle",
+      wrapText: true,
+      horizontal: "left",
+    };
     if (isEven) {
       cell.fill = {
         type: "pattern",
@@ -64,7 +68,7 @@ function applyGroupHeaderStyle(row: ExcelJS.Row) {
       fgColor: { argb: SKY_BLUE_HEX },
     };
     cell.font = { bold: true, color: { argb: WHITE_HEX }, size: 11 };
-    cell.alignment = { vertical: "middle" };
+    cell.alignment = { vertical: "middle", horizontal: "left" };
   });
 }
 
@@ -173,8 +177,7 @@ export async function exportExcel(
       { header: "Assumptions", key: "assumptions", width: 30 },
     ];
 
-    const compNumericCols = [6, 7]; // Design Effort (h), Dev Effort (h)
-    applyHeaderStyle(compSheet.getRow(1), compNumericCols);
+    applyHeaderStyle(compSheet.getRow(1));
 
     // Group by group name
     const grouped = new Map<string, SelectedComponent[]>();
@@ -203,7 +206,7 @@ export async function exportExcel(
           devEffort: componentDevEffort(c, useAi),
           assumptions: c.assumptions,
         });
-        applyDataRowStyle(row, rowIdx % 2 === 0, compNumericCols);
+        applyDataRowStyle(row, rowIdx % 2 === 0);
         rowIdx++;
       }
     }
@@ -221,8 +224,8 @@ export async function exportExcel(
       "",
     ]);
     totalRow.font = { bold: true, size: 11 };
-    compNumericCols.forEach((col) => {
-      totalRow.getCell(col).alignment = { horizontal: "center" };
+    totalRow.eachCell((cell) => {
+      cell.alignment = { vertical: "middle", horizontal: "left" };
     });
   }
 
@@ -246,9 +249,7 @@ export async function exportExcel(
       { header: "Total Dev (h)", key: "totalDev", width: 14 },
     ];
 
-    // Cols 4-10: all numeric effort and pages columns
-    const templNumericCols = [4, 5, 6, 7, 8, 9, 10];
-    applyHeaderStyle(templSheet.getRow(1), templNumericCols);
+    applyHeaderStyle(templSheet.getRow(1));
 
     selectedTemplates.forEach((t, i) => {
       const row = templSheet.addRow({
@@ -263,7 +264,7 @@ export async function exportExcel(
         totalDesign: templateTotalDesign(t, useAi),
         totalDev: templateTotalDev(t, useAi),
       });
-      applyDataRowStyle(row, i % 2 === 0, templNumericCols);
+      applyDataRowStyle(row, i % 2 === 0);
     });
 
     const tmplTotals = templatesSubtotal(templates, useAi);
@@ -281,8 +282,8 @@ export async function exportExcel(
       tmplTotals.totalDev,
     ]);
     totalRow.font = { bold: true, size: 11 };
-    templNumericCols.forEach((col) => {
-      totalRow.getCell(col).alignment = { horizontal: "center" };
+    totalRow.eachCell((cell) => {
+      cell.alignment = { vertical: "middle", horizontal: "left" };
     });
   }
 
