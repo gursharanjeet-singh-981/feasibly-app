@@ -12,7 +12,7 @@ export function componentDevEffort(c: SelectedComponent, useAi: boolean): number
 export function templateDesignBase(t: SelectedTemplate, useAi: boolean): number {
   return useAi ? t.aiDesignEffortBase : t.designEffortBase;
 }
-
+ 
 export function templateDevBase(t: SelectedTemplate, useAi: boolean): number {
   return useAi ? t.aiDevEffortBase : t.devEffortBase;
 }
