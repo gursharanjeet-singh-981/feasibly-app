@@ -30,7 +30,7 @@ function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdat
   const devEffort = useAiEstimation
     ? component.aiDevEffort
     : component.devEffort;
-  const isEditable = component.isCustom === true;
+  const isEditable = true;
 
   const designField: keyof SelectedComponent = useAiEstimation
     ? "aiDesignEffort"
@@ -65,21 +65,15 @@ function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdat
           )}
         </div>
         <div className={`flex items-start px-4 py-3 w-25 shrink-0 ${CELL_BORDER}`}>
-          {isEditable ? (
-            <EditableTextCell
-              editable
-              value={component.category}
-              onChange={(v) => onUpdate({ category: v })}
-              placeholder="Category"
-              className={CELL_TEXT}
-            />
-          ) : (
-            <CategoryLabel category={component.category} />
-          )}
+          <CategoryLabel
+            category={component.category}
+            onChange={(value) => onUpdate({ category: value })}
+          />
         </div>
         <div className={`flex items-start px-4 py-3 w-50 shrink-0 ${CELL_BORDER} ${CELL_TEXT}`}>
           <EditableTextCell
             editable={isEditable}
+            multiline
             value={component.designDescription}
             onChange={(v) => onUpdate({ designDescription: v })}
             placeholder="Design description"
@@ -88,6 +82,7 @@ function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdat
         <div className={`flex items-start px-4 py-3 w-50 shrink-0 ${CELL_BORDER} ${CELL_TEXT}`}>
           <EditableTextCell
             editable={isEditable}
+            multiline
             value={component.developmentDescription}
             onChange={(v) => onUpdate({ developmentDescription: v })}
             placeholder="Development description"
@@ -133,7 +128,10 @@ function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdat
             ) : (
               <p className="text-sm font-medium text-black truncate">{component.name}</p>
             )}
-            <CategoryLabel category={component.category} />
+            <CategoryLabel
+              category={component.category}
+              onChange={(value) => onUpdate({ category: value })}
+            />
             {match && (
               <ConfidenceBadge confidence={match.confidence} pages={match.pages} />
             )}
@@ -141,6 +139,7 @@ function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdat
           {isEditable ? (
             <EditableTextCell
               editable
+              multiline
               value={component.designDescription}
               onChange={(v) => onUpdate({ designDescription: v })}
               placeholder="Design description"
