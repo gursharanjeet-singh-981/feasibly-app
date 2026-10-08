@@ -83,16 +83,24 @@ export function EditableNumberCell({
 }: EditableNumberCellProps) {
   if (editable) {
     return (
-      <input
-        type="number"
-        min={min}
-        value={value}
-        onChange={(e) =>
-          onChange(Math.max(min, Number(e.target.value) || 0))
-        }
-        aria-label={ariaLabel}
-        className={cn(BASE_TEXT_INPUT, className)}
-      />
+      <span className="inline-flex items-baseline">
+        <input
+          type="text"
+          inputMode="decimal"
+          value={value}
+          onChange={(event) =>
+            onChange(Math.max(min, Number(event.target.value) || 0))
+          }
+          aria-label={ariaLabel}
+          className={cn(BASE_TEXT_INPUT, suffix ? "w-auto" : undefined, className)}
+          style={
+            suffix
+              ? { width: `${Math.max(String(value).length, 1)}ch` }
+              : undefined
+          }
+        />
+        {suffix}
+      </span>
     );
   }
   return (
