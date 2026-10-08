@@ -1,7 +1,13 @@
 import { SvgIcon } from "@/components/SvgIcon";
 
-export function CategoryLabel({ category }: { category: string }) {
-  if (!category) return null;
+export function CategoryLabel({
+  category,
+  onChange,
+}: {
+  category: string;
+  onChange?: (value: string) => void;
+}) {
+  if (!category && !onChange) return null;
 
   const isCore = category.toLowerCase() === "core";
   return (
@@ -13,7 +19,18 @@ export function CategoryLabel({ category }: { category: string }) {
       {isCore && (
         <SvgIcon name="heart" width={12} height={12} className="text-red-500" />
       )}
-      {category}
+      {onChange ? (
+        <input
+          value={category}
+          onChange={(event) => onChange(event.target.value)}
+          placeholder="Category"
+          aria-label="Category"
+          size={category ? category.length : 8}
+          className="min-w-0 bg-transparent outline-none focus-visible:ring-1 focus-visible:ring-cobalt/30 rounded"
+        />
+      ) : (
+        category
+      )}
     </span>
   );
 }
