@@ -1,5 +1,5 @@
 import type { SelectedComponent, SelectedTemplate, EstimationSummary } from "@/types";
-import { BUFFER_MULTIPLIER, DAYS_PER_WEEK } from "@/lib/constants";
+import { DEFAULT_BUFFER_PERCENT, DAYS_PER_WEEK } from "@/lib/constants";
 
 export function componentDesignEffort(c: SelectedComponent, useAi: boolean): number {
   return useAi ? c.aiDesignEffort : c.designEffort;
@@ -66,7 +66,8 @@ export function templatesSubtotal(
 export function calculateEstimation(
   components: SelectedComponent[],
   templates: SelectedTemplate[],
-  useAi = false
+  useAi = false,
+  bufferPercent = DEFAULT_BUFFER_PERCENT,
 ): EstimationSummary {
   const selectedComponents = components.filter((c) => c.isSelected);
   const selectedTemplates = templates.filter((t) => t.isSelected);
@@ -77,8 +78,9 @@ export function calculateEstimation(
   const designDays = comp.design + tmpl.totalDesign;
   const devDays = comp.dev + tmpl.totalDev;
 
-  const designDaysWithBuffer = designDays * BUFFER_MULTIPLIER;
-  const devDaysWithBuffer = devDays * BUFFER_MULTIPLIER;
+  const bufferMultiplier = 1 + bufferPercent / 100;
+  const designDaysWithBuffer = designDays * bufferMultiplier;
+  const devDaysWithBuffer = devDays * bufferMultiplier;
 
   const uniqueGroups = new Set(selectedComponents.map((c) => c.group));
 

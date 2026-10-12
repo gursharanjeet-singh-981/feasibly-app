@@ -88,6 +88,15 @@ describe("calculateEstimation", () => {
     expect(result.devWeeks).toBe(3);
   });
 
+  it("applies the selected buffer percentage", () => {
+    const component = makeComponent({ designEffort: 10, devEffort: 10 });
+    const bufferedDaysByPercent = [0, 5, 10, 15, 20].map((bufferPercent) =>
+      calculateEstimation([component], [], false, bufferPercent).designDaysWithBuffer,
+    );
+
+    expect(bufferedDaysByPercent).toEqual([10, 10.5, 11, 11.5, 12]);
+  });
+
   it("includes template additional pages in per-page effort and page count", () => {
     const result = calculateEstimation(
       [],
