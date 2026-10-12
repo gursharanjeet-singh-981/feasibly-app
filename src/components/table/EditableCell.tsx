@@ -11,6 +11,7 @@ interface EditableTextCellProps {
   className?: string;
   readClassName?: string;
   ariaLabel?: string;
+  multiline?: boolean;
 }
 
 export function EditableTextCell({
@@ -21,8 +22,33 @@ export function EditableTextCell({
   className,
   readClassName,
   ariaLabel,
+  multiline = false,
 }: EditableTextCellProps) {
   if (editable) {
+    if (multiline) {
+      const resize = (element: HTMLTextAreaElement | null) => {
+        if (!element) return;
+        element.style.height = "auto";
+        element.style.height = `${element.scrollHeight}px`;
+      };
+
+      return (
+        <textarea
+          ref={resize}
+          rows={1}
+          value={value}
+          onChange={(event) => {
+            const target = event.currentTarget;
+            resize(target);
+            onChange(target.value);
+          }}
+          placeholder={placeholder}
+          aria-label={ariaLabel ?? placeholder}
+          className={cn(BASE_TEXT_INPUT, "resize-none overflow-hidden", className)}
+        />
+      );
+    }
+
     return (
       <input
         value={value}
@@ -57,16 +83,24 @@ export function EditableNumberCell({
 }: EditableNumberCellProps) {
   if (editable) {
     return (
-      <input
-        type="number"
-        min={min}
-        value={value}
-        onChange={(e) =>
-          onChange(Math.max(min, Number(e.target.value) || 0))
-        }
-        aria-label={ariaLabel}
-        className={cn(BASE_TEXT_INPUT, className)}
-      />
+      <span className="inline-flex items-baseline">
+        <input
+          type="text"
+          inputMode="decimal"
+          value={value}
+          onChange={(event) =>
+            onChange(Math.max(min, Number(event.target.value) || 0))
+          }
+          aria-label={ariaLabel}
+          className={cn(BASE_TEXT_INPUT, suffix ? "w-auto" : undefined, className)}
+          style={
+            suffix
+              ? { width: `${Math.max(String(value).length, 1)}ch` }
+              : undefined
+          }
+        />
+        {suffix}
+      </span>
     );
   }
   return (

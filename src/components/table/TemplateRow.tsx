@@ -38,7 +38,7 @@ function TemplateRowBase({
   const devBase = useAiEstimation
     ? template.aiDevEffortBase
     : template.devEffortBase;
-  const isEditable = template.isCustom === true;
+  const isEditable = true;
 
   const designBaseField: keyof SelectedTemplate = useAiEstimation
     ? "aiDesignEffortBase"
@@ -59,8 +59,8 @@ function TemplateRowBase({
           />
           <EditableTextCell
             editable={isEditable}
-            value={template.description}
-            onChange={(v) => onUpdate({ description: v })}
+            value={template.name}
+            onChange={(v) => onUpdate({ name: v })}
             placeholder="Variant name"
             className="leading-snug font-medium"
           />
@@ -73,21 +73,15 @@ function TemplateRowBase({
           )}
         </div>
         <div className={`flex items-start px-4 py-3 w-22.5 shrink-0 ${CELL_BORDER}`}>
-          {isEditable ? (
-            <EditableTextCell
-              editable
-              value={template.category}
-              onChange={(v) => onUpdate({ category: v })}
-              placeholder="Category"
-              className="leading-snug"
-            />
-          ) : (
-            <CategoryLabel category={template.category} />
-          )}
+          <CategoryLabel
+            category={template.category}
+            onChange={(value) => onUpdate({ category: value })}
+          />
         </div>
         <div className={`flex items-start px-4 py-3 w-50 shrink-0 ${CELL_BORDER} leading-snug`}>
           <EditableTextCell
             editable={isEditable}
+            multiline
             value={template.description}
             onChange={(v) => onUpdate({ description: v })}
             placeholder="Template description"
@@ -150,30 +144,74 @@ function TemplateRowBase({
         />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            {isEditable ? (
-              <EditableTextCell
-                editable
-                value={template.description}
-                onChange={(v) => onUpdate({ description: v })}
-                placeholder="Template name"
-                className="text-sm font-medium text-black"
-              />
-            ) : (
-              <p className="text-sm font-medium text-black truncate">{template.description}</p>
-            )}
-            <CategoryLabel category={template.category} />
+            <EditableTextCell
+              editable
+              value={template.name}
+              onChange={(value) => onUpdate({ name: value })}
+              placeholder="Variant name"
+              className="text-sm font-medium text-black"
+            />
+            <CategoryLabel
+              category={template.category}
+              onChange={(value) => onUpdate({ category: value })}
+            />
             {match && (
               <ConfidenceBadge confidence={match.confidence} pages={match.pages} />
             )}
           </div>
-          <p className="text-xs text-light-grey-text line-clamp-2 mb-2">
-            {template.description}
-          </p>
+          <EditableTextCell
+            editable
+            multiline
+            value={template.description}
+            onChange={(value) => onUpdate({ description: value })}
+            placeholder="Template description"
+            className="text-xs text-light-grey-text mb-2"
+          />
           <div className="flex flex-wrap gap-3 text-xs text-black mb-2">
-            <span>Design: {designBase}h</span>
-            <span>+{template.designEffortPerPage}h/pg</span>
-            <span>Dev: {devBase}h</span>
-            <span>+{template.devEffortPerPage}h/pg</span>
+            <label className="flex items-center gap-1">
+              Design:
+              <EditableNumberCell
+                editable
+                value={designBase}
+                onChange={(value) => onUpdate({ [designBaseField]: value } as Partial<SelectedTemplate>)}
+                className="w-12"
+                ariaLabel="Design effort base"
+              />
+              h
+            </label>
+            <label className="flex items-center gap-1">
+              Design/page:
+              <EditableNumberCell
+                editable
+                value={template.designEffortPerPage}
+                onChange={(value) => onUpdate({ designEffortPerPage: value })}
+                className="w-12"
+                ariaLabel="Design effort per additional page"
+              />
+              h
+            </label>
+            <label className="flex items-center gap-1">
+              Dev:
+              <EditableNumberCell
+                editable
+                value={devBase}
+                onChange={(value) => onUpdate({ [devBaseField]: value } as Partial<SelectedTemplate>)}
+                className="w-12"
+                ariaLabel="Development effort base"
+              />
+              h
+            </label>
+            <label className="flex items-center gap-1">
+              Dev/page:
+              <EditableNumberCell
+                editable
+                value={template.devEffortPerPage}
+                onChange={(value) => onUpdate({ devEffortPerPage: value })}
+                className="w-12"
+                ariaLabel="Development effort per additional page"
+              />
+              h
+            </label>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs text-light-grey-text">Additional pages:</span>
