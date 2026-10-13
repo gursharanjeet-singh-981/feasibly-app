@@ -1,7 +1,11 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { calculateEstimation } from "@/lib/calculations";
-import { STORAGE_KEY, STORAGE_VERSION } from "@/lib/constants";
+import {
+  DEFAULT_BUFFER_PERCENT,
+  STORAGE_KEY,
+  STORAGE_VERSION,
+} from "@/lib/constants";
 import { initialScanSliceState, type ScanSliceState } from "@/lib/scanner/types";
 import type {
   Project,
@@ -13,6 +17,7 @@ import type {
 const emptyProject: Project = {
   projectName: "",
   liveUrl: "",
+  bufferPercent: DEFAULT_BUFFER_PERCENT,
   scope: { components: false, templates: false },
   platform: "AEM",
 };
@@ -189,8 +194,13 @@ export const useAppStore = create<AppState>()(
         })),
 
       getEstimation: () => {
-        const { components, templates, useAiEstimation } = get();
-        return calculateEstimation(components, templates, useAiEstimation);
+        const { components, templates, useAiEstimation, project } = get();
+        return calculateEstimation(
+          components,
+          templates,
+          useAiEstimation,
+          project.bufferPercent,
+        );
       },
 
       scan: { ...initialScanSliceState },
@@ -220,6 +230,7 @@ export const useAppStore = create<AppState>()(
       }),
       // v1 -> v2: promote the `assumptions === "__custom__"` sentinel to explicit isCustom.
       // v2 -> v3: seed empty scan slice for the live-site scan feature.
+      // v3 -> v4: default existing projects to the previous 20% buffer.
       migrate: (persisted, version) => {
         const state = persisted as Partial<AppState> | undefined;
         if (!state) return persisted as AppState;
@@ -237,6 +248,14 @@ export const useAppStore = create<AppState>()(
         }
         if (version < 3) {
           state.scan = { ...initialScanSliceState };
+        }
+        if (version < 4) {
+          state.project = {
+            ...emptyProject,
+            ...state.project,
+            bufferPercent:
+              state.project?.bufferPercent ?? DEFAULT_BUFFER_PERCENT,
+          };
         }
         return state as AppState;
       },

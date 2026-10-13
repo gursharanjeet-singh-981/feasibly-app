@@ -17,7 +17,7 @@ export const DATA_URLS = {
 export const ICON_SPRITE_URL = "/images/icons.svg";
 
 export const STORAGE_KEY = "feasibly-storage";
-export const STORAGE_VERSION = 3;
+export const STORAGE_VERSION = 4;
 
 export const SCAN_FEATURE_ENABLED = true;
 // When true, shows a "Single page / Whole site" toggle on the onboarding form.
@@ -32,10 +32,11 @@ export const SCAN_DEFAULTS = {
   maxDepth: 10,
 } as const;
 
-export const BUFFER_RATIO = 0.2;
-export const BUFFER_MULTIPLIER = 1 + BUFFER_RATIO;
+export const BUFFER_OPTIONS = [0, 5, 10, 15, 20] as const;
+export const DEFAULT_BUFFER_PERCENT = 20;
 export const DAYS_PER_WEEK = 5;
-export const BUFFER_LABEL = `Incl. ${Math.round(BUFFER_RATIO * 100)}% buffer time`;
+export const getBufferLabel = (bufferPercent: number) =>
+  `Incl. ${bufferPercent}% buffer time`;
 
 export const DEFAULT_COMPONENT_GROUP = "New Component";
 export const DEFAULT_TEMPLATE_GROUP = "New Template";

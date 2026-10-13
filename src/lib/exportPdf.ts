@@ -6,7 +6,7 @@ import type {
   EstimationSummary,
 } from "@/types";
 import { BRAND } from "@/lib/theme";
-import { BUFFER_LABEL } from "@/lib/constants";
+import { getBufferLabel } from "@/lib/constants";
 import {
   componentDesignEffort,
   componentDevEffort,
@@ -212,7 +212,7 @@ export function exportPDF(
   doc.text(`${estimation.devWeeks} weeks`, margin + 5, y + 33);
   setColor(doc, LIGHT_GREY);
   doc.setFontSize(7);
-  doc.text(BUFFER_LABEL, margin + cardWidth - 35, y + 33);
+  doc.text(getBufferLabel(project.bufferPercent), margin + cardWidth - 35, y + 33);
 
   // Design card
   const cardX2 = margin + cardWidth + 10;
@@ -238,7 +238,7 @@ export function exportPDF(
   doc.text(`${estimation.designWeeks} weeks`, cardX2 + 5, y + 33);
   setColor(doc, LIGHT_GREY);
   doc.setFontSize(7);
-  doc.text(BUFFER_LABEL, cardX2 + cardWidth - 35, y + 33);
+  doc.text(getBufferLabel(project.bufferPercent), cardX2 + cardWidth - 35, y + 33);
 
   y += cardHeight + 10;
 

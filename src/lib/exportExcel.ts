@@ -130,7 +130,7 @@ export async function exportExcel(
   const statHeaders = summarySheet.addRow([
     "Metric",
     "Value",
-    "With Buffer (20%)",
+    `With Buffer (${project.bufferPercent}%)`,
     "Weeks",
   ]);
   applyHeaderStyle(statHeaders);

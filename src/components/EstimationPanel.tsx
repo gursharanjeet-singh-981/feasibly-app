@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useAppStore } from "@/store";
 import { calculateEstimation } from "@/lib/calculations";
+import { getBufferLabel } from "@/lib/constants";
 import { EstimationCard } from "@/components/estimation/EstimationCard";
 import { StatTile } from "@/components/estimation/StatTile";
 import { ExportButtons } from "@/components/estimation/ExportButtons";
@@ -52,9 +53,16 @@ export function EstimationPanel() {
   const [infoSidebar, setInfoSidebar] = useState<InfoKind | null>(null);
 
   const estimation = useMemo(
-    () => calculateEstimation(components, templates, useAiEstimation),
-    [components, templates, useAiEstimation],
+    () =>
+      calculateEstimation(
+        components,
+        templates,
+        useAiEstimation,
+        project.bufferPercent,
+      ),
+    [components, templates, useAiEstimation, project.bufferPercent],
   );
+  const bufferLabel = getBufferLabel(project.bufferPercent);
 
   return (
     <div className="bg-surface-muted flex flex-col justify-between rounded-3xl lg:rounded-[60px] p-6 md:p-8 lg:p-10 w-full h-full overflow-y-auto">
@@ -110,6 +118,7 @@ export function EstimationPanel() {
           title="Development"
           days={estimation.devDaysWithBuffer}
           weeks={estimation.devWeeks}
+          bufferLabel={bufferLabel}
           note="Includes both Front-end & Back-end"
           onInfo={() => setInfoSidebar("dev")}
         />
@@ -121,6 +130,7 @@ export function EstimationPanel() {
           title="Design"
           days={estimation.designDaysWithBuffer}
           weeks={estimation.designWeeks}
+          bufferLabel={bufferLabel}
           note="Includes both UX & UI"
           onInfo={() => setInfoSidebar("design")}
         />

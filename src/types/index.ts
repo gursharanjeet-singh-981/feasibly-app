@@ -41,6 +41,7 @@ export interface SelectedTemplate extends Template {
 export interface Project {
   projectName: string;
   liveUrl: string;
+  bufferPercent: number;
   scope: {
     components: boolean;
     templates: boolean;

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { ChevronDown } from "lucide-react";
 import { useAppStore } from "@/store";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +16,13 @@ import {
   FormFieldSection,
   OutlineIcon,
 } from "@/components/onboarding/FormFieldSection";
-import { ROUTES, SCAN_FEATURE_ENABLED, SCAN_SINGLE_PAGE_OPTION_ENABLED } from "@/lib/constants";
+import {
+  BUFFER_OPTIONS,
+  DEFAULT_BUFFER_PERCENT,
+  ROUTES,
+  SCAN_FEATURE_ENABLED,
+  SCAN_SINGLE_PAGE_OPTION_ENABLED,
+} from "@/lib/constants";
 import { useScan } from "@/hooks/useScan";
 import { ScanProgressDialog } from "@/components/scan/ScanProgressDialog";
 
@@ -23,6 +30,7 @@ const projectSchema = z
   .object({
     projectName: z.string().min(1, "Project name is required"),
     liveUrl: z.string().url("Must be a valid URL").or(z.literal("")),
+    bufferPercent: z.number().int().min(0).max(20).multipleOf(5),
     scopeComponents: z.boolean(),
     scopeTemplates: z.boolean(),
   })
@@ -53,6 +61,7 @@ export default function OnboardingPage() {
     defaultValues: {
       projectName: "",
       liveUrl: "",
+      bufferPercent: DEFAULT_BUFFER_PERCENT,
       scopeComponents: false,
       scopeTemplates: false,
     },
@@ -67,6 +76,7 @@ export default function OnboardingPage() {
     setProject({
       projectName: data.projectName,
       liveUrl: data.liveUrl,
+      bufferPercent: data.bufferPercent,
       scope: {
         components: data.scopeComponents,
         templates: data.scopeTemplates,
@@ -182,6 +192,46 @@ export default function OnboardingPage() {
             {errors.liveUrl && (
               <p className="text-destructive text-sm">
                 {errors.liveUrl.message}
+              </p>
+            )}
+          </FormFieldSection>
+
+          <FormFieldSection
+            iconSlot={
+              <OutlineIcon>
+                <path d="M12 3v18" />
+                <path d="M17 8H9.5a3.5 3.5 0 1 0 0 7H14a3 3 0 1 1 0 6H6" />
+              </OutlineIcon>
+            }
+            title="Choose your estimate buffer"
+            description="Applied to design and development effort."
+          >
+            <div className="flex flex-col gap-2 pl-1">
+              <Label htmlFor="buffer-percent" className="text-sm text-black">
+                Buffer
+              </Label>
+              <div className="relative">
+                <select
+                  id="buffer-percent"
+                  {...register("bufferPercent", { valueAsNumber: true })}
+                  className="h-12 md:h-15 w-full appearance-none rounded-full border border-strokes bg-white px-5 pr-12 md:px-6.25 text-sm md:text-[16px] text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt"
+                  aria-invalid={!!errors.bufferPercent}
+                >
+                  {BUFFER_OPTIONS.map((bufferPercent) => (
+                    <option key={bufferPercent} value={bufferPercent}>
+                      {bufferPercent}%
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown
+                  aria-hidden="true"
+                  className="pointer-events-none absolute right-5 top-1/2 size-5 -translate-y-1/2 text-black"
+                />
+              </div>
+            </div>
+            {errors.bufferPercent && (
+              <p className="text-destructive text-sm">
+                Choose a buffer from 0% to 20% in 5% increments.
               </p>
             )}
           </FormFieldSection>

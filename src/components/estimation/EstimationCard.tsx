@@ -1,7 +1,6 @@
 "use client";
 
 import { SvgIcon } from "@/components/SvgIcon";
-import { BUFFER_LABEL } from "@/lib/constants";
 
 interface Props {
   icon: string;
@@ -10,6 +9,7 @@ interface Props {
   title: string;
   days: number;
   weeks: number;
+  bufferLabel: string;
   note: string;
   onInfo: () => void;
 }
@@ -21,6 +21,7 @@ export function EstimationCard({
   title,
   days,
   weeks,
+  bufferLabel,
   note,
   onInfo,
 }: Props) {
@@ -57,7 +58,7 @@ export function EstimationCard({
         </p>
         <div className="flex items-center justify-between">
           <p className="text-lg text-black">{weeks} weeks</p>
-          <p className="text-xs text-light-grey-text">{BUFFER_LABEL}</p>
+          <p className="text-xs text-light-grey-text">{bufferLabel}</p>
         </div>
         <p className="text-[10px] text-light-grey-text font-medium">{note}</p>
       </div>
