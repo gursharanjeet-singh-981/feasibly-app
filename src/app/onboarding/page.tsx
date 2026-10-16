@@ -2,10 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm, useWatch } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronDown } from "lucide-react";
+import { Select } from "@base-ui/react/select";
+import { Check, ChevronDown } from "lucide-react";
 import { useAppStore } from "@/store";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -210,24 +211,60 @@ export default function OnboardingPage() {
               <Label htmlFor="buffer-percent" className="text-sm text-black">
                 Buffer
               </Label>
-              <div className="relative">
-                <select
-                  id="buffer-percent"
-                  {...register("bufferPercent", { valueAsNumber: true })}
-                  className="h-12 md:h-15 w-full appearance-none rounded-full border border-strokes bg-white px-5 pr-12 md:px-6.25 text-sm md:text-[16px] text-black focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt"
-                  aria-invalid={!!errors.bufferPercent}
-                >
-                  {BUFFER_OPTIONS.map((bufferPercent) => (
-                    <option key={bufferPercent} value={bufferPercent}>
-                      {bufferPercent}%
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown
-                  aria-hidden="true"
-                  className="pointer-events-none absolute right-5 top-1/2 size-5 -translate-y-1/2 text-black"
-                />
-              </div>
+              <Controller
+                control={control}
+                name="bufferPercent"
+                render={({ field }) => (
+                  <Select.Root<number>
+                    name={field.name}
+                    value={field.value}
+                    onValueChange={(value) => {
+                      if (value !== null) field.onChange(value);
+                    }}
+                  >
+                    <Select.Trigger
+                      id="buffer-percent"
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      type="button"
+                      aria-invalid={!!errors.bufferPercent}
+                      className="flex h-12 w-full items-center justify-between rounded-full border border-strokes bg-white px-5 text-left text-sm text-black outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt md:h-15 md:px-6.25 md:text-[16px]"
+                    >
+                      <Select.Value>
+                        {(value) => (value === null ? "Choose a buffer" : `${value}%`)}
+                      </Select.Value>
+                      <Select.Icon>
+                        <ChevronDown aria-hidden="true" className="size-5 shrink-0" />
+                      </Select.Icon>
+                    </Select.Trigger>
+                    <Select.Portal>
+                      <Select.Positioner
+                        alignItemWithTrigger={false}
+                        side="bottom"
+                        sideOffset={8}
+                        className="z-50 outline-none"
+                      >
+                        <Select.Popup className="min-w-[var(--anchor-width)] overflow-hidden rounded-2xl border border-strokes bg-white p-1.5 shadow-lg outline-none">
+                          <Select.List className="max-h-[calc(var(--available-height)-0.875rem)] overflow-y-auto">
+                            {BUFFER_OPTIONS.map((bufferPercent) => (
+                              <Select.Item
+                                key={bufferPercent}
+                                value={bufferPercent}
+                                className="flex min-h-10 cursor-pointer items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm text-black outline-none transition-colors data-[highlighted]:bg-background-blue data-[selected]:font-semibold data-[selected]:text-cobalt"
+                              >
+                                <Select.ItemText>{bufferPercent}%</Select.ItemText>
+                                <Select.ItemIndicator className="text-cobalt">
+                                  <Check aria-hidden="true" className="size-4" />
+                                </Select.ItemIndicator>
+                              </Select.Item>
+                            ))}
+                          </Select.List>
+                        </Select.Popup>
+                      </Select.Positioner>
+                    </Select.Portal>
+                  </Select.Root>
+                )}
+              />
             </div>
             {errors.bufferPercent && (
               <p className="text-destructive text-sm">
