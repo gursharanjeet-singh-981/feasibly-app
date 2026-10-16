@@ -1,9 +1,10 @@
 "use client";
-
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { CirclePlus } from "lucide-react";
 import { useAppStore } from "@/store";
 import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { SvgIcon } from "@/components/SvgIcon";
 import { ROUTES } from "@/lib/constants";
 
@@ -15,8 +16,10 @@ const allTabs = [
 
 export function AppHeader() {
   const pathname = usePathname();
+  const router = useRouter();
   const project = useAppStore((s) => s.project);
   const setProject = useAppStore((s) => s.setProject);
+  const resetStore = useAppStore((s) => s.resetStore);
 
   const tabs = allTabs.filter(
     (tab) => tab.scope === null || project.scope[tab.scope]
@@ -50,25 +53,36 @@ export function AppHeader() {
           />
         </div>
 
-        {/* Right: Tabs */}
-        <div className="flex gap-5 bg-white border border-strokes rounded-[1000px] p-3 overflow-x-auto">
-          {tabs.map((tab) => {
-            const isActive = pathname === tab.href;
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className={`flex items-center gap-1.25 p-3 rounded-full text-sm whitespace-nowrap transition-colors ${
-                  isActive
-                    ? "bg-background-blue border border-cobalt text-black font-medium"
-                    : "text-light-grey-text hover:bg-gray-50"
-                }`}
-              >
-                <SvgIcon name={tab.icon} width={24} height={24} className={isActive ? "text-cobalt" : "text-current opacity-54"} />
-                <span className="hidden sm:inline">{tab.label}</span>
-              </Link>
-            );
-          })}
+        <div className="flex flex-wrap items-center gap-4 lg:gap-6">
+          <div className="flex gap-5 bg-white border border-strokes rounded-[1000px] p-3 overflow-x-auto">
+            {tabs.map((tab) => {
+              const isActive = pathname === tab.href;
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className={`flex items-center gap-1.25 p-3 rounded-full text-sm whitespace-nowrap transition-colors ${
+                    isActive
+                      ? "bg-background-blue border border-cobalt text-black font-medium"
+                      : "text-light-grey-text hover:bg-gray-50"
+                  }`}
+                >
+                  <SvgIcon name={tab.icon} width={24} height={24} className={isActive ? "text-cobalt" : "text-current opacity-54"} />
+                  <span className="hidden sm:inline">{tab.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+          <Button
+            onClick={() => {
+              resetStore();
+              router.replace(ROUTES.onboarding);
+            }}
+            className="h-12 w-48 justify-center flex items-center gap-2.5 px-5 py-3 rounded-full bg-cobalt text-white text-base font-medium hover:bg-cobalt/90 transition-colors whitespace-nowrap"
+          >
+            New estimate
+            <CirclePlus className="w-5 h-5" />
+          </Button>
         </div>
       </div>
     </header>
