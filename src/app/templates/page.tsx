@@ -6,6 +6,7 @@ import { PageLayout } from "@/components/PageLayout";
 import { GroupedAccordion } from "@/components/table/GroupedAccordion";
 import { TemplateRow } from "@/components/table/TemplateRow";
 import { ScanSummaryBanner } from "@/components/scan/ScanSummaryBanner";
+import { isScanLocked } from "@/lib/scanner/aiJobState";
 import { useGroupedItems } from "@/hooks/useGroupedItems";
 import { useRequireOnboarding } from "@/hooks/useRequireOnboarding";
 import { useAppStore } from "@/store";
@@ -29,6 +30,7 @@ export default function TemplatesPage() {
   const setTemplates = useAppStore((s) => s.setTemplates);
   const toggleTemplate = useAppStore((s) => s.toggleTemplate);
   const setTemplatesSelection = useAppStore((s) => s.setTemplatesSelection);
+  const scanLocked = useAppStore((s) => isScanLocked(s.scan));
   const setAdditionalPages = useAppStore((s) => s.setAdditionalPages);
   const addTemplate = useAppStore((s) => s.addTemplate);
   const updateTemplate = useAppStore((s) => s.updateTemplate);
@@ -99,9 +101,11 @@ export default function TemplatesPage() {
     [],
   );
   const toggleAllInGroup = useCallback(
-    (group: string) =>
-      toggleAllInGroupHelper(group, grouped, setTemplatesSelection),
-    [grouped, setTemplatesSelection],
+    (group: string) => {
+      if (scanLocked) return;
+      toggleAllInGroupHelper(group, grouped, setTemplatesSelection);
+    },
+    [grouped, setTemplatesSelection, scanLocked],
   );
 
   const handleAddTemplateGroup = useCallback(() => {
@@ -176,12 +180,15 @@ export default function TemplatesPage() {
         template={template}
         useAiEstimation={useAiEstimation}
         match={matchedTemplateIds[template.id]}
-        onToggle={() => toggleTemplate(template.id)}
+        locked={scanLocked}
+        onToggle={() => {
+          if (!scanLocked) toggleTemplate(template.id);
+        }}
         onSetPages={(pages) => setAdditionalPages(template.id, pages)}
         onUpdate={(updates) => updateTemplate(template.id, updates)}
       />
     ),
-    [useAiEstimation, toggleTemplate, setAdditionalPages, updateTemplate, matchedTemplateIds],
+    [useAiEstimation, toggleTemplate, setAdditionalPages, updateTemplate, matchedTemplateIds, scanLocked],
   );
 
   if (!ready) return null;

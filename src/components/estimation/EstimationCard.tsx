@@ -7,8 +7,8 @@ interface Props {
   iconWidth?: number;
   iconHeight?: number;
   title: string;
+  hours: number;
   days: number;
-  weeks: number;
   bufferLabel: string;
   note: string;
   onInfo: () => void;
@@ -19,8 +19,8 @@ export function EstimationCard({
   iconWidth = 14,
   iconHeight = 14,
   title,
+  hours,
   days,
-  weeks,
   bufferLabel,
   note,
   onInfo,
@@ -54,10 +54,10 @@ export function EstimationCard({
           </button>
         </div>
         <p className="text-3xl lg:text-[40px] text-black">
-          {days.toFixed(1)} days
+          {hours.toFixed(1)} hours
         </p>
         <div className="flex items-center justify-between">
-          <p className="text-lg text-black">{weeks} weeks</p>
+          <p className="text-lg text-black">{days} days</p>
           <p className="text-xs text-light-grey-text">{bufferLabel}</p>
         </div>
         <p className="text-[10px] text-light-grey-text font-medium">{note}</p>

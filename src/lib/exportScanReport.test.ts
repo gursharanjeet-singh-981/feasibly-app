@@ -68,6 +68,9 @@ describe("buildFailedEntries", () => {
       ],
       error: null,
       scanAppliedAt: null,
+      scanVariant: null,
+      progressMessage: null,
+      aiJob: null,
     };
 
     const rows = buildFailedEntries(scan, new Map(), "https://example.com/");
@@ -104,6 +107,9 @@ describe("buildFailedEntries", () => {
       ],
       error: null,
       scanAppliedAt: null,
+      scanVariant: null,
+      progressMessage: null,
+      aiJob: null,
     };
 
     const rows = buildFailedEntries(scan, new Map(), "https://example.com/");
@@ -145,6 +151,9 @@ describe("buildFailedEntries", () => {
       ],
       error: null,
       scanAppliedAt: null,
+      scanVariant: null,
+      progressMessage: null,
+      aiJob: null,
     };
 
     const rows = buildFailedEntries(scan, new Map(), "https://example.com/");
@@ -189,6 +198,9 @@ describe("buildFailedEntries", () => {
       warnings: ["similar_skip https://example.com/product/123: path_template_limit"],
       error: null,
       scanAppliedAt: null,
+      scanVariant: null,
+      progressMessage: null,
+      aiJob: null,
     };
 
     const rows = buildFailedEntries(scan, new Map(), "https://example.com/");

@@ -5,6 +5,7 @@ import { Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TOAST_DURATION_MS, SCAN_FEATURE_ENABLED, SCAN_SINGLE_PAGE_OPTION_ENABLED } from "@/lib/constants";
 import { useAppStore } from "@/store";
+import { isScanLocked } from "@/lib/scanner/aiJobState";
 import type {
   Project,
   SelectedComponent,
@@ -34,6 +35,7 @@ export function ExportButtons({
   const [message, setMessage] = useState<Message>(null);
   const scan = useAppStore((s) => s.scan);
   const hasScanData = scan.status === "complete" && scan.pagesScanned > 0;
+  const scanLocked = isScanLocked(scan);
 
   const notify = (type: "success" | "error", text: string) => {
     setMessage({ type, text });
@@ -106,7 +108,7 @@ export function ExportButtons({
       )}
       <Button
         onClick={handlePdf}
-        disabled={exporting !== null}
+        disabled={exporting !== null || scanLocked}
         className="h-12 md:h-14 lg:h-15 rounded-full bg-cobalt hover:bg-cobalt/90 text-white text-base w-full gap-2"
       >
         {exporting === "pdf" ? "Exporting…" : "Export PDF Report"}
@@ -114,7 +116,7 @@ export function ExportButtons({
       </Button>
       <Button
         onClick={handleExcel}
-        disabled={exporting !== null}
+        disabled={exporting !== null || scanLocked}
         className="h-12 md:h-14 lg:h-15 rounded-full bg-white border border-cobalt text-cobalt hover:bg-cobalt/5 text-base w-full gap-2"
       >
         {exporting === "excel" ? "Exporting…" : "Export Excel Report"}
@@ -123,7 +125,7 @@ export function ExportButtons({
       {SCAN_FEATURE_ENABLED && SCAN_SINGLE_PAGE_OPTION_ENABLED && hasScanData && (
         <Button
           onClick={handleScanReport}
-          disabled={exporting !== null}
+          disabled={exporting !== null || scanLocked}
           className="h-12 md:h-14 lg:h-15 rounded-full bg-white border border-cobalt text-cobalt hover:bg-cobalt/5 text-base w-full gap-2"
         >
           {exporting === "scan" ? "Exporting…" : "Export Scan Report"}

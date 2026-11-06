@@ -32,6 +32,8 @@ export interface CrawlOptions {
   useSitemapRepresentatives?: boolean;
   /** Do not enqueue links found on representative pages. */
   followLinks?: boolean;
+  /** Crawl exactly these URLs instead of discovering them from the sitemap. Used by batch jobs. */
+  explicitUrls?: string[];
 }
 
 export interface CrawlResult {
@@ -63,6 +65,7 @@ export async function crawl(
     maxPagesPerPathTemplate = 1,
     similarPageDepthThreshold = 3,
     useSitemapRepresentatives = false,
+    explicitUrls,
     followLinks = true,
   } = options;
 
@@ -77,7 +80,7 @@ export async function crawl(
   const isDisallowed = (url: string) =>
     robots?.isDisallowed(url, userAgent) === true;
 
-  const seedUrls = await collectSitemapUrls(
+  const seedUrls = explicitUrls ?? await collectSitemapUrls(
     base,
     robots?.getSitemaps() ?? [],
     fetchImpl,
@@ -181,7 +184,9 @@ export async function crawl(
     for (const skipped of sitemapSelection.skipped) {
       recordUnscanned(skipped.url, "sitemap", "representative_page", skipped.detail);
     }
-    enqueue(base.toString(), 0, "link");
+    // With an explicit URL list, crawl exactly those URLs. Adding the base URL would take a slot
+    // from the requested pages and could be classified in place of them.
+    if (!explicitUrls) enqueue(base.toString(), 0, "link");
     if (usedSitemap) {
       for (const url of selectedSitemapUrls) enqueue(url, 0, "sitemap");
     }
@@ -359,6 +364,103 @@ function routeFamily(input: string): string {
   if (section && /^(categories|category|collections?|plp)$/.test(section) && segments.length >= 2) return "plp";
   if (section && /^(blog|articles?|news|posts?|stories|insights)$/.test(section) && segments.length >= 2) return "article";
   return `page:${url.pathname.toLowerCase()}`;
+}
+
+/** Upper bound on sitemap files fetched during discovery (index files and their children). */
+export const SITEMAP_FETCH_LIMIT = 500;
+
+/**
+ * Lists the in-scope page URLs a site advertises through robots.txt and its sitemaps, without
+ * fetching the pages themselves. Used to plan batch jobs.
+ *
+ * Unlike the regular crawler's sitemap reader, this one resolves relative <loc> values against
+ * the sitemap they came from, and follows nested sitemap indexes up to SITEMAP_FETCH_LIMIT files.
+ */
+export async function discoverSitemapUrls(
+  baseInput: string | URL,
+  options: { fetchImpl?: typeof fetch; userAgent?: string; scopePathPrefix?: string } = {},
+): Promise<{ urls: string[]; warnings: string[] }> {
+  const base = baseInput instanceof URL ? baseInput : assertPublicUrl(baseInput);
+  const fetchImpl = options.fetchImpl ?? fetch;
+  const userAgent = options.userAgent ?? DEFAULT_USER_AGENT;
+  const warnings: string[] = [];
+  const abortRelay = createAbortRelay(undefined);
+
+  const robots = await loadRobots(base, fetchImpl, userAgent, warnings, undefined, abortRelay);
+  const queue = [
+    ...new Set([
+      ...(robots?.getSitemaps() ?? []),
+      new URL("/sitemap.xml", base).toString(),
+      new URL("/sitemap_index.xml", base).toString(),
+    ]),
+  ];
+  const visited = new Set<string>();
+  const pageUrls = new Set<string>();
+  const limit = pLimit(4);
+
+  const readSitemap = (sitemapUrl: string) =>
+    limit(async () => {
+      try {
+        assertPublicUrl(sitemapUrl);
+        const text = await timedFetch<string | null>(
+          sitemapUrl,
+          { fetchImpl, userAgent, timeoutMs: SCAN_DEFAULTS.perPageTimeoutMs, signal: undefined, abortRelay },
+          async (res) => (res.ok ? res.text() : null),
+        );
+        return text === null ? null : parseSitemapLocations(text, sitemapUrl, base);
+      } catch (err) {
+        warnings.push(`sitemap ${sitemapUrl} failed: ${(err as Error).message}`);
+        return null;
+      }
+    });
+
+  while (queue.length > 0) {
+    const room = SITEMAP_FETCH_LIMIT - visited.size;
+    if (room <= 0) {
+      warnings.push(`sitemap_fetch_limit_reached:${queue.length}_files_not_read`);
+      break;
+    }
+    const wave = queue.splice(0, room).filter((u) => !visited.has(u));
+    for (const u of wave) visited.add(u);
+    const parsed = await Promise.all(wave.map(readSitemap));
+    for (const result of parsed) {
+      if (!result) continue;
+      for (const page of result.pages) pageUrls.add(page);
+      for (const child of result.sitemaps) if (!visited.has(child)) queue.push(child);
+    }
+  }
+
+  const urls = new Set<string>();
+  for (const raw of pageUrls) {
+    const normalized = normalizeUrl(raw, base);
+    if (!normalized) continue;
+    if (!isWithinPathScope(normalized, options.scopePathPrefix)) continue;
+    if (robots?.isDisallowed(normalized, userAgent) === true) continue;
+    urls.add(normalized);
+  }
+  return { urls: [...urls], warnings };
+}
+
+/** Parses a sitemap or sitemap index, resolving every <loc> against the sitemap's own URL. */
+function parseSitemapLocations(
+  xml: string,
+  sitemapUrl: string,
+  base: URL,
+): { pages: string[]; sitemaps: string[] } {
+  const $ = load(xml, { xmlMode: true });
+  const isIndex = $("sitemapindex").length > 0;
+  const resolved: string[] = [];
+  $("loc").each((_, el) => {
+    const raw = $(el).text().trim();
+    if (!raw) return;
+    try {
+      const url = new URL(raw, sitemapUrl).toString();
+      if (new URL(url).origin === base.origin) resolved.push(url);
+    } catch {
+      // Malformed location: skip it.
+    }
+  });
+  return isIndex ? { pages: [], sitemaps: resolved } : { pages: resolved, sitemaps: [] };
 }
 
 // ---------- internals ----------

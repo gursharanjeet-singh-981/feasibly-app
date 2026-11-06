@@ -1,5 +1,7 @@
 "use client";
 import Link from "next/link";
+import { stopAiJob } from "@/hooks/aiJob";
+import { isAiJobActive } from "@/lib/scanner/aiJobState";
 import { usePathname, useRouter } from "next/navigation";
 import { CirclePlus } from "lucide-react";
 import { useAppStore } from "@/store";
@@ -75,6 +77,11 @@ export function AppHeader() {
           </div>
           <Button
             onClick={() => {
+              // Stop a running AI job first, otherwise it keeps running on the server and blocks new AI scans.
+              const job = useAppStore.getState().scan.aiJob;
+              if (job && isAiJobActive(job.status)) {
+                stopAiJob();
+              }
               resetStore();
               router.replace(ROUTES.onboarding);
             }}

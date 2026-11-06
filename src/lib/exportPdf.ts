@@ -205,11 +205,11 @@ export function exportPDF(
   doc.text("Development", margin + 17, y + 12);
 
   doc.setFontSize(18);
-  doc.text(`${estimation.devDaysWithBuffer.toFixed(1)} days`, margin + 5, y + 26);
+  doc.text(`${estimation.devHoursWithBuffer.toFixed(1)} hours`, margin + 5, y + 26);
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text(`${estimation.devWeeks} weeks`, margin + 5, y + 33);
+  doc.text(`${estimation.devDays} days`, margin + 5, y + 33);
   setColor(doc, LIGHT_GREY);
   doc.setFontSize(7);
   doc.text(getBufferLabel(project.bufferPercent), margin + cardWidth - 35, y + 33);
@@ -231,11 +231,11 @@ export function exportPDF(
   doc.text("Design", cardX2 + 17, y + 12);
 
   doc.setFontSize(18);
-  doc.text(`${estimation.designDaysWithBuffer.toFixed(1)} days`, cardX2 + 5, y + 26);
+  doc.text(`${estimation.designHoursWithBuffer.toFixed(1)} hours`, cardX2 + 5, y + 26);
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text(`${estimation.designWeeks} weeks`, cardX2 + 5, y + 33);
+  doc.text(`${estimation.designDays} days`, cardX2 + 5, y + 33);
   setColor(doc, LIGHT_GREY);
   doc.setFontSize(7);
   doc.text(getBufferLabel(project.bufferPercent), cardX2 + cardWidth - 35, y + 33);

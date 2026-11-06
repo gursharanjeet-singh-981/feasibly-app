@@ -21,9 +21,11 @@ interface Props {
   match?: MatchMetadata;
   onToggle: () => void;
   onUpdate: (updates: Partial<SelectedComponent>) => void;
+  /** Disables selection while an AI job is active. */
+  locked?: boolean;
 }
 
-function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdate }: Props) {
+function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdate, locked = false }: Props) {
   const designEffort = useAiEstimation
     ? component.aiDesignEffort
     : component.designEffort;
@@ -45,7 +47,8 @@ function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdat
         <div className={`flex items-start gap-3 px-4 py-3 w-55 shrink-0 ${CELL_BORDER}`}>
           <Checkbox
             checked={component.isSelected}
-            onCheckedChange={onToggle}
+            disabled={locked}
+          onCheckedChange={onToggle}
             className={CHECKBOX_ROW}
             aria-label={`Select ${component.name || "component"}`}
           />
@@ -111,6 +114,7 @@ function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdat
       <div className="lg:hidden p-4 flex gap-3">
         <Checkbox
           checked={component.isSelected}
+          disabled={locked}
           onCheckedChange={onToggle}
           className="w-4.5 h-4.5 rounded-[5px] border-dark-background mt-1 shrink-0"
           aria-label={`Select ${component.name || "component"}`}

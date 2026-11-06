@@ -22,6 +22,8 @@ interface Props {
   onToggle: () => void;
   onSetPages: (pages: number) => void;
   onUpdate: (updates: Partial<SelectedTemplate>) => void;
+  /** Disables selection while an AI job is active. */
+  locked?: boolean;
 }
 
 function TemplateRowBase({
@@ -31,6 +33,7 @@ function TemplateRowBase({
   onToggle,
   onSetPages,
   onUpdate,
+  locked = false,
 }: Props) {
   const designBase = useAiEstimation
     ? template.aiDesignEffortBase
@@ -53,6 +56,7 @@ function TemplateRowBase({
         <div className={`flex items-start gap-3 px-4 py-3 w-50 shrink-0 ${CELL_BORDER}`}>
           <Checkbox
             checked={template.isSelected}
+            disabled={locked}
             onCheckedChange={onToggle}
             className={CHECKBOX_ROW}
             aria-label={`Select ${template.description || template.name}`}
@@ -138,7 +142,8 @@ function TemplateRowBase({
       <div className="lg:hidden p-4 flex gap-3">
         <Checkbox
           checked={template.isSelected}
-          onCheckedChange={onToggle}
+          disabled={locked}
+            onCheckedChange={onToggle}
           className="w-4.5 h-4.5 rounded-[5px] border-dark-background mt-1 shrink-0"
           aria-label={`Select ${template.description || template.name}`}
         />

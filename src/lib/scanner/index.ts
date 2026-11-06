@@ -8,5 +8,3 @@ export { COMPONENT_RULES, TEMPLATE_MAP } from "./constants";
 export type { DetectionRule } from "./constants";
 export { matchDetections } from "./matcher";
 export type { Library, MatchResult, MatcherOptions } from "./matcher";
-export { orchestrateScan } from "./orchestrator";
-export type { OrchestrateOptions } from "./orchestrator";

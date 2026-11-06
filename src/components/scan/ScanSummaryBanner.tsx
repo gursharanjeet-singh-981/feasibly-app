@@ -7,6 +7,8 @@ import { useAppStore } from "@/store";
 import { exportScanReport } from "@/lib/exportScanReport";
 import { TOAST_DURATION_MS } from "@/lib/constants";
 import { countMatchedGroups } from "@/lib/scanner/scanCounts";
+import { isScanLocked } from "@/lib/scanner/aiJobState";
+import { AiJobBanner } from "@/components/scan/AiJobBanner";
 
 type Kind = "components" | "templates";
 
@@ -20,6 +22,7 @@ export function ScanSummaryBanner({ kind }: Props) {
   const components = useAppStore((s) => s.components);
   const templates = useAppStore((s) => s.templates);
   const [exporting, setExporting] = useState(false);
+  const scanLocked = useAppStore((s) => isScanLocked(s.scan));
 
   if (scan.status !== "complete" || !scan.scanAppliedAt) return null;
 
@@ -48,6 +51,7 @@ export function ScanSummaryBanner({ kind }: Props) {
 
   return (
     <div className="mb-3 flex flex-col gap-2">
+      <AiJobBanner />
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-strokes/60 bg-background-blue px-4 py-3 text-sm text-black">
         <div className="flex flex-col gap-0.5">
           <p className="font-medium">
@@ -64,7 +68,7 @@ export function ScanSummaryBanner({ kind }: Props) {
               size="sm"
               variant="outline"
               onClick={handleExport}
-              disabled={exporting}
+              disabled={exporting || scanLocked}
               className="h-8 gap-1.5 border-cobalt text-cobalt hover:bg-cobalt hover:text-white"
             >
               <Download size={14} />

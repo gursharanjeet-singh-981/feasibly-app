@@ -8,14 +8,14 @@
   {
     "id": 2,
     "name": "Accessibility",
-    "designDescription": "All components and screens should be accessible in complance with WGAG 2.2. All components to fall under this.",
-    "developmentDescription": "All components and screens should be accessible in complance with WGAG 2.2. All components to fall under this."
+    "designDescription": "All components and screens should be accessible in compliance with WCAG 2.2. All components to fall under this.",
+    "developmentDescription": "All components and screens should be accessible in compliance with WCAG 2.2. All components to fall under this."
   },
   {
     "id": 3,
     "name": "Languages",
     "designDescription": "Translations are out of scope for design. Any translations should be scoped separately.",
-    "developmentDescription": "Market and translations shouold be scoped separately."
+    "developmentDescription": "Market and translations should be scoped separately."
   },
   {
     "id": 4,

@@ -25,6 +25,8 @@ import {
   SCAN_SINGLE_PAGE_OPTION_ENABLED,
 } from "@/lib/constants";
 import { useScan } from "@/hooks/useScan";
+import { markEnteredFromOnboarding } from "@/hooks/useRequireOnboarding";
+
 import { ScanProgressDialog } from "@/components/scan/ScanProgressDialog";
 
 const projectSchema = z
@@ -72,7 +74,8 @@ export default function OnboardingPage() {
   const scopeTemplates = useWatch({ control, name: "scopeTemplates" });
   const liveUrl = useWatch({ control, name: "liveUrl" });
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: FormData, mode: "single" | "full") => {
+    markEnteredFromOnboarding();
     resetStore();
     setProject({
       projectName: data.projectName,
@@ -89,7 +92,7 @@ export default function OnboardingPage() {
     if (SCAN_FEATURE_ENABLED && data.liveUrl) {
       setPendingRoute(nextRoute);
       setScanOpen(true);
-      void startScan(data.liveUrl, scanMode);
+      void startScan(data.liveUrl, mode, "ai");
       return;
     }
 
@@ -138,7 +141,7 @@ export default function OnboardingPage() {
 
       <div className="flex-1 flex items-start lg:items-center justify-center px-6 py-8 md:px-12 lg:px-16 overflow-y-auto">
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit((data) => onSubmit(data, scanMode))}
           className="flex flex-col gap-7.5 w-full max-w-129.75"
         >
           <div className="flex flex-col gap-3 md:gap-4.5">
@@ -377,6 +380,13 @@ export default function OnboardingPage() {
           >
             Create Project
           </Button>
+
+          {SCAN_FEATURE_ENABLED && !!liveUrl && (
+            <p className="text-xs text-black/60 pl-1">
+              The AI scan sends the scanned pages&apos; HTML to Google Gemini (Groq as fallback).
+              Free-tier providers may use this data to improve their models.
+            </p>
+          )}
         </form>
       </div>
 

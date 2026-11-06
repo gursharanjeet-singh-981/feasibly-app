@@ -116,8 +116,8 @@ export function EstimationPanel() {
           iconWidth={14}
           iconHeight={8}
           title="Development"
-          days={estimation.devDaysWithBuffer}
-          weeks={estimation.devWeeks}
+          hours={estimation.devHoursWithBuffer}
+          days={estimation.devDays}
           bufferLabel={bufferLabel}
           note="Includes both Front-end & Back-end"
           onInfo={() => setInfoSidebar("dev")}
@@ -128,8 +128,8 @@ export function EstimationPanel() {
           iconWidth={14}
           iconHeight={14}
           title="Design"
-          days={estimation.designDaysWithBuffer}
-          weeks={estimation.designWeeks}
+          hours={estimation.designHoursWithBuffer}
+          days={estimation.designDays}
           bufferLabel={bufferLabel}
           note="Includes both UX & UI"
           onInfo={() => setInfoSidebar("design")}

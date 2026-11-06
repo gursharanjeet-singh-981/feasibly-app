@@ -1,5 +1,5 @@
 import type { SelectedComponent, SelectedTemplate, EstimationSummary } from "@/types";
-import { DEFAULT_BUFFER_PERCENT, DAYS_PER_WEEK } from "@/lib/constants";
+import { DEFAULT_BUFFER_PERCENT, HOURS_PER_DAY } from "@/lib/constants";
 
 export function componentDesignEffort(c: SelectedComponent, useAi: boolean): number {
   return useAi ? c.aiDesignEffort : c.designEffort;
@@ -75,12 +75,12 @@ export function calculateEstimation(
   const comp = componentsSubtotal(components, useAi);
   const tmpl = templatesSubtotal(templates, useAi);
 
-  const designDays = comp.design + tmpl.totalDesign;
-  const devDays = comp.dev + tmpl.totalDev;
+  const designHours = comp.design + tmpl.totalDesign;
+  const devHours = comp.dev + tmpl.totalDev;
 
   const bufferMultiplier = 1 + bufferPercent / 100;
-  const designDaysWithBuffer = designDays * bufferMultiplier;
-  const devDaysWithBuffer = devDays * bufferMultiplier;
+  const designHoursWithBuffer = designHours * bufferMultiplier;
+  const devHoursWithBuffer = devHours * bufferMultiplier;
 
   const uniqueGroups = new Set(selectedComponents.map((c) => c.group));
 
@@ -89,12 +89,12 @@ export function calculateEstimation(
     totalVariants: selectedComponents.length,
     totalTemplates: selectedTemplates.length,
     totalAdditionalPages: tmpl.additionalPages,
-    designDays,
-    designDaysWithBuffer,
-    designWeeks: Math.ceil(designDaysWithBuffer / DAYS_PER_WEEK),
-    devDays,
-    devDaysWithBuffer,
-    devWeeks: Math.ceil(devDaysWithBuffer / DAYS_PER_WEEK),
+    designHours,
+    designHoursWithBuffer,
+    designDays: Math.ceil(designHoursWithBuffer / HOURS_PER_DAY),
+    devHours,
+    devHoursWithBuffer,
+    devDays: Math.ceil(devHoursWithBuffer / HOURS_PER_DAY),
   };
 }
 

@@ -54,10 +54,10 @@ export interface EstimationSummary {
   totalVariants: number;
   totalTemplates: number;
   totalAdditionalPages: number;
+  designHours: number;
+  designHoursWithBuffer: number;
   designDays: number;
-  designDaysWithBuffer: number;
-  designWeeks: number;
+  devHours: number;
+  devHoursWithBuffer: number;
   devDays: number;
-  devDaysWithBuffer: number;
-  devWeeks: number;
 }

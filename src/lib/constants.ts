@@ -34,7 +34,7 @@ export const SCAN_DEFAULTS = {
 
 export const BUFFER_OPTIONS = [0, 5, 10, 15, 20] as const;
 export const DEFAULT_BUFFER_PERCENT = 20;
-export const DAYS_PER_WEEK = 5;
+export const HOURS_PER_DAY = 6;
 export const getBufferLabel = (bufferPercent: number) =>
   `Incl. ${bufferPercent}% buffer time`;
 
