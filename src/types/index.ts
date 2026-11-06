@@ -42,6 +42,7 @@ export interface Project {
   projectName: string;
   liveUrl: string;
   bufferPercent: number;
+  hoursPerDay: number;
   scope: {
     components: boolean;
     templates: boolean;
@@ -54,10 +55,10 @@ export interface EstimationSummary {
   totalVariants: number;
   totalTemplates: number;
   totalAdditionalPages: number;
+  designHours: number;
+  designHoursWithBuffer: number;
   designDays: number;
-  designDaysWithBuffer: number;
-  designWeeks: number;
+  devHours: number;
+  devHoursWithBuffer: number;
   devDays: number;
-  devDaysWithBuffer: number;
-  devWeeks: number;
 }

@@ -6,6 +6,7 @@ import { PageLayout } from "@/components/PageLayout";
 import { GroupedAccordion } from "@/components/table/GroupedAccordion";
 import { ComponentRow } from "@/components/table/ComponentRow";
 import { ScanSummaryBanner } from "@/components/scan/ScanSummaryBanner";
+import { isScanLocked } from "@/lib/scanner/aiJobState";
 import { useGroupedItems } from "@/hooks/useGroupedItems";
 import { useRequireOnboarding } from "@/hooks/useRequireOnboarding";
 import { useAppStore } from "@/store";
@@ -29,6 +30,7 @@ export default function ComponentsPage() {
   const setComponents = useAppStore((s) => s.setComponents);
   const toggleComponent = useAppStore((s) => s.toggleComponent);
   const setComponentsSelection = useAppStore((s) => s.setComponentsSelection);
+  const scanLocked = useAppStore((s) => isScanLocked(s.scan));
   const addComponent = useAppStore((s) => s.addComponent);
   const updateComponent = useAppStore((s) => s.updateComponent);
   const useAiEstimation = useAppStore((s) => s.useAiEstimation);
@@ -102,9 +104,11 @@ export default function ComponentsPage() {
     [],
   );
   const toggleAllInGroup = useCallback(
-    (group: string) =>
-      toggleAllInGroupHelper(group, grouped, setComponentsSelection),
-    [grouped, setComponentsSelection],
+    (group: string) => {
+      if (scanLocked) return;
+      toggleAllInGroupHelper(group, grouped, setComponentsSelection);
+    },
+    [grouped, setComponentsSelection, scanLocked],
   );
 
   const handleAddComponentGroup = useCallback(() => {
@@ -177,11 +181,14 @@ export default function ComponentsPage() {
         component={component}
         useAiEstimation={useAiEstimation}
         match={matchedComponentIds[component.id]}
-        onToggle={() => toggleComponent(component.id)}
+        locked={scanLocked}
+        onToggle={() => {
+          if (!scanLocked) toggleComponent(component.id);
+        }}
         onUpdate={(updates) => updateComponent(component.id, updates)}
       />
     ),
-    [useAiEstimation, toggleComponent, updateComponent, matchedComponentIds],
+    [useAiEstimation, toggleComponent, updateComponent, matchedComponentIds, scanLocked],
   );
 
   if (!ready) return null;

@@ -1,5 +1,5 @@
 import type { SelectedComponent, SelectedTemplate, EstimationSummary } from "@/types";
-import { DEFAULT_BUFFER_PERCENT, DAYS_PER_WEEK } from "@/lib/constants";
+import { DEFAULT_BUFFER_PERCENT, DEFAULT_HOURS_PER_DAY } from "@/lib/constants";
 
 export function componentDesignEffort(c: SelectedComponent, useAi: boolean): number {
   return useAi ? c.aiDesignEffort : c.designEffort;
@@ -63,11 +63,26 @@ export function templatesSubtotal(
   };
 }
 
+/** The day figure as shown on screen and in the PDF: "1 day", "2.5 days". */
+export function formatDays(days: number): string {
+  return `${days} ${days === 1 ? "day" : "days"}`;
+}
+
+/**
+ * Days rounded up to the next half day, so 2.57 days shows as 3 and 0.6 days as 1. Rounding up keeps
+ * the estimate from understating effort. Any non-zero effort shows at least half a day.
+ */
+export function roundDaysToHalf(days: number): number {
+  if (days <= 0) return 0;
+  return Math.max(0.5, Math.ceil(days * 2) / 2);
+}
+
 export function calculateEstimation(
   components: SelectedComponent[],
   templates: SelectedTemplate[],
   useAi = false,
   bufferPercent = DEFAULT_BUFFER_PERCENT,
+  hoursPerDay = DEFAULT_HOURS_PER_DAY,
 ): EstimationSummary {
   const selectedComponents = components.filter((c) => c.isSelected);
   const selectedTemplates = templates.filter((t) => t.isSelected);
@@ -75,12 +90,12 @@ export function calculateEstimation(
   const comp = componentsSubtotal(components, useAi);
   const tmpl = templatesSubtotal(templates, useAi);
 
-  const designDays = comp.design + tmpl.totalDesign;
-  const devDays = comp.dev + tmpl.totalDev;
+  const designHours = comp.design + tmpl.totalDesign;
+  const devHours = comp.dev + tmpl.totalDev;
 
   const bufferMultiplier = 1 + bufferPercent / 100;
-  const designDaysWithBuffer = designDays * bufferMultiplier;
-  const devDaysWithBuffer = devDays * bufferMultiplier;
+  const designHoursWithBuffer = designHours * bufferMultiplier;
+  const devHoursWithBuffer = devHours * bufferMultiplier;
 
   const uniqueGroups = new Set(selectedComponents.map((c) => c.group));
 
@@ -89,12 +104,12 @@ export function calculateEstimation(
     totalVariants: selectedComponents.length,
     totalTemplates: selectedTemplates.length,
     totalAdditionalPages: tmpl.additionalPages,
-    designDays,
-    designDaysWithBuffer,
-    designWeeks: Math.ceil(designDaysWithBuffer / DAYS_PER_WEEK),
-    devDays,
-    devDaysWithBuffer,
-    devWeeks: Math.ceil(devDaysWithBuffer / DAYS_PER_WEEK),
+    designHours,
+    designHoursWithBuffer,
+    designDays: roundDaysToHalf(designHoursWithBuffer / hoursPerDay),
+    devHours,
+    devHoursWithBuffer,
+    devDays: roundDaysToHalf(devHoursWithBuffer / hoursPerDay),
   };
 }
 

@@ -129,9 +129,9 @@ export async function exportExcel(
 
   const statHeaders = summarySheet.addRow([
     "Metric",
-    "Value",
+    "Hours",
     `With Buffer (${project.bufferPercent}%)`,
-    "Weeks",
+    "Days",
   ]);
   applyHeaderStyle(statHeaders);
 
@@ -141,16 +141,16 @@ export async function exportExcel(
     ["Total Templates", estimation.totalTemplates, "", ""],
     ["Additional Pages", estimation.totalAdditionalPages, "", ""],
     [
-      "Development Effort (days)",
+      "Development Effort (hours)",
+      estimation.devHours,
+      estimation.devHoursWithBuffer.toFixed(1),
       estimation.devDays,
-      estimation.devDaysWithBuffer.toFixed(1),
-      estimation.devWeeks,
     ],
     [
-      "Design Effort (days)",
+      "Design Effort (hours)",
+      estimation.designHours,
+      estimation.designHoursWithBuffer.toFixed(1),
       estimation.designDays,
-      estimation.designDaysWithBuffer.toFixed(1),
-      estimation.designWeeks,
     ],
   ];
 

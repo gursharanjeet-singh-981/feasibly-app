@@ -45,10 +45,10 @@ describe("calculateEstimation", () => {
     expect(result.totalVariants).toBe(0);
     expect(result.totalTemplates).toBe(0);
     expect(result.totalAdditionalPages).toBe(0);
+    expect(result.designHours).toBe(0);
+    expect(result.devHours).toBe(0);
     expect(result.designDays).toBe(0);
     expect(result.devDays).toBe(0);
-    expect(result.designWeeks).toBe(0);
-    expect(result.devWeeks).toBe(0);
   });
 
   it("skips unselected components and templates", () => {
@@ -59,7 +59,7 @@ describe("calculateEstimation", () => {
     );
     expect(result.totalVariants).toBe(0);
     expect(result.totalTemplates).toBe(0);
-    expect(result.designDays).toBe(0);
+    expect(result.designHours).toBe(0);
   });
 
   it("counts unique component groups as totalComponents", () => {
@@ -76,25 +76,25 @@ describe("calculateEstimation", () => {
     expect(result.totalVariants).toBe(3);
   });
 
-  it("applies 20% buffer and 5-days-per-week rounding", () => {
+  it("applies the buffer to hours and rounds up days at 6 hours per day", () => {
     const result = calculateEstimation(
       [makeComponent({ designEffort: 10, devEffort: 10 })],
       [],
       false,
     );
-    expect(result.designDays).toBe(10);
-    expect(result.designDaysWithBuffer).toBeCloseTo(12);
-    expect(result.designWeeks).toBe(3); // ceil(12 / 5)
-    expect(result.devWeeks).toBe(3);
+    expect(result.designHours).toBe(10);
+    expect(result.designHoursWithBuffer).toBeCloseTo(12);
+    expect(result.designDays).toBe(2); // ceil(12 / 6)
+    expect(result.devDays).toBe(2);
   });
 
   it("applies the selected buffer percentage", () => {
     const component = makeComponent({ designEffort: 10, devEffort: 10 });
-    const bufferedDaysByPercent = [0, 5, 10, 15, 20].map((bufferPercent) =>
-      calculateEstimation([component], [], false, bufferPercent).designDaysWithBuffer,
+    const bufferedHoursByPercent = [0, 5, 10, 15, 20].map((bufferPercent) =>
+      calculateEstimation([component], [], false, bufferPercent).designHoursWithBuffer,
     );
 
-    expect(bufferedDaysByPercent).toEqual([10, 10.5, 11, 11.5, 12]);
+    expect(bufferedHoursByPercent).toEqual([10, 10.5, 11, 11.5, 12]);
   });
 
   it("includes template additional pages in per-page effort and page count", () => {
@@ -105,10 +105,10 @@ describe("calculateEstimation", () => {
     );
     expect(result.totalTemplates).toBe(1);
     expect(result.totalAdditionalPages).toBe(4);
-    // 4 base + 4 pages * 1 per-page = 8 design days
-    expect(result.designDays).toBe(8);
-    // 6 base + 4 pages * 2 per-page = 14 dev days
-    expect(result.devDays).toBe(14);
+    expect(result.designHours).toBe(8);
+    expect(result.devHours).toBe(14);
+    expect(result.designDays).toBe(2); // (8 * 1.2) / 6 = 1.6, rounded up to the next half day
+    expect(result.devDays).toBe(3); // (14 * 1.2) / 6 = 2.8, rounded up to the next half day
   });
 
   it("uses AI effort values when useAi=true", () => {
@@ -117,7 +117,9 @@ describe("calculateEstimation", () => {
       [],
       true,
     );
-    expect(result.designDays).toBe(1);
-    expect(result.devDays).toBe(2);
+    expect(result.designHours).toBe(1);
+    expect(result.devHours).toBe(2);
+    expect(result.designDays).toBe(0.5); // 1 hour is still at least half a day
+    expect(result.devDays).toBe(0.5);
   });
 });

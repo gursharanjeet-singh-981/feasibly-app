@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useAppStore } from "@/store";
 import { countMatchedGroups } from "@/lib/scanner/scanCounts";
+import { isAiJobActive } from "@/lib/scanner/aiJobState";
 import type { ScanStatus } from "@/lib/scanner/types";
 
 interface Props {
@@ -38,13 +39,23 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
 
   if (!open) return null;
 
-  const label = STAGE_LABELS[scan.status] ?? "Working…";
+  const isAi = scan.scanVariant === "ai";
+  const aiJobActive = scan.aiJob ? isAiJobActive(scan.aiJob.status) : false;
+  const label =
+    isAi && scan.status === "complete" && aiJobActive
+      ? `Batch ${scan.aiJob?.batchesDone ?? 0} complete`
+      : isAi && scan.status === "analyzing"
+        ? "AI is reviewing representative pages…"
+        : STAGE_LABELS[scan.status] ?? "Working…";
+  const subtitle = isAi
+    ? "Feasibly's AI is reviewing the site to pre-select components and templates for you."
+    : "Feasibly is inspecting the site to pre-select components and templates for you.";
   const pct = Math.max(0, Math.min(100, scan.progress));
   const isDone = scan.status === "complete";
   const isError = scan.status === "error";
   const isRunning = !isDone && !isError;
-  const isDiscovering = scan.status === "crawling" && pct <= 5;
-  const displayedProgress = getDisplayedProgress(scan.status, pct);
+  // While later batches run, the bar shows the current batch, not the whole scan.
+  const displayedProgress = aiJobActive ? pct : getDisplayedProgress(scan.status, pct);
   const matchedVariantCount = countMatches(scan.matchedComponentIds);
   const matchedGroupCount = countMatchedGroups(scan.matchedComponentIds);
 
@@ -64,14 +75,14 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
             <p className="text-sm text-black/60">
               {isError
                 ? errorMessage(scan.error)
-                : "Feasibly is inspecting the site to pre-select components and templates for you."}
+                : subtitle}
             </p>
           </div>
 
           {!isError && (
             <div className="flex flex-col gap-2">
               <div className="flex items-center justify-between text-xs text-black/70">
-                <span>{isDiscovering ? "Checking robots.txt and sitemaps…" : label}</span>
+                <span>{scan.progressMessage ?? label}</span>
                 <span>{displayedProgress}%</span>
               </div>
               <div className="h-2 w-full overflow-hidden rounded-full bg-black/10">
@@ -91,7 +102,7 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
           {isDone && (
             <div className="flex flex-col gap-1 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
               <span className="font-medium">
-                Scan complete — {matchedGroupCount} component group{matchedGroupCount === 1 ? "" : "s"}, {matchedVariantCount} variant{matchedVariantCount === 1 ? "" : "s"}, and {countMatches(scan.matchedTemplateIds)} template{countMatches(scan.matchedTemplateIds) === 1 ? "" : "s"} pre-selected.
+                {aiJobActive ? `Batch ${scan.aiJob?.batchesDone ?? 0} complete` : "Scan complete"} — {matchedGroupCount} component group{matchedGroupCount === 1 ? "" : "s"}, {matchedVariantCount} variant{matchedVariantCount === 1 ? "" : "s"}, and {countMatches(scan.matchedTemplateIds)} template{countMatches(scan.matchedTemplateIds) === 1 ? "" : "s"} pre-selected.
               </span>
               {scan.warnings.length > 0 && (
                 <span className="text-xs text-emerald-700/80">

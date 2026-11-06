@@ -35,7 +35,8 @@ export type UnscannedPageReason =
   | "path_template_limit"
   | "scan_incomplete"
   | "fetch_failed"
-  | "unsupported_content";
+  | "unsupported_content"
+  | "job_ended";
 
 export interface UnscannedPage {
   url: string;
@@ -119,6 +120,27 @@ export type ScanStreamEvent =
   | ScanCompleteEvent
   | ScanErrorEvent;
 
+export type AiJobStatus = "running" | "pausing" | "paused" | "complete" | "finished" | "stopped" | "error";
+
+/** Client-safe summary of a whole-site AI job. The server keeps the full state. */
+export interface AiJobSummary {
+  id: string;
+  url: string;
+  status: AiJobStatus;
+  provider: "gemini" | "groq" | null;
+  pagesDiscovered: number;
+  pagesDone: number;
+  pagesRemaining: number;
+  /** Progress through the current batch, 0–100 (reading pages, then AI review). */
+  batchProgress: number;
+  /** Progress through the whole job, 0–100. Moves forward only. */
+  progress: number;
+  batchesDone: number;
+  totalBatches: number;
+  error: string | null;
+  message: string;
+}
+
 export interface ScanSliceState {
   status: ScanStatus;
   progress: number;
@@ -135,9 +157,18 @@ export interface ScanSliceState {
   warnings: string[];
   error: string | null;
   scanAppliedAt: string | null;
+  /** Which scan produced the current state. Null when no scan has run. */
+  scanVariant: "regular" | "ai" | null;
+  /** Latest progress message from the server, shown in the progress dialog. */
+  progressMessage: string | null;
+  /** Whole-site AI job, when one is running or paused. */
+  aiJob: AiJobSummary | null;
 }
 
 export const initialScanSliceState: ScanSliceState = {
+  aiJob: null,
+  scanVariant: null,
+  progressMessage: null,
   status: "idle",
   progress: 0,
   scanId: null,

@@ -65,6 +65,7 @@ export async function exportScanReport(
   const unmatchedComponents = scan.unmatched.filter((item) => item.kind === "component");
   const unmatchedTemplates = scan.unmatched.filter((item) => item.kind === "template");
   const failedEntries = buildFailedEntries(scan, pageByUrl, project.liveUrl);
+  const limitSkippedEntries = buildLimitSkippedEntries(scan);
 
   // Invert matchedComponentIds → pageUrl → components[]
   const pageComponents = new Map<string, { variant: string; group: string; confidence: number; reason: string }[]>();
@@ -117,6 +118,7 @@ export async function exportScanReport(
   overviewSheet.addRow(["URLs Selected for Scan", scanCoverage.selectedForScan]);
   overviewSheet.addRow(["Selected URLs Remaining", scanCoverage.selectedRemaining]);
   overviewSheet.addRow(["Pages With Scan Issues", failedEntries.length]);
+  overviewSheet.addRow(["Pages Skipped by Page Limit", limitSkippedEntries.length]);
   overviewSheet.addRow([]);
 
   overviewSheet.columns = [
@@ -331,6 +333,27 @@ export async function exportScanReport(
     row.font = { italic: true, color: { argb: BRAND.lightGrey.argb } };
   }
 
+  // ── Sheet 6: Skipped by Page Limit ──
+  const limitSheet = workbook.addWorksheet("Skipped by Limit", {
+    properties: { tabColor: { argb: BRAND.lightGrey.argb } },
+  });
+  limitSheet.columns = [
+    { key: "url", width: 60 },
+    { key: "reason", width: 40 },
+    { key: "action", width: 60 },
+  ];
+  headerStyle(limitSheet.addRow({ url: "Page URL", reason: "Reason", action: "What to do" }));
+  let limitRowIdx = 0;
+  for (const entry of limitSkippedEntries) {
+    const row = limitSheet.addRow({ url: entry.url, reason: entry.reason, action: entry.action });
+    dataStyle(row, limitRowIdx % 2 === 0);
+    limitRowIdx++;
+  }
+  if (limitRowIdx === 0) {
+    const row = limitSheet.addRow({ url: "No pages were skipped by the page limit." });
+    row.font = { italic: true, color: { argb: BRAND.lightGrey.argb } };
+  }
+
   // ── Download ──
   applyWorkbookAlignment(workbook);
   const buffer = await workbook.xlsx.writeBuffer();
@@ -464,6 +487,10 @@ function describeUnscannedReason(reason: UnscannedPage["reason"]): {
   action: string;
 } {
   const descriptions: Record<UnscannedPage["reason"], { reason: string; action: string }> = {
+    job_ended: {
+      reason: "Scan job was ended before this page was reached",
+      action: "Continue the AI scan job, or run the scan again to cover this page.",
+    },
     max_pages_limit: {
       reason: "Maximum scan page limit reached",
       action: "Run a narrower scan or increase the configured page limit.",
@@ -510,6 +537,23 @@ function httpStatusLabel(status: number): string {
   return labels[status] ?? (status >= 400 && status < 500 ? "Client Error" : "Server Error");
 }
 
+/** URLs whose only skip reason is the page limit. Pages with another reason stay in issues. */
+function limitSkippedUrlSet(scan: ScanSliceState): Set<string> {
+  const limitUrls = new Set(
+    scan.unscannedPages.filter((p) => p.reason === "max_pages_limit").map((p) => p.url),
+  );
+  for (const p of scan.unscannedPages) {
+    if (p.reason !== "max_pages_limit") limitUrls.delete(p.url);
+  }
+  return limitUrls;
+}
+
+/** Pages skipped by the page limit, listed separately from scan issues. */
+export function buildLimitSkippedEntries(scan: ScanSliceState): UnscannedReportEntry[] {
+  const limitUrls = limitSkippedUrlSet(scan);
+  return buildUnscannedEntries(scan.unscannedPages.filter((p) => limitUrls.has(p.url)));
+}
+
 export interface FailedEntry {
   url: string;
   title: string;
@@ -529,8 +573,11 @@ export function buildFailedEntries(
   const entries: FailedEntry[] = [];
   const baseUrl = parseUrl(liveUrl);
   const unscannedUrls = new Set(scan.unscannedPages.map((page) => page.url));
+  // Pages skipped by the page limit are reported on their own sheet, not as issues.
+  const limitSkippedUrls = limitSkippedUrlSet(scan);
 
   for (const page of buildUnscannedEntries(scan.unscannedPages)) {
+    if (limitSkippedUrls.has(page.url)) continue;
     const discovered = pageByUrl.get(page.url);
     entries.push({
       url: page.url,

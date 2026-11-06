@@ -20,11 +20,15 @@ import {
 import {
   BUFFER_OPTIONS,
   DEFAULT_BUFFER_PERCENT,
+  DEFAULT_HOURS_PER_DAY,
+  HOURS_PER_DAY_OPTIONS,
   ROUTES,
   SCAN_FEATURE_ENABLED,
   SCAN_SINGLE_PAGE_OPTION_ENABLED,
 } from "@/lib/constants";
 import { useScan } from "@/hooks/useScan";
+import { markEnteredFromOnboarding } from "@/hooks/useRequireOnboarding";
+
 import { ScanProgressDialog } from "@/components/scan/ScanProgressDialog";
 
 const projectSchema = z
@@ -32,6 +36,7 @@ const projectSchema = z
     projectName: z.string().min(1, "Project name is required"),
     liveUrl: z.string().url("Must be a valid URL").or(z.literal("")),
     bufferPercent: z.number().int().min(0).max(20).multipleOf(5),
+    hoursPerDay: z.number().refine((v) => (HOURS_PER_DAY_OPTIONS as readonly number[]).includes(v), "Choose 6, 6.5, 7, 7.5 or 8 hours per day."),
     scopeComponents: z.boolean(),
     scopeTemplates: z.boolean(),
   })
@@ -63,6 +68,7 @@ export default function OnboardingPage() {
       projectName: "",
       liveUrl: "",
       bufferPercent: DEFAULT_BUFFER_PERCENT,
+      hoursPerDay: DEFAULT_HOURS_PER_DAY,
       scopeComponents: false,
       scopeTemplates: false,
     },
@@ -72,12 +78,14 @@ export default function OnboardingPage() {
   const scopeTemplates = useWatch({ control, name: "scopeTemplates" });
   const liveUrl = useWatch({ control, name: "liveUrl" });
 
-  const onSubmit = (data: FormData) => {
+  const onSubmit = (data: FormData, mode: "single" | "full") => {
+    markEnteredFromOnboarding();
     resetStore();
     setProject({
       projectName: data.projectName,
       liveUrl: data.liveUrl,
       bufferPercent: data.bufferPercent,
+      hoursPerDay: data.hoursPerDay,
       scope: {
         components: data.scopeComponents,
         templates: data.scopeTemplates,
@@ -89,7 +97,7 @@ export default function OnboardingPage() {
     if (SCAN_FEATURE_ENABLED && data.liveUrl) {
       setPendingRoute(nextRoute);
       setScanOpen(true);
-      void startScan(data.liveUrl, scanMode);
+      void startScan(data.liveUrl, mode, "ai");
       return;
     }
 
@@ -138,7 +146,7 @@ export default function OnboardingPage() {
 
       <div className="flex-1 flex items-start lg:items-center justify-center px-6 py-8 md:px-12 lg:px-16 overflow-y-auto">
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          onSubmit={handleSubmit((data) => onSubmit(data, scanMode))}
           className="flex flex-col gap-7.5 w-full max-w-129.75"
         >
           <div className="flex flex-col gap-3 md:gap-4.5">
@@ -273,6 +281,82 @@ export default function OnboardingPage() {
             )}
           </FormFieldSection>
 
+          <FormFieldSection
+            iconSlot={
+              <OutlineIcon>
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+              </OutlineIcon>
+            }
+            title="Choose your hours per day"
+            description="Used to convert estimated hours into days."
+          >
+            <div className="flex flex-col gap-2 pl-1">
+              <Label htmlFor="hours-per-day" className="text-sm text-black">
+                Hours per day
+              </Label>
+              <Controller
+                control={control}
+                name="hoursPerDay"
+                render={({ field }) => (
+                  <Select.Root<number>
+                    name={field.name}
+                    value={field.value}
+                    onValueChange={(value) => {
+                      if (value !== null) field.onChange(value);
+                    }}
+                  >
+                    <Select.Trigger
+                      id="hours-per-day"
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      type="button"
+                      aria-invalid={!!errors.hoursPerDay}
+                      className="flex h-12 w-full items-center justify-between rounded-full border border-strokes bg-white px-5 text-left text-sm text-black outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cobalt md:h-15 md:px-6.25 md:text-[16px]"
+                    >
+                      <Select.Value>
+                        {(value) => (value === null ? "Choose hours per day" : `${value} h`)}
+                      </Select.Value>
+                      <Select.Icon>
+                        <ChevronDown aria-hidden="true" className="size-5 shrink-0" />
+                      </Select.Icon>
+                    </Select.Trigger>
+                    <Select.Portal>
+                      <Select.Positioner
+                        alignItemWithTrigger={false}
+                        side="bottom"
+                        sideOffset={8}
+                        className="z-50 outline-none"
+                      >
+                        <Select.Popup className="min-w-[var(--anchor-width)] overflow-hidden rounded-2xl border border-strokes bg-white p-1.5 shadow-lg outline-none">
+                          <Select.List className="max-h-[calc(var(--available-height)-0.875rem)] overflow-y-auto">
+                            {HOURS_PER_DAY_OPTIONS.map((hours) => (
+                              <Select.Item
+                                key={hours}
+                                value={hours}
+                                className="flex min-h-10 cursor-pointer items-center justify-between gap-3 rounded-xl px-4 py-2.5 text-sm text-black outline-none transition-colors data-[highlighted]:bg-background-blue data-[selected]:font-semibold data-[selected]:text-cobalt"
+                              >
+                                <Select.ItemText>{hours} h</Select.ItemText>
+                                <Select.ItemIndicator className="text-cobalt">
+                                  <Check aria-hidden="true" className="size-4" />
+                                </Select.ItemIndicator>
+                              </Select.Item>
+                            ))}
+                          </Select.List>
+                        </Select.Popup>
+                      </Select.Positioner>
+                    </Select.Portal>
+                  </Select.Root>
+                )}
+              />
+            </div>
+            {errors.hoursPerDay && (
+              <p className="text-destructive text-sm">
+                Choose 6, 6.5, 7, 7.5 or 8 hours per day.
+              </p>
+            )}
+          </FormFieldSection>
+
           {SCAN_FEATURE_ENABLED && SCAN_SINGLE_PAGE_OPTION_ENABLED && !!liveUrl && (
             <FormFieldSection
               iconSlot={
@@ -377,6 +461,13 @@ export default function OnboardingPage() {
           >
             Create Project
           </Button>
+
+          {SCAN_FEATURE_ENABLED && !!liveUrl && (
+            <p className="text-xs text-black/60 pl-1">
+              The AI scan sends the scanned pages&apos; HTML to Google Gemini (Groq as fallback).
+              Free-tier providers may use this data to improve their models.
+            </p>
+          )}
         </form>
       </div>
 

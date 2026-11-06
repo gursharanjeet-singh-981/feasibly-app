@@ -34,7 +34,9 @@ export const SCAN_DEFAULTS = {
 
 export const BUFFER_OPTIONS = [0, 5, 10, 15, 20] as const;
 export const DEFAULT_BUFFER_PERCENT = 20;
-export const DAYS_PER_WEEK = 5;
+/** Hours in a working day. The project chooses one of these; the estimate uses it to convert hours to days. */
+export const HOURS_PER_DAY_OPTIONS = [6, 6.5, 7, 7.5, 8] as const;
+export const DEFAULT_HOURS_PER_DAY = 6;
 export const getBufferLabel = (bufferPercent: number) =>
   `Incl. ${bufferPercent}% buffer time`;
 

@@ -7,9 +7,13 @@ import type {
   ScanStage,
   ScanStreamEvent,
 } from "@/lib/scanner/types";
+import { isAiJobActive } from "@/lib/scanner/aiJobState";
+import { startAiJob, stopAiJob } from "./aiJob";
+
+export type ScanVariant = "regular" | "ai";
 
 export interface UseScanApi {
-  startScan: (url: string, mode?: "single" | "full") => Promise<void>;
+  startScan: (url: string, mode?: "single" | "full", variant?: ScanVariant) => Promise<void>;
   cancelScan: () => void;
 }
 
@@ -28,6 +32,9 @@ export function useScan(options: UseScanOptions = {}): UseScanApi {
   const cancelScan = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
+    // Cancel ends a running AI job in this tab right away.
+    const job = useAppStore.getState().scan.aiJob;
+    if (job && isAiJobActive(job.status)) stopAiJob();
   }, []);
 
   useEffect(() => {
@@ -37,7 +44,7 @@ export function useScan(options: UseScanOptions = {}): UseScanApi {
   }, []);
 
   const startScan = useCallback(
-    async (url: string, mode: "single" | "full" = "full") => {
+    async (url: string, mode: "single" | "full" = "full", variant: ScanVariant = "regular") => {
       abortRef.current?.abort();
       const ac = new AbortController();
       abortRef.current = ac;
@@ -48,10 +55,25 @@ export function useScan(options: UseScanOptions = {}): UseScanApi {
         progress: 0,
         error: null,
         scanId: null,
+        scanVariant: variant,
+        progressMessage: null,
       });
 
+      // Whole-site AI scans run in this tab in batches. The browser drives each step.
+      if (variant === "ai" && mode === "full") {
+        try {
+          await startAiJob(url);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          setScan({ status: "error", error: message });
+        }
+        return;
+      }
+
       try {
-        const response = await fetchImpl("/api/scan/full", {
+        // The regular scanner (/api/scan/full) is retired. All scans use the AI route.
+        const endpoint = "/api/scan/ai";
+        const response = await fetchImpl(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ url, mode }),
@@ -122,6 +144,7 @@ export function applyEventToState(
         ...state,
         status,
         progress: event.progress,
+        progressMessage: event.message,
         pagesScanned: event.pagesScanned ?? state.pagesScanned,
       };
     }
@@ -187,6 +210,7 @@ function applyEventToStore(
       setScan({
         status: stageToStatus(event.stage),
         progress: event.progress,
+        progressMessage: event.message,
         pagesScanned: event.pagesScanned,
       });
       break;
