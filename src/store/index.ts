@@ -3,6 +3,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 import { calculateEstimation } from "@/lib/calculations";
 import {
   DEFAULT_BUFFER_PERCENT,
+  DEFAULT_HOURS_PER_DAY,
   STORAGE_KEY,
   STORAGE_VERSION,
 } from "@/lib/constants";
@@ -18,6 +19,7 @@ const emptyProject: Project = {
   projectName: "",
   liveUrl: "",
   bufferPercent: DEFAULT_BUFFER_PERCENT,
+  hoursPerDay: DEFAULT_HOURS_PER_DAY,
   scope: { components: false, templates: false },
   platform: "AEM",
 };
@@ -200,6 +202,7 @@ export const useAppStore = create<AppState>()(
           templates,
           useAiEstimation,
           project.bufferPercent,
+          project.hoursPerDay ?? DEFAULT_HOURS_PER_DAY,
         );
       },
 

@@ -133,6 +133,8 @@ export interface AiJobSummary {
   pagesRemaining: number;
   /** Progress through the current batch, 0–100 (reading pages, then AI review). */
   batchProgress: number;
+  /** Progress through the whole job, 0–100. Moves forward only. */
+  progress: number;
   batchesDone: number;
   totalBatches: number;
   error: string | null;

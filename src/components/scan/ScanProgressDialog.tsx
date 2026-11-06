@@ -43,7 +43,7 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
   const aiJobActive = scan.aiJob ? isAiJobActive(scan.aiJob.status) : false;
   const label =
     isAi && scan.status === "complete" && aiJobActive
-      ? "Batch complete"
+      ? `Batch ${scan.aiJob?.batchesDone ?? 0} complete`
       : isAi && scan.status === "analyzing"
         ? "AI is reviewing representative pages…"
         : STAGE_LABELS[scan.status] ?? "Working…";
@@ -102,7 +102,7 @@ export function ScanProgressDialog({ open, onCancel, onDismiss, onProceed }: Pro
           {isDone && (
             <div className="flex flex-col gap-1 rounded-lg bg-emerald-50 p-3 text-sm text-emerald-800">
               <span className="font-medium">
-                {aiJobActive ? "Batch complete" : "Scan complete"} — {matchedGroupCount} component group{matchedGroupCount === 1 ? "" : "s"}, {matchedVariantCount} variant{matchedVariantCount === 1 ? "" : "s"}, and {countMatches(scan.matchedTemplateIds)} template{countMatches(scan.matchedTemplateIds) === 1 ? "" : "s"} pre-selected.
+                {aiJobActive ? `Batch ${scan.aiJob?.batchesDone ?? 0} complete` : "Scan complete"} — {matchedGroupCount} component group{matchedGroupCount === 1 ? "" : "s"}, {matchedVariantCount} variant{matchedVariantCount === 1 ? "" : "s"}, and {countMatches(scan.matchedTemplateIds)} template{countMatches(scan.matchedTemplateIds) === 1 ? "" : "s"} pre-selected.
               </span>
               {scan.warnings.length > 0 && (
                 <span className="text-xs text-emerald-700/80">

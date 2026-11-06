@@ -1,5 +1,5 @@
 import type { SelectedComponent, SelectedTemplate, EstimationSummary } from "@/types";
-import { DEFAULT_BUFFER_PERCENT, HOURS_PER_DAY } from "@/lib/constants";
+import { DEFAULT_BUFFER_PERCENT, DEFAULT_HOURS_PER_DAY } from "@/lib/constants";
 
 export function componentDesignEffort(c: SelectedComponent, useAi: boolean): number {
   return useAi ? c.aiDesignEffort : c.designEffort;
@@ -68,6 +68,7 @@ export function calculateEstimation(
   templates: SelectedTemplate[],
   useAi = false,
   bufferPercent = DEFAULT_BUFFER_PERCENT,
+  hoursPerDay = DEFAULT_HOURS_PER_DAY,
 ): EstimationSummary {
   const selectedComponents = components.filter((c) => c.isSelected);
   const selectedTemplates = templates.filter((t) => t.isSelected);
@@ -91,10 +92,10 @@ export function calculateEstimation(
     totalAdditionalPages: tmpl.additionalPages,
     designHours,
     designHoursWithBuffer,
-    designDays: Math.ceil(designHoursWithBuffer / HOURS_PER_DAY),
+    designDays: Math.ceil(designHoursWithBuffer / hoursPerDay),
     devHours,
     devHoursWithBuffer,
-    devDays: Math.ceil(devHoursWithBuffer / HOURS_PER_DAY),
+    devDays: Math.ceil(devHoursWithBuffer / hoursPerDay),
   };
 }
 

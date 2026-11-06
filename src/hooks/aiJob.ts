@@ -92,6 +92,7 @@ export async function startAiJob(url: string): Promise<void> {
         totalBatches: 0,
         error: code,
         batchProgress: 0,
+        progress: 0,
         message: messageFor(code),
       },
       null,
@@ -148,7 +149,7 @@ export function applyAiJob(job: AiJobSummary, result: ScanResult | null): void {
       scanVariant: "ai",
       status: "complete",
       // While later batches run, the bar shows the current batch, not the whole scan.
-      progress: active ? job.batchProgress : 100,
+      progress: active ? job.progress : 100,
       progressMessage: job.message,
       error: null,
       scanId: result.scanId,
@@ -182,7 +183,7 @@ export function applyAiJob(job: AiJobSummary, result: ScanResult | null): void {
     aiJob: job,
     scanVariant: "ai",
     status: active ? "analyzing" : "complete",
-    progress: job.batchProgress,
+    progress: job.progress,
     progressMessage: job.message,
   });
 }

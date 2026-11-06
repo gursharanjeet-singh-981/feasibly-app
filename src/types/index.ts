@@ -42,6 +42,7 @@ export interface Project {
   projectName: string;
   liveUrl: string;
   bufferPercent: number;
+  hoursPerDay: number;
   scope: {
     components: boolean;
     templates: boolean;

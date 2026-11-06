@@ -59,8 +59,9 @@ export function EstimationPanel() {
         templates,
         useAiEstimation,
         project.bufferPercent,
+        project.hoursPerDay,
       ),
-    [components, templates, useAiEstimation, project.bufferPercent],
+    [components, templates, useAiEstimation, project.bufferPercent, project.hoursPerDay],
   );
   const bufferLabel = getBufferLabel(project.bufferPercent);
 

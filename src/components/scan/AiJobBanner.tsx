@@ -25,9 +25,9 @@ function renderStatus(job: AiJobSummary) {
         <Panel tone="info">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-col gap-0.5">
-              <p className="font-medium">AI scan of the remaining {pagesWord(remaining)} is still in progress.</p>
+              <p className="font-medium">AI scan is still in progress.</p>
               <p className="text-xs opacity-80">
-                Selection and export are disabled until the scan finishes or is paused. {job.message}
+                {job.message} Selection and export are disabled until the scan finishes or is paused.
               </p>
             </div>
             <Button size="sm" variant="outline" onClick={() => pauseAiJob()}>

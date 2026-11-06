@@ -149,10 +149,11 @@ export class BrowserAiJob {
       url: this.url,
       status,
       provider: this.provider,
-      pagesDiscovered: this.discovered.length + this.queue.length + this.unscanned.filter((p) => p.reason === "max_pages_limit").length,
+      pagesDiscovered: this.discovered.length + this.pendingCount() + this.unscanned.filter((p) => p.reason === "max_pages_limit").length,
       pagesDone: this.discovered.length,
-      pagesRemaining: this.remainingAtEnd ?? this.queue.length,
+      pagesRemaining: this.remainingAtEnd ?? this.pendingCount(),
       batchProgress: this.batchProgress,
+      progress: this.overallProgress(status),
       batchesDone: this.batchesDone,
       totalBatches: this.totalBatches,
       error: this.error,
@@ -207,9 +208,22 @@ export class BrowserAiJob {
     }
   }
 
+  /** Pages not yet committed: the queue plus the batch in progress. */
+  private pendingCount(): number {
+    return this.queue.length + (this.inFlight?.length ?? 0);
+  }
+
+  /** One number for the whole job, so the bar and the banner always agree. */
+  private overallProgress(status: AiJobStatus): number {
+    if (status === "complete") return 100;
+    const total = Math.max(1, this.totalBatches);
+    const value = ((this.batchesDone + this.batchProgress / 100) / total) * 100;
+    return Math.min(100, Math.max(0, Math.round(value)));
+  }
+
   private message(status: AiJobStatus): string {
     const batch = `${this.batchesDone} of ${this.totalBatches} batch${this.totalBatches === 1 ? "" : "es"}`;
-    const remaining = this.remainingAtEnd ?? this.queue.length;
+    const remaining = this.remainingAtEnd ?? this.pendingCount();
     const left = `${remaining} page${remaining === 1 ? "" : "s"}`;
     switch (status) {
       case "running":
@@ -389,7 +403,8 @@ export class BrowserAiJob {
       this.discovered.push({ url: p.url, title: p.title, pageType: p.pageType, depth: p.depth, status: p.status });
     }
     this.note = "";
-    this.batchProgress = 100;
+    // The batch is counted in batchesDone; its progress starts again at 0 for the next batch.
+    this.batchProgress = 0;
     this.clustersTotal += clusters.length;
     this.coveredPages += coveredInBatch.size;
     this.clustersWithoutResult += batchWithoutResult;

@@ -296,6 +296,24 @@ describe("rate limits versus provider quota", () => {
 });
 
 describe("progress feedback", () => {
+  it("counts the batch in progress as remaining, so the banner never says 0 pages during batch 2", async () => {
+    const h = harness({ total: 1200 });
+    await h.job.prepare();
+    await h.job.start();
+    const duringSecond = h.updates.find((u) => u.job.batchesDone === 1 && u.job.status === "running");
+    expect(duringSecond?.job.pagesRemaining).toBe(700);
+  });
+
+  it("reports one progress number for the whole job that never goes backwards", async () => {
+    const h = harness({ total: 1200 });
+    await h.job.prepare();
+    await h.job.start();
+    const values = h.updates.map((u) => u.job.progress);
+    expect(values.every((v, i) => i === 0 || v >= values[i - 1]!)).toBe(true);
+    expect(values[values.length - 1]).toBe(100);
+    expect(h.updates.find((u) => u.job.batchesDone === 1 && u.job.status === "running")!.job.progress).toBeGreaterThanOrEqual(33); // 1 of 3 batches
+  });
+
   it("shows the pausing state at once when Pause is clicked, not when the batch ends", async () => {
     const h = harness({ total: 1200 });
     await h.job.prepare();
