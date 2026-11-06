@@ -7,6 +7,7 @@ import type {
 } from "@/types";
 import { BRAND } from "@/lib/theme";
 import { getBufferLabel } from "@/lib/constants";
+import { formatDays } from "@/lib/calculations";
 import {
   componentDesignEffort,
   componentDevEffort,
@@ -209,7 +210,7 @@ export function exportPDF(
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text(`${estimation.devDays} days`, margin + 5, y + 33);
+  doc.text(formatDays(estimation.devDays), margin + 5, y + 33);
   setColor(doc, LIGHT_GREY);
   doc.setFontSize(7);
   doc.text(getBufferLabel(project.bufferPercent), margin + cardWidth - 35, y + 33);
@@ -235,7 +236,7 @@ export function exportPDF(
 
   doc.setFontSize(9);
   doc.setFont("helvetica", "normal");
-  doc.text(`${estimation.designDays} days`, cardX2 + 5, y + 33);
+  doc.text(formatDays(estimation.designDays), cardX2 + 5, y + 33);
   setColor(doc, LIGHT_GREY);
   doc.setFontSize(7);
   doc.text(getBufferLabel(project.bufferPercent), cardX2 + cardWidth - 35, y + 33);

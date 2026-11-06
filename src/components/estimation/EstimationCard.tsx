@@ -1,6 +1,7 @@
 "use client";
 
 import { SvgIcon } from "@/components/SvgIcon";
+import { formatDays } from "@/lib/calculations";
 
 interface Props {
   icon: string;
@@ -57,7 +58,7 @@ export function EstimationCard({
           {hours.toFixed(1)} hours
         </p>
         <div className="flex items-center justify-between">
-          <p className="text-lg text-black">{days} days</p>
+          <p className="text-lg text-black">{formatDays(days)}</p>
           <p className="text-xs text-light-grey-text">{bufferLabel}</p>
         </div>
         <p className="text-[10px] text-light-grey-text font-medium">{note}</p>

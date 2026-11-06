@@ -63,6 +63,20 @@ export function templatesSubtotal(
   };
 }
 
+/** The day figure as shown on screen and in the PDF: "1 day", "2.5 days". */
+export function formatDays(days: number): string {
+  return `${days} ${days === 1 ? "day" : "days"}`;
+}
+
+/**
+ * Days rounded up to the next half day, so 2.57 days shows as 3 and 0.6 days as 1. Rounding up keeps
+ * the estimate from understating effort. Any non-zero effort shows at least half a day.
+ */
+export function roundDaysToHalf(days: number): number {
+  if (days <= 0) return 0;
+  return Math.max(0.5, Math.ceil(days * 2) / 2);
+}
+
 export function calculateEstimation(
   components: SelectedComponent[],
   templates: SelectedTemplate[],
@@ -92,10 +106,10 @@ export function calculateEstimation(
     totalAdditionalPages: tmpl.additionalPages,
     designHours,
     designHoursWithBuffer,
-    designDays: Math.ceil(designHoursWithBuffer / hoursPerDay),
+    designDays: roundDaysToHalf(designHoursWithBuffer / hoursPerDay),
     devHours,
     devHoursWithBuffer,
-    devDays: Math.ceil(devHoursWithBuffer / hoursPerDay),
+    devDays: roundDaysToHalf(devHoursWithBuffer / hoursPerDay),
   };
 }
 

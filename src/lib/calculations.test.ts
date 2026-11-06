@@ -107,8 +107,8 @@ describe("calculateEstimation", () => {
     expect(result.totalAdditionalPages).toBe(4);
     expect(result.designHours).toBe(8);
     expect(result.devHours).toBe(14);
-    expect(result.designDays).toBe(2); // ceil((8 * 1.2) / 6)
-    expect(result.devDays).toBe(3); // ceil((14 * 1.2) / 6)
+    expect(result.designDays).toBe(2); // (8 * 1.2) / 6 = 1.6, rounded up to the next half day
+    expect(result.devDays).toBe(3); // (14 * 1.2) / 6 = 2.8, rounded up to the next half day
   });
 
   it("uses AI effort values when useAi=true", () => {
@@ -119,7 +119,7 @@ describe("calculateEstimation", () => {
     );
     expect(result.designHours).toBe(1);
     expect(result.devHours).toBe(2);
-    expect(result.designDays).toBe(1);
-    expect(result.devDays).toBe(1);
+    expect(result.designDays).toBe(0.5); // 1 hour is still at least half a day
+    expect(result.devDays).toBe(0.5);
   });
 });
