@@ -68,7 +68,7 @@ type Terminal = "complete" | "finished" | "stopped" | "error";
 type AiOutcome =
   | { kind: "ok"; response: ClassifyResponse; attempts: number }
   | { kind: "failed"; attempts: number }
-  | { kind: "no_budget"; reason: "quota" | "no_budget" };
+  | { kind: "no_budget"; reason: "quota" | "unavailable" | "no_budget" };
 
 export class BrowserAiJob {
   readonly id: string = newId();
@@ -85,6 +85,8 @@ export class BrowserAiJob {
   private warnings = new Set<string>();
   private providerCounts: Record<AiProviderName, number> = { gemini: 0, groq: 0 };
   private exhausted = new Set<AiProviderName>();
+  private quotaExhausted = new Set<AiProviderName>();
+  private unavailable = new Set<AiProviderName>();
   private pauseRequested = false;
   private finishRequested = false;
   private stopRequested = false;
@@ -360,7 +362,7 @@ export class BrowserAiJob {
     let batchCalls = 0;
     const coveredInBatch = new Set<string>();
     let batchWithoutResult = 0;
-    let stopAi: "none" | "batch_cap" | "no_budget" | "quota" = "none";
+    let stopAi: "none" | "batch_cap" | "no_budget" | "quota" | "unavailable" = "none";
 
     outer: for (const cluster of clusters) {
       let clusterHasResult = false;
@@ -377,7 +379,7 @@ export class BrowserAiJob {
         this.emit();
         const outcome = await this.callAi(sourceUrl);
         if (outcome.kind === "no_budget") {
-          stopAi = outcome.reason === "quota" ? "quota" : "no_budget";
+          stopAi = outcome.reason;
           break outer;
         }
         batchCalls += outcome.attempts;
@@ -437,8 +439,13 @@ export class BrowserAiJob {
     while (true) {
       const provider = this.pickProvider();
       if (!provider) {
-        const allQuota = this.providers.length > 0 && this.providers.every((p) => this.exhausted.has(p));
-        return { kind: "no_budget", reason: allQuota ? "quota" : "no_budget" };
+        const allQuota =
+          this.providers.length > 0 && this.providers.every((p) => this.quotaExhausted.has(p));
+        const unavailable = this.providers.some((p) => this.unavailable.has(p));
+        return {
+          kind: "no_budget",
+          reason: allQuota ? "quota" : unavailable ? "unavailable" : "no_budget",
+        };
       }
       if (provider !== this.provider) {
         if (this.provider) this.warnings.add(`ai_provider_switched:${this.provider}->${provider}`);
@@ -468,7 +475,14 @@ export class BrowserAiJob {
         // The provider's quota, or this server's daily cap, is used up: move to the other provider.
         if (err instanceof AiApiError && err.status === 429) {
           this.exhausted.add(provider);
+          this.quotaExhausted.add(provider);
           this.warnings.add(`ai_quota_reached:${provider}`);
+          continue;
+        }
+        if (err instanceof AiApiError && err.code === `${provider}_http_503`) {
+          this.exhausted.add(provider);
+          this.unavailable.add(provider);
+          this.warnings.add(`ai_provider_unavailable:${provider}`);
           continue;
         }
         const code = err instanceof AiApiError ? err.code : "ai_unknown_error";

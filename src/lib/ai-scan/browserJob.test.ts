@@ -205,6 +205,38 @@ describe("provider switching and errors", () => {
     expect(h.job.result()!.warnings).toContain("ai_quota_reached:gemini");
   });
 
+  it("moves to Groq when Gemini is temporarily unavailable", async () => {
+    const h = harness({
+      total: 10,
+      classify: async (provider) => {
+        if (provider === "gemini") throw new AiApiError("gemini_http_503", 502);
+        return { provider, detections: [{ groupName: "Forms", confidence: 0.8, evidence: "x" }], template: null };
+      },
+    });
+    await h.job.prepare();
+    await h.job.start();
+    expect(h.job.snapshot().status).toBe("complete");
+    expect(h.classifyCalls.map((call) => call.provider)).toEqual(["gemini", "groq"]);
+    expect(h.job.result()!.warnings).toContain("ai_provider_unavailable:gemini");
+    expect(h.job.result()!.warnings).toContain("ai_provider_switched:gemini->groq");
+  });
+
+  it("continues with heuristic results when Gemini is unavailable and no fallback is configured", async () => {
+    const h = harness({
+      total: 10,
+      providers: ["gemini"],
+      classify: async () => {
+        throw new AiApiError("gemini_http_503", 502);
+      },
+    });
+    await h.job.prepare();
+    await h.job.start();
+    expect(h.job.snapshot().status).toBe("complete");
+    expect(h.job.result()!.pagesScanned).toBe(10);
+    expect(h.job.result()!.warnings).toContain("ai_provider_unavailable:gemini");
+    expect(h.job.result()!.warnings).not.toContain("ai_quota_reached:gemini");
+  });
+
   it("stops with an error when every provider hits its quota, keeping heuristic results", async () => {
     const h = harness({
       total: 10,

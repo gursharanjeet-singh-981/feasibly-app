@@ -140,20 +140,42 @@ function ComponentRowBase({ component, useAiEstimation, match, onToggle, onUpdat
               <ConfidenceBadge confidence={match.confidence} pages={match.pages} />
             )}
           </div>
-          {isEditable ? (
-            <EditableTextCell
-              editable
-              multiline
-              value={component.designDescription}
-              onChange={(v) => onUpdate({ designDescription: v })}
-              placeholder="Design description"
-              className="text-xs text-light-grey-text mb-2"
-            />
-          ) : (
-            <p className="text-xs text-light-grey-text line-clamp-2 mb-2">
-              {component.designDescription}
-            </p>
-          )}
+          <div className="mb-3 space-y-2">
+            <div>
+              <p className="mb-1 text-xs font-medium text-black">Design</p>
+              {isEditable ? (
+                <EditableTextCell
+                  editable
+                  multiline
+                  value={component.designDescription}
+                  onChange={(v) => onUpdate({ designDescription: v })}
+                  placeholder="Design description"
+                  className="text-xs text-light-grey-text"
+                />
+              ) : (
+                <p className="text-xs text-light-grey-text line-clamp-2">
+                  {component.designDescription}
+                </p>
+              )}
+            </div>
+            <div>
+              <p className="mb-1 text-xs font-medium text-black">Development</p>
+              {isEditable ? (
+                <EditableTextCell
+                  editable
+                  multiline
+                  value={component.developmentDescription}
+                  onChange={(v) => onUpdate({ developmentDescription: v })}
+                  placeholder="Development description"
+                  className="text-xs text-light-grey-text"
+                />
+              ) : (
+                <p className="text-xs text-light-grey-text line-clamp-2">
+                  {component.developmentDescription}
+                </p>
+              )}
+            </div>
+          </div>
           <div className="flex gap-4 text-xs text-black">
             {isEditable ? (
               <>
