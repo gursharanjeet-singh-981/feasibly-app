@@ -154,48 +154,54 @@ export async function classifyWithProvider(
   const prompt = buildPrompt(input.url, input.html, options.allowedGroups, options.allowedTemplates);
 
   let text: string;
-  if (provider === "gemini") {
-    const gemini = options.gemini ?? geminiConfig();
-    if (!gemini.apiKey) throw new AiProviderError("gemini_not_configured", false);
-    const res = await fetchImpl(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(gemini.model)}:generateContent`,
-      {
+  try {
+    if (provider === "gemini") {
+      const gemini = options.gemini ?? geminiConfig();
+      if (!gemini.apiKey) throw new AiProviderError("gemini_not_configured", false);
+      const res = await fetchImpl(
+        `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(gemini.model)}:generateContent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": gemini.apiKey },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: prompt }] }],
+            generationConfig: { responseMimeType: "application/json", temperature: 0 },
+          }),
+          signal: AbortSignal.timeout(timeoutMs),
+        },
+      );
+      if (!res.ok) throw httpError("gemini", res.status);
+      const data = (await res.json()) as {
+        candidates?: { content?: { parts?: { text?: string }[] } }[];
+      };
+      text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
+      if (!text) throw new AiProviderError("gemini_empty_response", true);
+    } else {
+      const groq = options.groq ?? groqConfig();
+      if (!groq.apiKey) throw new AiProviderError("groq_not_configured", false);
+      const res = await fetchImpl("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": gemini.apiKey },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${groq.apiKey}`,
+        },
         body: JSON.stringify({
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-          generationConfig: { responseMimeType: "application/json", temperature: 0 },
+          model: groq.model,
+          temperature: 0,
+          response_format: { type: "json_object" },
+          messages: [{ role: "user", content: prompt }],
         }),
         signal: AbortSignal.timeout(timeoutMs),
-      },
-    );
-    if (!res.ok) throw httpError("gemini", res.status);
-    const data = (await res.json()) as {
-      candidates?: { content?: { parts?: { text?: string }[] } }[];
-    };
-    text = data.candidates?.[0]?.content?.parts?.map((p) => p.text ?? "").join("") ?? "";
-    if (!text) throw new AiProviderError("gemini_empty_response", true);
-  } else {
-    const groq = options.groq ?? groqConfig();
-    if (!groq.apiKey) throw new AiProviderError("groq_not_configured", false);
-    const res = await fetchImpl("https://api.groq.com/openai/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${groq.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: groq.model,
-        temperature: 0,
-        response_format: { type: "json_object" },
-        messages: [{ role: "user", content: prompt }],
-      }),
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-    if (!res.ok) throw httpError("groq", res.status);
-    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-    text = data.choices?.[0]?.message?.content ?? "";
-    if (!text) throw new AiProviderError("groq_empty_response", true);
+      });
+      if (!res.ok) throw httpError("groq", res.status);
+      const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+      text = data.choices?.[0]?.message?.content ?? "";
+      if (!text) throw new AiProviderError("groq_empty_response", true);
+    }
+  } catch (err) {
+    // Timeouts and network failures are transient. Report them with a retryable code.
+    if (err instanceof AiProviderError) throw err;
+    throw new AiProviderError(`${provider}_request_failed`, true);
   }
 
   return parseAiResponse(text, options.allowedGroups, options.allowedTemplates);

@@ -484,7 +484,8 @@ export class BrowserAiJob {
             this.warnings.add(`ai_provider_switched:${provider}->${other}`);
             this.provider = other;
           } else {
-            await (this.deps.sleep ?? defaultSleep)(TRANSIENT_RETRY_MS);
+            // Back off more on each retry: overload spikes often last longer than one short wait.
+            await (this.deps.sleep ?? defaultSleep)(TRANSIENT_RETRY_MS * transientRetries);
             if (this.stopRequested) return { kind: "failed", attempts };
           }
           continue;
@@ -539,9 +540,9 @@ const RATE_RETRY_MS = 60_000;
 const MAX_TRANSIENT_RETRIES = 3;
 const TRANSIENT_RETRY_MS = 5_000;
 
-/** Provider 5xx (overload, outage) or an empty reply. The page itself is fine. */
+/** Provider 5xx (overload, outage), a timeout or network failure, or an empty reply. The page itself is fine. */
 export function isTransientProviderCode(code: string): boolean {
-  return /_http_5\d\d$/.test(code) || code.endsWith("_empty_response");
+  return /_http_5\d\d$/.test(code) || code.endsWith("_empty_response") || code.endsWith("_request_failed");
 }
 
 function defaultSleep(ms: number): Promise<void> {
