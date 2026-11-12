@@ -1,7 +1,61 @@
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 const BASE_TEXT_INPUT =
   "bg-transparent outline-none w-full placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-cobalt/30 rounded";
+
+const useIsomorphicLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+/**
+ * Textarea that grows with its text. It re-measures when its value changes and when it first gets
+ * a size. A textarea mounted while hidden (collapsed group, display:none) measures 0px, so without
+ * the ResizeObserver it stays at 0px and its text never shows.
+ */
+function AutoGrowTextarea({
+  value,
+  onChange,
+  placeholder,
+  ariaLabel,
+  className,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  placeholder?: string;
+  ariaLabel?: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLTextAreaElement>(null);
+
+  const grow = useCallback(() => {
+    const element = ref.current;
+    if (!element) return;
+    element.style.height = "auto";
+    // A hidden element reports 0; keep the one-line height rather than collapsing to 0px.
+    if (element.scrollHeight > 0) element.style.height = `${element.scrollHeight}px`;
+  }, []);
+
+  useIsomorphicLayoutEffect(grow, [value, grow]);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => grow());
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [grow]);
+
+  return (
+    <textarea
+      ref={ref}
+      rows={1}
+      value={value}
+      onChange={(event) => onChange(event.currentTarget.value)}
+      placeholder={placeholder}
+      aria-label={ariaLabel}
+      className={cn(BASE_TEXT_INPUT, "resize-none overflow-hidden", className)}
+    />
+  );
+}
 
 interface EditableTextCellProps {
   editable: boolean;
@@ -26,25 +80,13 @@ export function EditableTextCell({
 }: EditableTextCellProps) {
   if (editable) {
     if (multiline) {
-      const resize = (element: HTMLTextAreaElement | null) => {
-        if (!element) return;
-        element.style.height = "auto";
-        element.style.height = `${element.scrollHeight}px`;
-      };
-
       return (
-        <textarea
-          ref={resize}
-          rows={1}
+        <AutoGrowTextarea
           value={value}
-          onChange={(event) => {
-            const target = event.currentTarget;
-            resize(target);
-            onChange(target.value);
-          }}
+          onChange={onChange}
           placeholder={placeholder}
-          aria-label={ariaLabel ?? placeholder}
-          className={cn(BASE_TEXT_INPUT, "resize-none overflow-hidden", className)}
+          ariaLabel={ariaLabel ?? placeholder}
+          className={className}
         />
       );
     }

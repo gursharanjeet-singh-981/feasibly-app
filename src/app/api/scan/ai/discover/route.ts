@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { discoverSitemapUrls } from "@/lib/scanner/crawler";
+import { discoverLinkUrls, discoverSitemapUrls } from "@/lib/scanner/crawler";
 import { UrlGuardError, assertPublicUrl } from "@/lib/scanner/urlGuard";
 import { isAiScanEnabled, providerLimits } from "@/lib/ai-scan/config";
 import { configuredProviders } from "@/lib/ai-scan/provider";
@@ -12,6 +12,12 @@ export const maxDuration = 60;
 
 const bodySchema = z.object({ url: z.string().min(1) });
 const NON_PAGE_EXTENSIONS = /\.(xml|pdf|jpe?g|png|gif|svg|webp|zip|docx?|xlsx?|pptx?|mp4|mp3)$/i;
+// Redirect and interstitial pages (e.g. Disney's /exit-interstitial/ links) carry no content to review.
+const NON_PAGE_PATHS = /^\/exit-interstitial\//i;
+const isPageUrl = (u: string) => {
+  const { pathname } = new URL(u);
+  return !NON_PAGE_EXTENSIONS.test(pathname) && !NON_PAGE_PATHS.test(pathname);
+};
 
 /** Lists the site's page URLs from its sitemaps. Stateless: the browser keeps the list. */
 export async function POST(request: Request): Promise<Response> {
@@ -37,9 +43,17 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: err instanceof UrlGuardError ? err.code : "invalid_url" }, { status: 400 });
   }
 
-  const { urls: all, warnings } = await discoverSitemapUrls(new URL("/", parsed.data.url));
+  const base = new URL("/", parsed.data.url);
+  const sitemap = await discoverSitemapUrls(base);
+  const warnings = [...sitemap.warnings];
   // Sitemaps also list files that are not pages (XML, PDFs, images). They are not reviewed.
-  const urls = all.filter((u) => !NON_PAGE_EXTENSIONS.test(new URL(u).pathname));
+  let urls = sitemap.urls.filter(isPageUrl);
+  // Many sites have no sitemap, or one that lists only the homepage. Follow the homepage's links instead.
+  if (urls.length <= 1) {
+    const links = await discoverLinkUrls(base);
+    warnings.push(`sitemap_insufficient:links_found=${links.urls.length}`, ...links.warnings);
+    urls = [...new Set([...urls, ...links.urls.filter(isPageUrl)])];
+  }
   const limits = providerLimits();
   const body: DiscoverResponse = {
     urls,

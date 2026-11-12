@@ -434,6 +434,7 @@ export class BrowserAiJob {
   private async callAi(page: string): Promise<AiOutcome> {
     let attempts = 0;
     let rateRetries = 0;
+    let transientRetries = 0;
     while (true) {
       const provider = this.pickProvider();
       if (!provider) {
@@ -472,6 +473,23 @@ export class BrowserAiJob {
           continue;
         }
         const code = err instanceof AiApiError ? err.code : "ai_unknown_error";
+        // Provider outage or overload (e.g. Gemini 503), or an empty reply: not this page's fault.
+        // Try the other provider first; with none left, wait and retry the same one.
+        if (isTransientProviderCode(code) && transientRetries < MAX_TRANSIENT_RETRIES) {
+          transientRetries += 1;
+          const other = this.providers.find(
+            (p) => p !== provider && !this.exhausted.has(p) && this.deps.budget.has(p),
+          );
+          if (other) {
+            this.warnings.add(`ai_provider_switched:${provider}->${other}`);
+            this.provider = other;
+          } else {
+            // Back off more on each retry: overload spikes often last longer than one short wait.
+            await (this.deps.sleep ?? defaultSleep)(TRANSIENT_RETRY_MS * transientRetries);
+            if (this.stopRequested) return { kind: "failed", attempts };
+          }
+          continue;
+        }
         this.warnings.add(`ai_failed:${page}:${code}`);
         return { kind: "failed", attempts };
       }
@@ -519,6 +537,13 @@ export class BrowserAiJob {
 
 const MAX_RATE_RETRIES = 2;
 const RATE_RETRY_MS = 60_000;
+const MAX_TRANSIENT_RETRIES = 3;
+const TRANSIENT_RETRY_MS = 5_000;
+
+/** Provider 5xx (overload, outage), a timeout or network failure, or an empty reply. The page itself is fine. */
+export function isTransientProviderCode(code: string): boolean {
+  return /_http_5\d\d$/.test(code) || code.endsWith("_empty_response") || code.endsWith("_request_failed");
+}
 
 function defaultSleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));

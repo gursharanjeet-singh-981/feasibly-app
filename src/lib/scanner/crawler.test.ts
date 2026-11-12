@@ -4,6 +4,7 @@ import {
   DEFAULT_USER_AGENT,
   classifyPageType,
   crawl,
+  discoverLinkUrls,
   getPathTemplate,
   normalizeUrl,
   parseSitemap,
@@ -817,5 +818,46 @@ describe("getPathTemplate", () => {
   it("returns null for root and single-segment URLs", () => {
     expect(getPathTemplate("https://x.com/")).toBeNull();
     expect(getPathTemplate("https://x.com/about")).toBeNull();
+  });
+});
+describe("discoverLinkUrls", () => {
+  const home = `<html><head><title>Home</title></head><body>
+    <a href="/about">About</a><a href="/blog">Blog</a><a href="https://other.example/x">Ext</a>
+    <a href="/logo.png">Logo</a><a href="#top">Top</a></body></html>`;
+
+  it("follows same-origin links from the homepage", async () => {
+    const { stub } = makeFetchStub({
+      "https://site.test/": { body: home },
+      "https://site.test/about": { body: "<a href='/team'>Team</a>" },
+      "https://site.test/blog": { body: "<html></html>" },
+      "https://site.test/team": { body: "<html></html>" },
+    });
+    const result = await discoverLinkUrls("https://site.test/", { fetchImpl: stub });
+    expect(result.urls).toEqual(
+      expect.arrayContaining([
+        "https://site.test/",
+        "https://site.test/about",
+        "https://site.test/blog",
+        "https://site.test/team",
+      ]),
+    );
+    expect(result.urls.some((u) => u.includes("other.example"))).toBe(false);
+  });
+
+  it("returns only the homepage when the page has no links", async () => {
+    const { stub } = makeFetchStub({ "https://site.test/": { body: "<html><body>Hi</body></html>" } });
+    const result = await discoverLinkUrls("https://site.test/", { fetchImpl: stub });
+    expect(result.urls).toEqual(["https://site.test/"]);
+  });
+
+  it("stops at the fetch cap and reports it", async () => {
+    const links = Array.from({ length: 10 }, (_, i) => `<a href="/p${i}">p</a>`).join("");
+    const routes: Record<string, { body: string }> = { "https://site.test/": { body: links } };
+    for (let i = 0; i < 10; i++) routes[`https://site.test/p${i}`] = { body: "<html></html>" };
+    const { stub, calls } = makeFetchStub(routes);
+    const result = await discoverLinkUrls("https://site.test/", { fetchImpl: stub, maxFetches: 2, concurrency: 1 });
+    expect(calls.filter((c) => c.url.includes("/p")).length).toBeLessThanOrEqual(1);
+    expect(result.warnings.some((w) => w.startsWith("link_discovery_stopped"))).toBe(true);
+    expect(result.urls.length).toBeGreaterThan(1);
   });
 });

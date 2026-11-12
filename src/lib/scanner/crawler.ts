@@ -441,6 +441,103 @@ export async function discoverSitemapUrls(
   return { urls: [...urls], warnings };
 }
 
+export const LINK_DISCOVERY_DEFAULTS = {
+  /** Max HTML pages downloaded while following links. */
+  maxFetches: 60,
+  /** Stop following links after this long, so discovery fits the route's time limit. */
+  timeBudgetMs: 20_000,
+  /** Link depth from the homepage. */
+  maxDepth: 2,
+} as const;
+
+export interface LinkDiscoveryOptions {
+  fetchImpl?: typeof fetch;
+  userAgent?: string;
+  maxFetches?: number;
+  maxDepth?: number;
+  concurrency?: number;
+  timeBudgetMs?: number;
+  now?: () => number;
+}
+
+/**
+ * Lists same-origin page URLs by following <a href> links from the homepage.
+ * Used when a site's sitemap is missing or lists only the homepage. Respects robots.txt.
+ */
+export async function discoverLinkUrls(
+  baseInput: string | URL,
+  options: LinkDiscoveryOptions = {},
+): Promise<{ urls: string[]; warnings: string[] }> {
+  const base = baseInput instanceof URL ? baseInput : assertPublicUrl(baseInput);
+  const {
+    fetchImpl = fetch,
+    userAgent = DEFAULT_USER_AGENT,
+    maxFetches = LINK_DISCOVERY_DEFAULTS.maxFetches,
+    maxDepth = LINK_DISCOVERY_DEFAULTS.maxDepth,
+    concurrency = SCAN_DEFAULTS.crawlerConcurrency,
+    timeBudgetMs = LINK_DISCOVERY_DEFAULTS.timeBudgetMs,
+    now = Date.now,
+  } = options;
+
+  const warnings: string[] = [];
+  const startedAt = now();
+  const robots = await loadRobots(base, fetchImpl, userAgent, warnings, undefined, undefined);
+  const found = new Set<string>();
+  const fetched = new Set<string>();
+
+  const fetchLinks = async (url: string): Promise<string[]> => {
+    try {
+      assertPublicUrl(url);
+      const html = await timedFetch<string | null>(
+        url,
+        { fetchImpl, userAgent, timeoutMs: SCAN_DEFAULTS.perPageTimeoutMs, signal: undefined, abortRelay: undefined },
+        async (res) =>
+          res.ok && (res.headers.get("content-type") ?? "").includes("text/html") ? res.text() : null,
+      );
+      if (html === null) return [];
+      const $ = load(html);
+      const links: string[] = [];
+      $("a[href]").each((_, el) => {
+        const normalized = normalizeUrl($(el).attr("href") ?? "", base);
+        if (normalized) links.push(normalized);
+      });
+      return links;
+    } catch (err) {
+      warnings.push(`link_discovery ${url} failed: ${(err as Error).message}`);
+      return [];
+    }
+  };
+
+  const start = normalizeUrl(base.toString(), base);
+  if (!start) return { urls: [], warnings };
+  found.add(start);
+  let frontier = [start];
+
+  for (let depth = 0; depth <= maxDepth && frontier.length > 0; depth++) {
+    const next: string[] = [];
+    for (let i = 0; i < frontier.length; i += concurrency) {
+      if (fetched.size >= maxFetches || now() - startedAt > timeBudgetMs) {
+        warnings.push(`link_discovery_stopped:fetched=${fetched.size}`);
+        return { urls: [...found], warnings };
+      }
+      const chunk = frontier.slice(i, i + concurrency);
+      for (const url of chunk) fetched.add(url);
+      const linkLists = await Promise.all(chunk.map(fetchLinks));
+      for (const links of linkLists) {
+        for (const link of links) {
+          if (found.has(link)) continue;
+          if (robots?.isDisallowed(link, userAgent) === true) continue;
+          found.add(link);
+          next.push(link);
+        }
+      }
+    }
+    frontier = next.filter((url) => !fetched.has(url));
+  }
+
+  return { urls: [...found], warnings };
+}
+
 /** Parses a sitemap or sitemap index, resolving every <loc> against the sitemap's own URL. */
 function parseSitemapLocations(
   xml: string,

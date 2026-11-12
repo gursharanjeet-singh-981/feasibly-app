@@ -126,7 +126,7 @@ export function isAiJobRunningInTab(): boolean {
 
 function messageFor(code: string): string {
   if (code === "sitemap_not_found") {
-    return "No sitemap was found for this site, so a whole-site scan can't list its pages.";
+    return "No pages could be listed for this site, from its sitemap or by following its links.";
   }
   if (code === "ai_not_configured") return "AI scanning is not configured on the server.";
   if (code === "rate_limited") return "Too many requests. Wait a few minutes and try again.";
