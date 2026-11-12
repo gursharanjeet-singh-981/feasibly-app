@@ -232,6 +232,38 @@ describe("provider switching and errors", () => {
     expect(h.job.result()!.warnings.some((w) => w.startsWith("ai_failed:"))).toBe(true);
   });
 
+  it("moves a page to Groq when Gemini is overloaded (503), without failing the page", async () => {
+    const h = harness({
+      total: 10,
+      classify: async (provider) => {
+        if (provider === "gemini") throw new AiApiError("gemini_http_503", 502);
+        return { provider, detections: [], template: null };
+      },
+    });
+    await h.job.prepare();
+    await h.job.start();
+    expect(h.job.snapshot().status).toBe("complete");
+    expect(h.job.result()!.warnings).toContain("ai_provider_switched:gemini->groq");
+    expect(h.job.result()!.warnings.some((w) => w.startsWith("ai_failed:"))).toBe(false);
+  });
+
+  it("retries a transient 503 on the only provider and keeps the result", async () => {
+    let geminiCalls = 0;
+    const h = harness({
+      total: 3,
+      providers: ["gemini"],
+      classify: async (provider) => {
+        geminiCalls += 1;
+        if (geminiCalls === 1) throw new AiApiError("gemini_http_503", 502);
+        return { provider, detections: [], template: null };
+      },
+    });
+    await h.job.prepare();
+    await h.job.start();
+    expect(geminiCalls).toBeGreaterThanOrEqual(2);
+    expect(h.job.result()!.warnings.some((w) => w.startsWith("ai_failed:"))).toBe(false);
+  });
+
   it("refuses to plan a whole-site scan when the sitemap lists only the homepage", async () => {
     const h = harness({ total: 1, discoverUrls: ["https://example.com/"] });
     await expect(h.job.prepare()).rejects.toMatchObject({ message: "sitemap_not_found" });

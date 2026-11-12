@@ -15,6 +15,8 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
+const TRANSIENT_RETRY_MS = 2_000;
+
 const library = {
   components: componentsJson as Component[],
   templates: templatesJson as Template[],
@@ -80,8 +82,19 @@ export async function POST(request: Request): Promise<Response> {
     return Response.json({ error: "daily_cap" }, { status: 429 });
   }
 
+  const classifyOnce = () =>
+    classifyWithProvider(provider, { url: page, html }, { allowedGroups, allowedTemplates });
   try {
-    const result = await classifyWithProvider(provider, { url: page, html }, { allowedGroups, allowedTemplates });
+    let result;
+    try {
+      result = await classifyOnce();
+    } catch (err) {
+      // Transient provider errors (e.g. Gemini 503 "high demand", empty replies) often clear
+      // within seconds. Retry once. Quota errors are not retried.
+      if (!(err instanceof AiProviderError) || !err.retryable || isQuotaError(err)) throw err;
+      await new Promise((resolve) => setTimeout(resolve, TRANSIENT_RETRY_MS));
+      result = await classifyOnce();
+    }
     const body: ClassifyResponse = { provider, detections: result.detections, template: result.template };
     return Response.json(body);
   } catch (err) {
